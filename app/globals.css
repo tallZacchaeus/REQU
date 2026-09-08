@@ -7,22 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
+  --font-sans: var(--font-source-sans);
+  --font-mono: var(--font-plex-mono);
+  --font-heading: var(--font-source-sans);
+
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -39,6 +27,27 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* CWMS ------------------------------------------------------------- */
+  /* The ground the cards sit on. Without this everything reads flat.    */
+  --color-canvas: var(--canvas);
+  --color-hairline: var(--hairline);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+
+  /* Status families. One colour per *meaning*, not per state name.      */
+  --color-st-neutral: #64748b;
+  --color-st-neutral-bg: #f1f3f6;
+  --color-st-motion: #1e4e8c;
+  --color-st-motion-bg: #e8eff8;
+  --color-st-action: #b45309;
+  --color-st-action-bg: #fdf2dc;
+  --color-st-good: #15803d;
+  --color-st-good-bg: #e7f4ec;
+  --color-st-bad: #b3261e;
+  --color-st-bad-bg: #fbeceb;
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -46,85 +55,93 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  --shadow-card: 0 1px 2px rgb(11 21 36 / 0.04), 0 1px 3px rgb(11 21 36 / 0.04);
+  --shadow-raised: 0 2px 4px rgb(11 21 36 / 0.05), 0 6px 16px rgb(11 21 36 / 0.06);
+  --shadow-bar: 0 -1px 0 rgb(11 21 36 / 0.06), 0 -8px 24px rgb(11 21 36 / 0.05);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
+  --radius: 0.75rem;
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Ink, not black. Navy-shifted neutrals read institutional. */
+  --ink: #0b1524;
+  --ink-soft: #55606f;
+  --ink-faint: #8a94a2;
+  --canvas: #f4f5f7;
+  --hairline: #e4e7ec;
+
+  --background: #f4f5f7;
+  --foreground: #0b1524;
+  --card: #ffffff;
+  --card-foreground: #0b1524;
+  --popover: #ffffff;
+  --popover-foreground: #0b1524;
+  --primary: #11324f;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f3;
+  --secondary-foreground: #11324f;
+  --muted: #f1f3f6;
+  --muted-foreground: #55606f;
+  --accent: #eef0f3;
+  --accent-foreground: #11324f;
+  --destructive: #b3261e;
+  --border: #e4e7ec;
+  --input: #dde1e7;
+  --ring: #11324f;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+
   html {
     @apply font-sans;
+    color-scheme: light;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-canvas text-ink;
+    /* Currency is read in columns; lining tabular figures everywhere. */
+    font-variant-numeric: tabular-nums lining-nums;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Visible focus, but only for keyboard users. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+@layer components {
+  /* 11px uppercase micro-label. The workhorse of the whole hierarchy. */
+  .label-micro {
+    @apply text-[11px] leading-none font-semibold tracking-[0.07em] text-ink-faint uppercase;
+  }
+
+  /* Currency needs its own weight class so it never reads as body text. */
+  .amount-lg {
+    @apply text-[30px] leading-[1.1] font-semibold tracking-[-0.02em] text-ink;
+  }
+
+  .amount-md {
+    @apply text-[17px] leading-tight font-semibold tracking-[-0.01em] text-ink;
+  }
+
+  .card-flat {
+    @apply bg-card border-hairline rounded-xl border shadow-card;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
