@@ -19,6 +19,7 @@ import {
   Trash2,
 } from "lucide-react"
 
+import { LogoMark } from "@/components/app/logo"
 import { MicroLabel } from "@/components/app/primitives"
 import { Sheet } from "@/components/app/sheet"
 import { Switch } from "@/components/app/switch"
@@ -57,14 +58,19 @@ export default function ProfilePage() {
 
   return (
     <>
-      <header className="border-hairline bg-card sticky top-0 z-20 flex h-14 items-center border-b px-4">
-        <h1 className="text-ink text-[17px] font-semibold tracking-[-0.01em]">Profile</h1>
-      </header>
+      {/* Same dark crown as the dashboard, so the two roots of the app match. */}
+      <header className="header-deep rounded-b-[28px] px-5 pt-5 pb-16">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.09em] text-white/60 uppercase">
+            <LogoMark className="size-4 text-white/80" />
+            Your workspace
+          </span>
+          <span className="rounded-md border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-bold tracking-[0.06em] text-white">
+            {CURRENT_USER.roleShort}
+          </span>
+        </div>
 
-      <div className="space-y-4 px-4 pt-5 pb-8">
-        {/* Identity sits plain on the canvas, exactly like the dashboard
-            greeting, so the first card below it still has lift. */}
-        <div className="flex items-center gap-4">
+        <div className="animate-rise mt-7 flex items-center gap-4">
           <button
             type="button"
             onClick={() => setSheet("avatar")}
@@ -73,34 +79,43 @@ export default function ProfilePage() {
           >
             {avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatar} alt="" className="size-16 rounded-full object-cover" />
+              <img
+                src={avatar}
+                alt=""
+                className="size-16 rounded-full object-cover ring-2 ring-white/25"
+              />
             ) : (
-              <span className="bg-primary text-primary-foreground flex size-16 items-center justify-center rounded-full text-[19px] font-semibold tracking-[-0.01em]">
+              <span className="bg-brand/25 flex size-16 items-center justify-center rounded-full text-[19px] font-semibold tracking-[-0.01em] text-white ring-2 ring-white/25 transition-all duration-200 group-hover:ring-white/45">
                 {CURRENT_USER.initials}
               </span>
             )}
-            <span className="bg-brand ring-canvas absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full ring-[3px] transition-transform duration-200 group-active:scale-90">
+            <span className="bg-brand absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full ring-[3px] ring-[#123a68] transition-transform duration-200 group-hover:scale-105 group-active:scale-90">
               <Camera className="size-3 text-white" strokeWidth={2.4} aria-hidden />
             </span>
           </button>
 
           <div className="min-w-0">
-            <h2 className="text-ink truncate text-[20px] leading-tight font-semibold tracking-[-0.025em]">
+            <h1 className="truncate text-[21px] leading-tight font-semibold tracking-[-0.025em] text-white">
               {CURRENT_USER.name}
-            </h2>
-            <p className="text-ink-soft mt-1 truncate text-[12.5px]">
+            </h1>
+            <p className="mt-1 truncate text-[12.5px] text-white/65">
               {CURRENT_USER.role} · {CURRENT_USER.department}
             </p>
-            <p className="text-ink-faint mt-0.5 truncate text-[12px]">{profile.email}</p>
+            <p className="mt-0.5 truncate text-[12px] text-white/45">{profile.email}</p>
           </div>
         </div>
+      </header>
 
-        {/* Same ruled stat block as the dashboard, three-up. */}
-        <div className="card-flat grid grid-cols-3">
+      {/* Straddles the crown's edge — the seam between the two grounds. */}
+      <div className="-mt-9 px-4">
+        <div className="card-flat grid grid-cols-3 shadow-raised">
           <Stat label="Submitted" value={submitted} className="border-hairline border-r" />
           <Stat label="Approved" value={approved} className="border-hairline border-r" />
           <Stat label="Disbursed" value={disbursed} />
         </div>
+      </div>
+
+      <div className="space-y-3.5 px-4 pt-5 pb-8">
 
         <Group
           title="Personal Information"
@@ -252,7 +267,7 @@ export default function ProfilePage() {
         <button
           type="button"
           onClick={() => setSheet("security")}
-          className="card-flat hover:border-ink-faint/40 flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors duration-200"
+          className="card-flat tap-card hover:border-ink-faint/40 group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5"
         >
           <ShieldCheck className="text-ink-faint size-4 shrink-0" strokeWidth={2} aria-hidden />
           <span className="min-w-0 flex-1 text-left">
@@ -261,7 +276,10 @@ export default function ProfilePage() {
               Passwordless · last sign-in today
             </span>
           </span>
-          <ChevronRight className="text-ink-faint size-4 shrink-0" aria-hidden />
+          <ChevronRight
+            className="text-ink-faint size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+            aria-hidden
+          />
         </button>
 
         <button

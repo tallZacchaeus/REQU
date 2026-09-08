@@ -1,54 +1,55 @@
-"use client"
+"use client";
 
-import { useEffect, useId, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
-import { ArrowRight, Check, Clock, Mail, ShieldCheck } from "lucide-react"
+import { useEffect, useId, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Check, Clock, Mail, ShieldCheck } from "lucide-react";
 
-import { LogoTile, Wordmark } from "@/components/app/logo"
-import { MicroLabel } from "@/components/app/primitives"
-import { isValidEmail, maskEmail, useSession } from "@/lib/session"
-import { cn } from "@/lib/utils"
+import { LogoTile } from "@/components/app/logo";
+import { MicroLabel } from "@/components/app/primitives";
+import { isValidEmail, maskEmail, useSession } from "@/lib/session";
+import { cn } from "@/lib/utils";
 
-type Status = "idle" | "sending" | "sent"
+type Status = "idle" | "sending" | "sent";
 
-const RESEND_SECONDS = 45
+const RESEND_SECONDS = 45;
 
 const STEPS = [
   "Enter the email address on your worker record",
   "Tap the secure link we send you",
   "You land straight in your requisitions",
-]
+];
 
 export default function LoginPage() {
-  const router = useRouter()
-  const { requestLink, pendingEmail } = useSession()
-  const [stage, setStage] = useState<"form" | "check">("form")
-  const [email, setEmail] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [status, setStatus] = useState<Status>("idle")
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const router = useRouter();
+  const { requestLink, pendingEmail } = useSession();
+  const [stage, setStage] = useState<"form" | "check">("form");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<Status>("idle");
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  useEffect(() => () => timers.current.forEach(clearTimeout), [])
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   function submit(event: React.FormEvent) {
-    event.preventDefault()
-    if (status !== "idle") return
+    event.preventDefault();
+    if (status !== "idle") return;
 
-    const value = email.trim()
-    if (!value) return setError("Enter the email address you registered with.")
-    if (!isValidEmail(value)) return setError("That doesn't look like a valid email address.")
+    const value = email.trim();
+    if (!value) return setError("Enter the email address you registered with.");
+    if (!isValidEmail(value))
+      return setError("That doesn't look like a valid email address.");
 
-    setError(null)
-    setStatus("sending")
+    setError(null);
+    setStatus("sending");
     // Two beats: the send, then a held confirmation so the button resolves
     // before the screen changes under the reader.
     timers.current.push(
       setTimeout(() => {
-        requestLink(value)
-        setStatus("sent")
+        requestLink(value);
+        setStatus("sent");
       }, 950),
       setTimeout(() => setStage("check"), 1500),
-    )
+    );
   }
 
   if (stage === "check") {
@@ -56,77 +57,85 @@ export default function LoginPage() {
       <CheckEmail
         email={pendingEmail ?? email}
         onUseAnother={() => {
-          setStage("form")
-          setStatus("idle")
+          setStage("form");
+          setStatus("idle");
         }}
         onOpen={() => router.push("/login/verify")}
       />
-    )
+    );
   }
 
   return (
-    <main className="flex min-h-dvh flex-col px-5 pt-14 pb-8">
-      <div className="animate-rise flex items-center gap-3">
-        <LogoTile />
-        <Wordmark />
+    <main className="canvas-lift flex min-h-dvh flex-col px-5 pt-12 pb-8">
+      <div className="my-auto">
+        <div className="animate-rise flex flex-col items-center text-center">
+          <LogoTile />
+          <h1 className="text-ink mt-6 text-[30px] leading-[1.12] font-semibold tracking-[-0.03em]">
+            Welcome back
+          </h1>
+          <p className="text-ink-soft mt-2.5 max-w-[290px] text-[14.5px] leading-[1.55]">
+            Sign in to raise and track requisitions for your department.
+          </p>
+        </div>
+
+        {/* The form is a document surface like every other card in the app. */}
+        <form
+          onSubmit={submit}
+          className="card-flat animate-rise mt-8 px-4 py-4 shadow-raised"
+          style={{ animationDelay: "110ms" }}
+          noValidate
+        >
+          <EmailField
+            value={email}
+            error={error}
+            disabled={status !== "idle"}
+            onChange={(value) => {
+              setEmail(value);
+              if (error) setError(null);
+            }}
+          />
+
+          <SubmitButton status={status} />
+
+          <p className="text-ink-soft mt-3.5 flex items-start gap-2 text-[12px] leading-[1.5]">
+            <ShieldCheck
+              className="text-ink-faint mt-px size-3.5 shrink-0"
+              strokeWidth={1.9}
+              aria-hidden
+            />
+            <span>
+              No password. We email a single-use link that expires in
+              15&nbsp;minutes.
+            </span>
+          </p>
+        </form>
+
+        {/* Real content in the middle rather than padding. */}
+        <section
+          className="animate-rise mt-5"
+          style={{ animationDelay: "160ms" }}
+        >
+          <MicroLabel className="mb-2.5">How sign-in works</MicroLabel>
+          <ol className="divide-hairline divide-y">
+            {STEPS.map((step, index) => (
+              <li key={step} className="flex gap-3 py-2.5">
+                <span className="text-ink-faint w-4 shrink-0 font-mono text-[11.5px] leading-[1.5]">
+                  {index + 1}
+                </span>
+                <span className="text-ink-soft text-[13px] leading-[1.5]">
+                  {step}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
       </div>
 
-      <div className="animate-rise mt-14" style={{ animationDelay: "60ms" }}>
-        <h1 className="text-ink text-[30px] leading-[1.12] font-semibold tracking-[-0.03em]">
-          Welcome back
-        </h1>
-        <p className="text-ink-soft mt-2.5 max-w-[300px] text-[14.5px] leading-[1.55]">
-          Sign in to raise and track requisitions for your department.
-        </p>
-      </div>
-
-      {/* The form is a document surface like every other card in the app. */}
-      <form
-        onSubmit={submit}
-        className="card-flat animate-rise mt-6 px-4 py-4"
-        style={{ animationDelay: "110ms" }}
-        noValidate
-      >
-        <EmailField
-          value={email}
-          error={error}
-          disabled={status !== "idle"}
-          onChange={(value) => {
-            setEmail(value)
-            if (error) setError(null)
-          }}
-        />
-
-        <SubmitButton status={status} />
-
-        <p className="text-ink-soft mt-3.5 flex items-start gap-2 text-[12px] leading-[1.5]">
-          <ShieldCheck className="text-ink-faint mt-px size-3.5 shrink-0" strokeWidth={1.9} aria-hidden />
-          <span>
-            No password. We email a single-use link that expires in 15&nbsp;minutes.
-          </span>
-        </p>
-      </form>
-
-      {/* Real content in the middle rather than padding. */}
-      <section className="animate-rise mt-5" style={{ animationDelay: "160ms" }}>
-        <MicroLabel className="mb-2.5">How sign-in works</MicroLabel>
-        <ol className="divide-hairline divide-y">
-          {STEPS.map((step, index) => (
-            <li key={step} className="flex gap-3 py-2.5">
-              <span className="text-ink-faint w-4 shrink-0 font-mono text-[11.5px] leading-[1.5]">
-                {index + 1}
-              </span>
-              <span className="text-ink-soft text-[13px] leading-[1.5]">{step}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <p className="text-ink-faint mt-auto pt-10 text-center text-[12px]">
+      <p className="text-ink-faint pt-8 text-center text-[12px]">
         Trouble signing in? Contact your provincial administrator.
       </p>
     </main>
-  )
+  );
 }
 
 function EmailField({
@@ -135,15 +144,18 @@ function EmailField({
   disabled,
   onChange,
 }: {
-  value: string
-  error: string | null
-  disabled: boolean
-  onChange: (value: string) => void
+  value: string;
+  error: string | null;
+  disabled: boolean;
+  onChange: (value: string) => void;
 }) {
-  const id = useId()
+  const id = useId();
   return (
     <div className="mb-3">
-      <label htmlFor={id} className="text-ink mb-1.5 block text-[13px] font-semibold">
+      <label
+        htmlFor={id}
+        className="text-ink mb-1.5 block text-[13px] font-semibold"
+      >
         Email address
       </label>
       <input
@@ -168,12 +180,16 @@ function EmailField({
         )}
       />
       {error && (
-        <p id={`${id}-error`} role="alert" className="text-st-bad animate-fade mt-2 text-[12.5px]">
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="text-st-bad animate-fade mt-2 text-[12.5px]"
+        >
           {error}
         </p>
       )}
     </div>
-  )
+  );
 }
 
 function SubmitButton({ status }: { status: Status }) {
@@ -185,7 +201,7 @@ function SubmitButton({ status }: { status: Status }) {
         "flex h-12 w-full items-center justify-center gap-2 rounded-lg text-[15px] font-semibold transition-all duration-200 active:scale-[0.99]",
         status === "sent"
           ? "bg-st-good text-white"
-          : "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer disabled:cursor-wait",
+          : "btn-gradient cursor-pointer text-white hover:brightness-110 disabled:cursor-wait",
       )}
     >
       {status === "idle" && (
@@ -197,7 +213,7 @@ function SubmitButton({ status }: { status: Status }) {
       {status === "sending" && (
         <>
           <span
-            className="border-primary-foreground/35 border-t-primary-foreground size-4 animate-spin rounded-full border-2"
+            className="size-4 animate-spin rounded-full border-2 border-white/35 border-t-white"
             aria-hidden
           />
           Sending link…
@@ -210,7 +226,7 @@ function SubmitButton({ status }: { status: Status }) {
         </>
       )}
     </button>
-  )
+  );
 }
 
 function CheckEmail({
@@ -218,24 +234,30 @@ function CheckEmail({
   onUseAnother,
   onOpen,
 }: {
-  email: string
-  onUseAnother: () => void
-  onOpen: () => void
+  email: string;
+  onUseAnother: () => void;
+  onOpen: () => void;
 }) {
-  const [left, setLeft] = useState(RESEND_SECONDS)
-  const [resent, setResent] = useState(false)
+  const [left, setLeft] = useState(RESEND_SECONDS);
+  const [resent, setResent] = useState(false);
 
   useEffect(() => {
-    if (left <= 0) return
-    const timer = setTimeout(() => setLeft((value) => value - 1), 1000)
-    return () => clearTimeout(timer)
-  }, [left])
+    if (left <= 0) return;
+    const timer = setTimeout(() => setLeft((value) => value - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [left]);
 
   return (
-    <main className="animate-fade flex min-h-dvh flex-col px-5 pt-16 pb-8">
-      <div className="animate-rise flex flex-col items-center text-center">
-        <span className="border-hairline bg-card text-primary flex size-14 items-center justify-center rounded-2xl border shadow-card">
-          <Mail className="size-6" strokeWidth={1.7} aria-hidden />
+    <main className="canvas-lift animate-fade flex min-h-dvh flex-col px-5 pt-16 pb-8">
+      <div className="animate-rise mt-auto flex flex-col items-center text-center">
+        <span className="relative flex size-14 items-center justify-center">
+          <span
+            className="bg-brand/20 animate-pulse-ring absolute inset-0 rounded-2xl"
+            aria-hidden
+          />
+          <span className="btn-gradient relative flex size-14 items-center justify-center rounded-2xl text-white shadow-[0_14px_30px_-10px_rgb(18_58_104_/_0.6)]">
+            <Mail className="size-6" strokeWidth={1.8} aria-hidden />
+          </span>
         </span>
 
         <h1 className="text-ink mt-6 text-[26px] leading-tight font-semibold tracking-[-0.025em]">
@@ -244,14 +266,20 @@ function CheckEmail({
         <p className="text-ink-soft mt-2.5 max-w-[290px] text-[14.5px] leading-[1.55]">
           We&apos;ve sent a secure sign-in link to
         </p>
-        <p className="text-ink mt-2 font-mono text-[13.5px] font-medium">{maskEmail(email)}</p>
+        <p className="text-ink mt-2 font-mono text-[13.5px] font-medium">
+          {maskEmail(email)}
+        </p>
       </div>
 
       <div className="card-flat mt-7 px-4 py-3.5">
         <p className="text-ink-soft flex items-start gap-2.5 text-[12.5px] leading-[1.5]">
-          <Clock className="text-ink-faint mt-px size-3.5 shrink-0" strokeWidth={2} aria-hidden />
-          The link expires in 15 minutes and can only be used once. Keep this screen open while you
-          check your inbox.
+          <Clock
+            className="text-ink-faint mt-px size-3.5 shrink-0"
+            strokeWidth={2}
+            aria-hidden
+          />
+          The link expires in 15 minutes and can only be used once. Keep this
+          screen open while you check your inbox.
         </p>
       </div>
 
@@ -259,7 +287,7 @@ function CheckEmail({
         <button
           type="button"
           onClick={onOpen}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-[15px] font-semibold transition-all duration-200 active:scale-[0.99]"
+          className="btn-gradient flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-[15px] font-semibold text-white shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99]"
         >
           <Mail className="size-[17px]" strokeWidth={2.2} aria-hidden />
           Open email app
@@ -281,8 +309,8 @@ function CheckEmail({
             <button
               type="button"
               onClick={() => {
-                setResent(true)
-                setLeft(RESEND_SECONDS)
+                setResent(true);
+                setLeft(RESEND_SECONDS);
               }}
               className="text-brand-ink animate-fade cursor-pointer text-[13.5px] font-semibold hover:underline"
             >
@@ -300,9 +328,10 @@ function CheckEmail({
         </button>
 
         <p className="text-ink-faint/80 mt-3 text-center text-[11px] leading-[1.5]">
-          Prototype — &ldquo;Open email app&rdquo; continues as though you tapped the link.
+          Prototype — &ldquo;Open email app&rdquo; continues as though you
+          tapped the link.
         </p>
       </div>
     </main>
-  )
+  );
 }

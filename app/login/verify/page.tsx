@@ -30,7 +30,7 @@ export default function VerifyPage() {
   }, [completeSignIn, router])
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-8">
+    <main className="canvas-lift flex min-h-dvh flex-col items-center justify-center px-8">
       <div className="relative flex size-16 items-center justify-center">
         {phase === "verifying" ? (
           <>

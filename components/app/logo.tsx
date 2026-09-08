@@ -18,11 +18,14 @@ export function LogoTile({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "bg-primary text-primary-foreground relative flex size-12 items-center justify-center rounded-xl",
+        "btn-gradient relative flex size-14 items-center justify-center rounded-2xl text-white",
+        // A tinted drop rather than a grey one — the mark reads as lit.
+        "shadow-[0_14px_30px_-10px_rgb(18_58_104_/_0.6)]",
         className,
       )}
     >
-      <LogoMark className="size-6" />
+      <span className="pointer-events-none absolute inset-x-3 top-0 h-px bg-white/30" aria-hidden />
+      <LogoMark className="size-7" />
     </span>
   )
 }

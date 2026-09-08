@@ -96,8 +96,12 @@ function Marker({ state, rejected }: { state: Stage["state"]; rejected: boolean 
 
   if (state === "current") {
     return (
-      <span className="ring-primary/20 bg-card flex size-5 shrink-0 items-center justify-center rounded-full ring-4">
-        <span className="border-primary size-5 rounded-full border-[3px]" aria-hidden />
+      <span className="relative flex size-5 shrink-0 items-center justify-center">
+        {/* Live stage — a slow ring, so "in progress" is legible at a glance. */}
+        <span className="bg-brand/30 animate-pulse-ring absolute inset-0 rounded-full" aria-hidden />
+        <span className="ring-primary/15 bg-card relative flex size-5 items-center justify-center rounded-full ring-4">
+          <span className="border-primary size-5 rounded-full border-[3px]" aria-hidden />
+        </span>
       </span>
     )
   }

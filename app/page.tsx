@@ -1,12 +1,24 @@
 "use client"
 
 import Link from "next/link"
-import { Bell, ChevronRight, Plus, TriangleAlert } from "lucide-react"
+import {
+  ArrowRight,
+  Bell,
+  ChevronDown,
+  ChevronRight,
+  CircleCheck,
+  Clock,
+  FileText,
+  Files,
+  Megaphone,
+  Plus,
+} from "lucide-react"
 
-import { MicroLabel } from "@/components/app/primitives"
+import { LogoMark } from "@/components/app/logo"
 import { RequisitionCard } from "@/components/app/requisition-card"
 import { CURRENT_USER } from "@/lib/data"
 import { useRequisitions } from "@/lib/store"
+import { cn } from "@/lib/utils"
 
 const IN_FLIGHT = ["under_review", "recommended", "awaiting_approval", "with_finance"]
 
@@ -26,119 +38,238 @@ export default function DashboardPage() {
   ).length
   const needsAction = requisitions.filter((r) => r.status === "changes_requested")
   const drafts = requisitions.filter((r) => r.status === "draft").length
+  const total = requisitions.length || 1
 
   const recent = [...requisitions]
     .sort((a, b) => (b.submittedAt ?? b.createdAt).localeCompare(a.submittedAt ?? a.createdAt))
-    .slice(0, 3)
+    .slice(0, 4)
 
   return (
     <>
-      <header className="border-hairline bg-card sticky top-0 z-20 flex h-14 items-center justify-between border-b px-4">
-        <span className="text-ink text-[15px] font-semibold tracking-[-0.01em]">
-          Requisition Portal
-        </span>
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="text-ink-soft hover:bg-muted relative -mr-2 flex size-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200"
-        >
-          <Bell className="size-[19px]" strokeWidth={1.8} aria-hidden />
-          {needsAction.length > 0 && (
-            <span className="bg-st-action ring-card absolute top-2 right-2 size-2 rounded-full ring-2" />
-          )}
-        </button>
-      </header>
+      {/* ---- Dark crown: identity, greeting and the one thing needing you ---- */}
+      <header className="header-deep rounded-b-[28px] px-4 pt-4 pb-14">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/12 text-white ring-1 ring-white/15">
+              <LogoMark className="size-[18px]" />
+            </span>
+            <span className="text-[15px] leading-none font-bold tracking-[0.12em] text-white">
+              CWMS
+            </span>
+            <span className="h-7 w-px shrink-0 bg-white/20" aria-hidden />
+            <span className="min-w-0 text-[11.5px] leading-[1.35] text-white/65">
+              Youth &amp; Young Adults
+              <span className="block">Requisition Portal</span>
+            </span>
+          </div>
 
-      <div className="space-y-5 px-4 pt-5 pb-8">
-        {/* Greeting — plain on the canvas, so the first card below has lift. */}
-        <div>
-          <p className="text-ink-soft text-[13px]" suppressHydrationWarning>
-            {greeting()}
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              aria-label="Notifications"
+              className="relative flex size-9 cursor-pointer items-center justify-center rounded-lg text-white/75 transition-colors duration-200 hover:bg-white/10 hover:text-white"
+            >
+              <Bell className="size-[18px]" strokeWidth={1.9} aria-hidden />
+              {needsAction.length > 0 && (
+                <span className="bg-st-action absolute top-1.5 right-1.5 size-2 rounded-full ring-2 ring-[#123a68]" />
+              )}
+            </button>
+            <Link
+              href="/profile"
+              aria-label="Your profile"
+              className="group flex cursor-pointer items-center gap-0.5"
+            >
+              <span className="bg-brand/25 flex size-9 items-center justify-center rounded-full text-[12.5px] font-semibold text-white ring-2 ring-white/25 transition-all duration-200 group-hover:ring-white/50">
+                {CURRENT_USER.initials}
+              </span>
+              <ChevronDown className="size-3.5 text-white/50" aria-hidden />
+            </Link>
+          </div>
+        </div>
+
+        <div className="animate-rise mt-7">
+          <p className="text-[13.5px] text-white/65" suppressHydrationWarning>
+            {greeting()},
           </p>
-          <h2 className="text-ink mt-0.5 text-[22px] leading-tight font-semibold tracking-[-0.02em]">
+          <h1 className="mt-1 text-[26px] leading-tight font-semibold tracking-[-0.025em] text-white">
             {CURRENT_USER.shortName}
-          </h2>
-          <p className="text-ink-faint mt-1 text-[12.5px]">
+          </h1>
+          <p className="mt-1.5 text-[12.5px] text-white/55">
             {CURRENT_USER.department} · {CURRENT_USER.unit}
           </p>
         </div>
 
-        {/* The one thing only the HOD can unblock gets the only warm colour. */}
         {needsAction.length > 0 && (
           <Link
             href={`/requisitions/${needsAction[0].id}`}
-            className="border-st-action/25 bg-st-action-bg hover:border-st-action/45 flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3.5 transition-colors duration-200"
+            style={{ animationDelay: "80ms" }}
+            className="on-deep-panel animate-rise group mt-5 flex cursor-pointer items-center gap-3 px-3.5 py-3 transition-colors duration-200 hover:bg-white/16"
           >
-            <TriangleAlert className="text-st-action size-[18px] shrink-0" strokeWidth={2} aria-hidden />
-            <div className="min-w-0 flex-1">
-              <p className="text-st-action text-[13.5px] leading-tight font-semibold">
+            <span className="bg-brand/25 flex size-9 shrink-0 items-center justify-center rounded-lg text-white">
+              <Megaphone className="size-[17px]" strokeWidth={2} aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[13.5px] leading-tight font-semibold text-white">
                 {needsAction.length} requisition{needsAction.length > 1 ? "s need" : " needs"} your
                 attention
-              </p>
-              <p className="text-st-action/80 mt-0.5 truncate text-[12px]">
+              </span>
+              <span className="mt-0.5 block truncate text-[12px] text-white/60">
                 {needsAction[0].programme} — changes requested
-              </p>
-            </div>
-            <ChevronRight className="text-st-action/60 size-4 shrink-0" aria-hidden />
+              </span>
+            </span>
+            <ArrowRight
+              className="size-4 shrink-0 text-white/70 transition-transform duration-200 group-hover:translate-x-0.5"
+              aria-hidden
+            />
           </Link>
         )}
+      </header>
 
-        {/* Counts as a single ruled block, not four floating tiles. */}
-        <div className="card-flat grid grid-cols-2">
-          <Stat label="In progress" value={pending} className="border-hairline border-r border-b" />
-          <Stat label="Approved" value={approved} className="border-hairline border-b" />
-          <Stat label="Needs action" value={needsAction.length} className="border-hairline border-r" accent={needsAction.length > 0} />
-          <Stat label="Drafts" value={drafts} />
-        </div>
+      {/* ---- Stats straddle the crown's edge ---- */}
+      <div className="-mt-9 grid grid-cols-2 gap-2.5 px-4">
+        <StatCard
+          icon={FileText}
+          value={pending}
+          total={total}
+          label="In progress"
+          href="/requisitions?filter=review"
+          tone="motion"
+          delay={0}
+        />
+        <StatCard
+          icon={CircleCheck}
+          value={approved}
+          total={total}
+          label="Approved"
+          href="/requisitions?filter=approved"
+          tone="good"
+          delay={60}
+        />
+        <StatCard
+          icon={Clock}
+          value={needsAction.length}
+          total={total}
+          label="Needs action"
+          href="/requisitions?filter=action"
+          tone="action"
+          delay={120}
+        />
+        <StatCard
+          icon={Files}
+          value={drafts}
+          total={total}
+          label="Drafts"
+          href="/requisitions?filter=drafts"
+          tone="neutral"
+          delay={180}
+        />
+      </div>
 
+      <div className="px-4 pt-5 pb-8">
         <Link
           href="/requisitions/new"
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-[15px] font-semibold transition-colors duration-200"
+          className="btn-gradient group flex h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99]"
         >
-          <Plus className="size-[18px]" strokeWidth={2.4} aria-hidden />
+          <Plus className="size-[18px]" strokeWidth={2.6} aria-hidden />
           New Requisition
+          <ArrowRight
+            className="size-[17px] transition-transform duration-200 group-hover:translate-x-1"
+            aria-hidden
+          />
         </Link>
 
-        <section className="space-y-2.5">
-          <div className="flex items-baseline justify-between">
-            <MicroLabel>Recent Requests</MicroLabel>
+        <section className="mt-7">
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="text-ink text-[17px] font-semibold tracking-[-0.02em]">
+              Recent Requests
+            </h2>
             <Link
               href="/requisitions"
-              className="text-primary cursor-pointer text-[12.5px] font-semibold hover:underline"
+              className="text-primary group flex cursor-pointer items-center gap-1 text-[12.5px] font-semibold"
             >
               View all
+              <ChevronRight
+                className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-hidden
+              />
             </Link>
           </div>
-          {recent.map((requisition) => (
-            <RequisitionCard key={requisition.id} requisition={requisition} />
-          ))}
+
+          <div className="space-y-2.5">
+            {recent.map((requisition, index) => (
+              <RequisitionCard
+                key={requisition.id}
+                requisition={requisition}
+                style={{ animationDelay: `${index * 60}ms` }}
+                className="animate-rise"
+              />
+            ))}
+          </div>
         </section>
       </div>
     </>
   )
 }
 
-function Stat({
-  label,
+const TONE_STYLES = {
+  motion: { tile: "bg-st-motion-bg text-st-motion", bar: "bg-st-motion" },
+  good: { tile: "bg-st-good-bg text-st-good", bar: "bg-st-good" },
+  action: { tile: "bg-st-action-bg text-st-action", bar: "bg-st-action" },
+  neutral: { tile: "bg-st-neutral-bg text-st-neutral", bar: "bg-st-neutral" },
+} as const
+
+function StatCard({
+  icon: Icon,
   value,
-  className,
-  accent = false,
+  total,
+  label,
+  href,
+  tone,
+  delay,
 }: {
-  label: string
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
   value: number
-  className?: string
-  accent?: boolean
+  total: number
+  label: string
+  href: string
+  tone: keyof typeof TONE_STYLES
+  delay: number
 }) {
+  const styles = TONE_STYLES[tone]
+  const share = Math.round((value / total) * 100)
+
   return (
-    <div className={`px-4 py-3.5 ${className ?? ""}`}>
-      <p
-        className={`text-[26px] leading-none font-semibold tracking-[-0.03em] ${
-          accent ? "text-st-action" : "text-ink"
-        }`}
-      >
+    <Link
+      href={href}
+      style={{ animationDelay: `${delay}ms` }}
+      className="card-flat tap-card animate-rise group hover:border-ink-faint/30 cursor-pointer px-3.5 py-3"
+    >
+      <div className="flex items-start justify-between">
+        <span
+          className={cn("flex size-9 items-center justify-center rounded-xl", styles.tile)}
+          aria-hidden
+        >
+          <Icon className="size-[18px]" strokeWidth={2} />
+        </span>
+        <ChevronRight
+          className="text-ink-faint size-4 transition-transform duration-200 group-hover:translate-x-0.5"
+          aria-hidden
+        />
+      </div>
+
+      <p className="text-ink mt-2 text-[26px] leading-none font-semibold tracking-[-0.03em] tabular-nums">
         {value}
       </p>
-      <p className="text-ink-soft mt-1.5 text-[12.5px]">{label}</p>
-    </div>
+      <p className="text-ink-soft mt-1 text-[12.5px]">{label}</p>
+
+      {/* Share of all requisitions, drawn in on mount. */}
+      <div className="bg-hairline mt-2.5 h-[3px] w-full overflow-hidden rounded-full">
+        <span
+          className={cn("animate-grow block h-full origin-left rounded-full", styles.bar)}
+          style={{ width: `${Math.max(share, value > 0 ? 12 : 0)}%`, animationDelay: `${delay + 150}ms` }}
+          aria-hidden
+        />
+      </div>
+    </Link>
   )
 }
