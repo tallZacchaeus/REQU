@@ -12,7 +12,11 @@ import { cn } from "@/lib/utils"
 
 const FILTERS: { key: string; label: string; match: (s: RequisitionStatus) => boolean }[] = [
   { key: "all", label: "All", match: () => true },
-  { key: "action", label: "Needs action", match: (s) => s === "changes_requested" },
+  {
+    key: "action",
+    label: "Needs action",
+    match: (s) => s === "changes_requested" || s === "disbursed",
+  },
   { key: "drafts", label: "Drafts", match: (s) => s === "draft" },
   {
     key: "review",
@@ -20,7 +24,12 @@ const FILTERS: { key: string; label: string; match: (s: RequisitionStatus) => bo
     match: (s) => s === "under_review" || s === "recommended" || s === "awaiting_approval",
   },
   { key: "approved", label: "Approved", match: (s) => s === "approved" || s === "with_finance" },
-  { key: "disbursed", label: "Disbursed", match: (s) => s === "disbursed" },
+  {
+    key: "disbursed",
+    label: "Disbursed",
+    match: (s) => s === "disbursed" || s === "reconciliation_review",
+  },
+  { key: "closed", label: "Closed", match: (s) => s === "reconciled" },
   { key: "rejected", label: "Rejected", match: (s) => s === "rejected" },
 ]
 

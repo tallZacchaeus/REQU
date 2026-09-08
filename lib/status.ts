@@ -65,12 +65,28 @@ export const STATUS: Record<RequisitionStatus, StatusMeta> = {
     emphasis: "dot",
     detail: "Finance is verifying the breakdown",
   },
+  /* Disbursed is no longer the end of the line: the money is out, and the
+     HOD now owes an account of it. That makes it an action state. */
   disbursed: {
     label: "Disbursed",
-    tone: "good",
-    stage: 4,
+    tone: "action",
+    stage: 5,
+    emphasis: "chip",
+    detail: "Funds released — reconciliation due from you",
+  },
+  reconciliation_review: {
+    label: "Reconciliation Filed",
+    tone: "motion",
+    stage: 5,
     emphasis: "dot",
-    detail: "Funds released",
+    detail: "Treasury is checking your receipts",
+  },
+  reconciled: {
+    label: "Reconciled",
+    tone: "good",
+    stage: 6,
+    emphasis: "dot",
+    detail: "Receipts accepted — this requisition is closed",
   },
   changes_requested: {
     label: "Changes Requested",
@@ -133,7 +149,16 @@ const STAGE_DEFS: { key: StageKey; done: string; open: string; actor: string }[]
     actor: "Finance Team",
   },
   { key: "disbursed", done: "Disbursed", open: "Disbursement", actor: "Treasury" },
+  { key: "reconciled", done: "Reconciled", open: "Reconciliation", actor: "You" },
 ]
+
+/** The reconciliation stage changes hands partway through. */
+function stageActor(key: StageKey, status: RequisitionStatus, fallback: string) {
+  if (key !== "reconciled") return fallback
+  if (status === "disbursed") return "You — receipts outstanding"
+  if (status === "reconciliation_review") return "Treasury"
+  return "You & Treasury"
+}
 
 /**
  * Builds the five-stage rail for a requisition. `dates` carries the real
@@ -155,7 +180,7 @@ export function buildStages(
 
     return {
       key: def.key,
-      actor: def.actor,
+      actor: stageActor(def.key, status, def.actor),
       label: state === "done" ? def.done : def.open,
       state,
       date: state === "done" ? dates[def.key] : undefined,

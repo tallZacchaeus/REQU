@@ -17,6 +17,7 @@ import {
   Phone,
   ShieldCheck,
   Trash2,
+  X,
 } from "lucide-react"
 
 import { LogoMark } from "@/components/app/logo"
@@ -27,6 +28,22 @@ import { CURRENT_USER } from "@/lib/data"
 import { maskEmail, useSession } from "@/lib/session"
 import { useRequisitions } from "@/lib/store"
 import { cn } from "@/lib/utils"
+
+const CAN = [
+  "Create and save draft requisitions",
+  "Submit requisitions for review",
+  "Track status and disbursement history",
+  "Respond to requested changes",
+  "Reconcile disbursed funds with receipts",
+]
+
+const CANNOT = [
+  "Recommend or approve requisitions",
+  "Disburse funds",
+  "Sign off your own reconciliation",
+  "Add other HODs or workers",
+  "View other departments' requisitions",
+]
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -42,10 +59,10 @@ export default function ProfilePage() {
   const fileInput = useRef<HTMLInputElement>(null)
 
   const submitted = requisitions.filter((r) => r.status !== "draft").length
-  const approved = requisitions.filter(
-    (r) => r.status === "approved" || r.status === "with_finance" || r.status === "disbursed",
+  const disbursed = requisitions.filter((r) =>
+    ["disbursed", "reconciliation_review", "reconciled"].includes(r.status),
   ).length
-  const disbursed = requisitions.filter((r) => r.status === "disbursed").length
+  const closed = requisitions.filter((r) => r.status === "reconciled").length
 
   const toggle = (key: string) => setOpen((current) => (current === key ? null : key))
 
@@ -110,8 +127,8 @@ export default function ProfilePage() {
       <div className="-mt-9 px-4">
         <div className="card-flat grid grid-cols-3 shadow-raised">
           <Stat label="Submitted" value={submitted} className="border-hairline border-r" />
-          <Stat label="Approved" value={approved} className="border-hairline border-r" />
-          <Stat label="Disbursed" value={disbursed} />
+          <Stat label="Disbursed" value={disbursed} className="border-hairline border-r" />
+          <Stat label="Closed" value={closed} />
         </div>
       </div>
 
@@ -212,8 +229,9 @@ export default function ProfilePage() {
             <Field label="Parish" value={CURRENT_USER.parish} />
           </dl>
           <p className="text-ink-soft border-hairline mt-3 border-t pt-3 text-[12px] leading-[1.5]">
-            You raise and track requisitions for this department. Recommendation, approval and
-            disbursement sit with the AYP, NYP and Finance.
+            You raise, track and reconcile requisitions for this department. Recommendation,
+            approval and disbursement sit with the AYP, NYP and Finance; Treasury signs off the
+            reconciliation.
           </p>
         </Group>
 
@@ -261,6 +279,27 @@ export default function ProfilePage() {
               checked={profile.notifyDigest}
               onChange={(value) => updateProfile({ notifyDigest: value })}
             />
+          </div>
+        </Group>
+
+        <Group
+          title="What You Can Do"
+          open={open === "permissions"}
+          onToggle={() => toggle("permissions")}
+        >
+          <div className="space-y-2">
+            {CAN.map((item) => (
+              <p key={item} className="flex gap-2.5 text-[13.5px] leading-[1.45]">
+                <Check className="text-st-good mt-0.5 size-4 shrink-0" strokeWidth={2.4} aria-hidden />
+                <span className="text-ink">{item}</span>
+              </p>
+            ))}
+            {CANNOT.map((item) => (
+              <p key={item} className="flex gap-2.5 text-[13.5px] leading-[1.45]">
+                <X className="text-ink-faint mt-0.5 size-4 shrink-0" strokeWidth={2.4} aria-hidden />
+                <span className="text-ink-faint">{item}</span>
+              </p>
+            ))}
           </div>
         </Group>
 

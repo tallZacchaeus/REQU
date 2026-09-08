@@ -20,7 +20,18 @@ import { CURRENT_USER } from "@/lib/data"
 import { useRequisitions } from "@/lib/store"
 import { cn } from "@/lib/utils"
 
-const IN_FLIGHT = ["under_review", "recommended", "awaiting_approval", "with_finance"]
+const IN_FLIGHT = [
+  "under_review",
+  "recommended",
+  "awaiting_approval",
+  "approved",
+  "with_finance",
+  "reconciliation_review",
+]
+
+/* Disbursed means the money is out and the receipts are not in — the HOD is
+   the only one who can move it, so it belongs with changes-requested. */
+const NEEDS_HOD = ["changes_requested", "disbursed"]
 
 function greeting() {
   const hour = new Date().getHours()
@@ -33,10 +44,8 @@ export default function DashboardPage() {
   const { requisitions } = useRequisitions()
 
   const pending = requisitions.filter((r) => IN_FLIGHT.includes(r.status)).length
-  const approved = requisitions.filter(
-    (r) => r.status === "approved" || r.status === "disbursed",
-  ).length
-  const needsAction = requisitions.filter((r) => r.status === "changes_requested")
+  const closed = requisitions.filter((r) => r.status === "reconciled").length
+  const needsAction = requisitions.filter((r) => NEEDS_HOD.includes(r.status))
   const drafts = requisitions.filter((r) => r.status === "draft").length
   const total = requisitions.length || 1
 
@@ -114,7 +123,8 @@ export default function DashboardPage() {
                 attention
               </span>
               <span className="mt-0.5 block truncate text-[12px] text-white/60">
-                {needsAction[0].programme} — changes requested
+                {needsAction[0].programme} —{" "}
+                {needsAction[0].status === "disbursed" ? "reconciliation due" : "changes requested"}
               </span>
             </span>
             <ArrowRight
@@ -138,10 +148,10 @@ export default function DashboardPage() {
         />
         <StatCard
           icon={CircleCheck}
-          value={approved}
+          value={closed}
           total={total}
-          label="Approved"
-          href="/requisitions?filter=approved"
+          label="Closed"
+          href="/requisitions?filter=closed"
           tone="good"
           delay={60}
         />

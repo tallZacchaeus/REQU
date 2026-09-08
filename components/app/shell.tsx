@@ -17,7 +17,12 @@ const NAV = [
 ]
 
 /** Task flows take over the screen — no tab bar to escape through halfway. */
-const FULLSCREEN = [/^\/requisitions\/new/, /^\/requisitions\/[^/]+\/submitted/, /^\/login/]
+const FULLSCREEN = [
+  /^\/requisitions\/new/,
+  /^\/requisitions\/[^/]+\/submitted/,
+  /^\/requisitions\/[^/]+\/reconcile/,
+  /^\/login/,
+]
 
 const isPublic = (pathname: string) => pathname.startsWith("/login")
 

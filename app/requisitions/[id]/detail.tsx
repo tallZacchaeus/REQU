@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronDown, Paperclip, Pencil, TriangleAlert } from "lucide-react"
+import { ChevronDown, Paperclip, Pencil, ReceiptText, TriangleAlert } from "lucide-react"
 
 import { ScreenHeader } from "@/components/app/screen-header"
 import { DetailRow, MicroLabel, Money, Section, StatusBadge } from "@/components/app/primitives"
@@ -9,7 +9,7 @@ import { StageMeter, StageRail } from "@/components/app/stage-rail"
 import { amountInWords, formatDate, durationSince } from "@/lib/format"
 import { buildStages, STAGE_COUNT, STATUS } from "@/lib/status"
 import { useRequisitions } from "@/lib/store"
-import { requisitionTotal } from "@/lib/types"
+import { reconciledTotal, reconciliationVariance, requisitionTotal } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 export function RequisitionDetail({ id }: { id: string }) {
@@ -41,6 +41,15 @@ export function RequisitionDetail({ id }: { id: string }) {
   const isReturned = requisition.status === "changes_requested"
   const isRejected = requisition.status === "rejected"
   const live = stages.find((s) => s.state === "current" || s.state === "blocked")
+  const reconciliation = requisition.reconciliation
+  const spent = reconciledTotal(requisition)
+  const variance = reconciliationVariance(requisition)
+  // Time at the live stage runs from the last stage that actually completed,
+  // not from an early one that happens to have a date.
+  const enteredStageAt = Object.values(requisition.stageDates)
+    .filter(Boolean)
+    .sort()
+    .at(-1)
 
   return (
     <>
@@ -62,14 +71,9 @@ export function RequisitionDetail({ id }: { id: string }) {
           <div className="border-hairline mt-3.5 border-t pt-3.5">
             <div className="mb-2 flex items-baseline justify-between">
               <MicroLabel>Stage {meta.stage + (isReturned || isRejected ? 0 : 1)} of {STAGE_COUNT}</MicroLabel>
-              {live?.state === "current" && requisition.submittedAt && (
+              {live?.state === "current" && enteredStageAt && (
                 <span className="text-ink-faint text-[11.5px]">
-                  {durationSince(
-                    requisition.stageDates.recommended ??
-                      requisition.stageDates.submitted ??
-                      requisition.submittedAt,
-                  )}{" "}
-                  at this stage
+                  {durationSince(enteredStageAt)} at this stage
                 </span>
               )}
             </div>
@@ -86,6 +90,15 @@ export function RequisitionDetail({ id }: { id: string }) {
             date={returnedComment.date}
             body={returnedComment.body}
             changes={returnedComment.requestedChanges ?? []}
+          />
+        )}
+
+        {/* Money is out; the transaction only closes when it is accounted for. */}
+        {requisition.status === "disbursed" && (
+          <ReconcileNotice
+            id={requisition.id}
+            amount={total}
+            date={requisition.stageDates.disbursed}
           />
         )}
 
@@ -151,6 +164,110 @@ export function RequisitionDetail({ id }: { id: string }) {
           </p>
         </Disclosure>
 
+        {reconciliation && (
+          <Disclosure
+            title="Reconciliation"
+            meta={requisition.status === "reconciled" ? "Closed" : "With Treasury"}
+            defaultOpen={requisition.status !== "reconciled"}
+          >
+            <table className="w-full">
+              <thead>
+                <tr className="border-hairline border-b">
+                  <th className="label-micro pb-2 text-left font-semibold">Line</th>
+                  <th className="label-micro pb-2 text-right font-semibold">Budget</th>
+                  <th className="label-micro pb-2 text-right font-semibold">Actual</th>
+                </tr>
+              </thead>
+              <tbody className="divide-hairline divide-y">
+                {requisition.items.map((item) => {
+                  const actual = reconciliation.actuals[item.id] ?? 0
+                  return (
+                    <tr key={item.id}>
+                      <td className="text-ink py-2.5 pr-3 text-[13.5px] leading-[1.4]">
+                        {item.description}
+                      </td>
+                      <td className="text-ink-faint py-2.5 text-right text-[13px] tabular-nums">
+                        {item.amount.toLocaleString("en-NG")}
+                      </td>
+                      <td
+                        className={cn(
+                          "py-2.5 pl-3 text-right text-[13.5px] font-semibold tabular-nums",
+                          actual > item.amount ? "text-st-action" : "text-ink",
+                        )}
+                      >
+                        {actual.toLocaleString("en-NG")}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-ink/15 border-t-2">
+                  <td className="pt-3">
+                    <MicroLabel>Total</MicroLabel>
+                  </td>
+                  <td className="text-ink-faint pt-3 text-right text-[13px] tabular-nums">
+                    {total.toLocaleString("en-NG")}
+                  </td>
+                  <td className="pt-3 pl-3 text-right">
+                    <Money value={spent} size="sm" />
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div
+              className={cn(
+                "mt-3 flex items-center justify-between gap-3 rounded-lg px-3 py-2.5",
+                variance === 0 ? "bg-st-good-bg" : variance < 0 ? "bg-st-action-bg" : "bg-st-motion-bg",
+              )}
+            >
+              <span
+                className={cn(
+                  "text-[12.5px] font-semibold",
+                  variance === 0 ? "text-st-good" : variance < 0 ? "text-st-action" : "text-st-motion",
+                )}
+              >
+                {variance === 0
+                  ? "Fully accounted for"
+                  : variance < 0
+                    ? "Overspent"
+                    : "Returned to Treasury"}
+              </span>
+              <span
+                className={cn(
+                  "text-[15px] font-semibold tabular-nums",
+                  variance === 0 ? "text-st-good" : variance < 0 ? "text-st-action" : "text-st-motion",
+                )}
+              >
+                ₦{Math.abs(variance).toLocaleString("en-NG")}
+              </span>
+            </div>
+
+            <MicroLabel className="mt-4 mb-2">Receipts ({reconciliation.receipts.length})</MicroLabel>
+            <ul className="divide-hairline divide-y">
+              {reconciliation.receipts.map((file) => (
+                <li key={file.id} className="flex items-center gap-2.5 py-2.5">
+                  <Paperclip className="text-ink-faint size-4 shrink-0" strokeWidth={1.8} aria-hidden />
+                  <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">{file.name}</span>
+                  <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
+                </li>
+              ))}
+            </ul>
+
+            {reconciliation.note && (
+              <>
+                <MicroLabel className="mt-4 mb-1.5">Note</MicroLabel>
+                <p className="text-ink text-[13.5px] leading-[1.55]">{reconciliation.note}</p>
+              </>
+            )}
+
+            <p className="text-ink-faint border-hairline mt-3 border-t pt-3 text-[11.5px]">
+              Filed {formatDate(reconciliation.submittedAt)}
+            </p>
+          </Disclosure>
+        )}
+
         <Disclosure title="Attachments" meta={`${requisition.attachments.length}`}>
           {requisition.attachments.length === 0 ? (
             <p className="text-ink-faint py-1 text-[13px]">No documents attached.</p>
@@ -205,9 +322,9 @@ export function RequisitionDetail({ id }: { id: string }) {
 
         {/* Permission boundary, stated plainly rather than left implicit. */}
         <p className="text-ink-faint px-1 text-[11.5px] leading-[1.5]">
-          As Head of Department you can raise, track and revise your own requisitions.
-          Recommendation, approval and disbursement are carried out by the AYP, NYP and Finance
-          respectively.
+          As Head of Department you raise, track, revise and reconcile your own requisitions.
+          Recommendation, approval and disbursement are carried out by the AYP, NYP and Finance;
+          Treasury verifies the reconciliation that closes it.
         </p>
       </div>
     </>
@@ -269,6 +386,41 @@ function ReturnedNotice({
         >
           <Pencil className="size-4" strokeWidth={2.2} aria-hidden />
           Edit &amp; Resubmit
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function ReconcileNotice({
+  id,
+  amount,
+  date,
+}: {
+  id: string
+  amount: number
+  date?: string
+}) {
+  return (
+    <div className="border-st-action/25 bg-st-action-bg overflow-hidden rounded-xl border">
+      <div className="border-st-action/15 flex items-center gap-2 border-b px-4 py-3">
+        <ReceiptText className="text-st-action size-4 shrink-0" strokeWidth={2.2} aria-hidden />
+        <p className="text-st-action text-[13.5px] font-semibold">Reconciliation due</p>
+      </div>
+
+      <div className="px-4 py-3.5">
+        <p className="text-ink text-[13.5px] leading-[1.55]">
+          <Money value={amount} size="sm" /> was released to you
+          {date && <> on {formatDate(date)}</>}. Record what each line actually cost and attach the
+          receipts to close this requisition.
+        </p>
+
+        <Link
+          href={`/requisitions/${id}/reconcile`}
+          className="bg-st-action mt-4 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-[14.5px] font-semibold text-white transition-[opacity,transform] duration-200 hover:opacity-90 active:scale-[0.99]"
+        >
+          <ReceiptText className="size-4" strokeWidth={2.2} aria-hidden />
+          Reconcile funds
         </Link>
       </div>
     </div>
