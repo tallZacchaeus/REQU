@@ -50,6 +50,14 @@ export interface Attachment {
   kind: "proposal" | "quotation" | "receipt" | "other"
 }
 
+/** Who raised the requisition. The AYP reviews across several of these. */
+export interface Requester {
+  name: string
+  initials: string
+  department: string
+  unit: string
+}
+
 /** What a line item actually cost, against what was requested for it. */
 export interface Reconciliation {
   /** Actual spend keyed by expense item id. */
@@ -84,6 +92,7 @@ export interface Requisition {
   location: string
   department: string
   purpose: string
+  requester: Requester
   items: ExpenseItem[]
   attachments: Attachment[]
   comments: Comment[]

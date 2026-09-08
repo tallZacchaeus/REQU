@@ -2,6 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 
+import { accountByRole, accountFor, type Account, type Role } from "./data"
+
 const STORAGE_KEY = "cwms.session.v1"
 
 export interface Profile {
@@ -14,38 +16,48 @@ export interface Profile {
 
 interface SessionValue {
   signedIn: boolean
+  role: Role
+  account: Account
   /** The address the link was sent to, kept across the two login screens. */
   pendingEmail: string | null
   profile: Profile
   hydrated: boolean
+  /** Where this role's app starts. */
+  home: string
   requestLink: (email: string) => void
   completeSignIn: () => void
   signOut: () => void
   updateProfile: (patch: Partial<Profile>) => void
 }
 
-const DEFAULT_PROFILE: Profile = {
-  phone: "+234 803 412 7788",
-  email: "david.adeyemi@cwms.org",
+interface Persisted {
+  signedIn: boolean
+  role: Role
+  pendingEmail: string | null
+  profile: Profile
+}
+
+const profileFor = (account: Account): Profile => ({
+  phone: account.phone,
+  email: account.email,
   notifyStatus: true,
   notifyComments: true,
   notifyDigest: false,
-}
+})
 
-interface Persisted {
-  signedIn: boolean
-  pendingEmail: string | null
-  profile: Profile
+export const HOME_FOR: Record<Role, string> = { hod: "/", ayp: "/ayp" }
+
+const initial: Persisted = {
+  signedIn: false,
+  role: "hod",
+  pendingEmail: null,
+  profile: profileFor(accountByRole("hod")),
 }
 
 const SessionContext = createContext<SessionValue | null>(null)
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<Persisted>({
-    signedIn: false,
-    pendingEmail: null,
-    profile: DEFAULT_PROFILE,
-  })
+  const [state, setState] = useState<Persisted>(initial)
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
@@ -53,15 +65,22 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       const stored = window.localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored) as Partial<Persisted>
-        setState((current) => ({
-          signedIn: parsed.signedIn ?? current.signedIn,
+        const role: Role = parsed.role === "ayp" ? "ayp" : "hod"
+        // Reading persisted state has to happen after mount: doing it during
+        // render would desync the server-rendered markup. The rule's cascading-
+        // render concern does not apply to a single one-shot hydration.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setState({
+          signedIn: parsed.signedIn ?? false,
+          role,
           pendingEmail: parsed.pendingEmail ?? null,
-          profile: { ...DEFAULT_PROFILE, ...parsed.profile },
-        }))
+          profile: { ...profileFor(accountByRole(role)), ...parsed.profile },
+        })
       }
     } catch {
       // Unreadable storage just leaves the visitor signed out.
     }
+     
     setHydrated(true)
   }, [])
 
@@ -78,22 +97,47 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setState((c) => ({ ...c, pendingEmail: email }))
   }, [])
 
+  /**
+   * Passwordless means the address is the credential *and* the role. An
+   * address that is not on a worker record falls back to the HOD persona
+   * rather than dead-ending the prototype.
+   */
   const completeSignIn = useCallback(() => {
-    setState((c) => ({ ...c, signedIn: true, pendingEmail: null }))
+    setState((c) => {
+      // Idempotent: pendingEmail is consumed on the first call, so a second
+      // one would resolve nobody and silently downgrade the session.
+      if (c.signedIn) return c
+      const account = (c.pendingEmail && accountFor(c.pendingEmail)) || accountByRole("hod")
+      return {
+        signedIn: true,
+        role: account.role,
+        pendingEmail: null,
+        profile: profileFor(account),
+      }
+    })
   }, [])
 
   const signOut = useCallback(() => {
-    setState((c) => ({ ...c, signedIn: false, pendingEmail: null }))
+    setState({ ...initial })
   }, [])
 
   const updateProfile = useCallback((patch: Partial<Profile>) => {
     setState((c) => ({ ...c, profile: { ...c.profile, ...patch } }))
   }, [])
 
-  const value = useMemo<SessionValue>(
-    () => ({ ...state, hydrated, requestLink, completeSignIn, signOut, updateProfile }),
-    [state, hydrated, requestLink, completeSignIn, signOut, updateProfile],
-  )
+  const value = useMemo<SessionValue>(() => {
+    const account = accountByRole(state.role)
+    return {
+      ...state,
+      account,
+      hydrated,
+      home: HOME_FOR[state.role],
+      requestLink,
+      completeSignIn,
+      signOut,
+      updateProfile,
+    }
+  }, [state, hydrated, requestLink, completeSignIn, signOut, updateProfile])
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
 }

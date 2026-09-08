@@ -1,4 +1,93 @@
-import type { Requisition } from "./types"
+import type { Requester, Requisition } from "./types"
+
+export type Role = "hod" | "ayp"
+
+export interface Account {
+  role: Role
+  name: string
+  shortName: string
+  initials: string
+  email: string
+  title: string
+  scope: string
+  phone: string
+}
+
+/**
+ * Sign-in is passwordless, so the address *is* the identity — it decides
+ * which side of the workflow you land on.
+ */
+export const DIRECTORY: Account[] = [
+  {
+    role: "hod",
+    name: "Pastor David Adeyemi",
+    shortName: "Pastor David",
+    initials: "DA",
+    email: "david.adeyemi@cwms.org",
+    title: "Head of Department",
+    scope: "Youth & Young Adults · Central Province",
+    phone: "+234 803 412 7788",
+  },
+  {
+    role: "ayp",
+    name: "Pastor Grace Ojo",
+    shortName: "Pastor Grace",
+    initials: "GO",
+    email: "grace.ojo@cwms.org",
+    title: "Assistant National Youth Pastor",
+    scope: "Youth & Young Adults · All Provinces",
+    phone: "+234 802 771 3390",
+  },
+]
+
+export const accountFor = (email: string) =>
+  DIRECTORY.find((a) => a.email.toLowerCase() === email.trim().toLowerCase())
+
+export const accountByRole = (role: Role) =>
+  DIRECTORY.find((a) => a.role === role) ?? DIRECTORY[0]
+
+export const AYP_USER = {
+  name: "Pastor Grace Ojo",
+  shortName: "Pastor Grace",
+  initials: "GO",
+  role: "Assistant National Youth Pastor",
+  roleShort: "AYP",
+  email: "grace.ojo@cwms.org",
+  phone: "+234 802 771 3390",
+  department: "Youth & Young Adults",
+  unit: "All Provinces",
+  area: "National Secretariat, Abuja",
+  approver: "Pastor Emmanuel Bassey",
+  approverRole: "National Youth Pastor",
+}
+
+/** The HODs whose requisitions reach the AYP. */
+export const REQUESTERS: Record<string, Requester> = {
+  david: {
+    name: "Pastor David Adeyemi",
+    initials: "DA",
+    department: "Youth & Young Adults",
+    unit: "Central Province",
+  },
+  ruth: {
+    name: "Pastor Ruth Nwankwo",
+    initials: "RN",
+    department: "Youth & Young Adults",
+    unit: "Lagos Province",
+  },
+  samuel: {
+    name: "Pastor Samuel Okafor",
+    initials: "SO",
+    department: "Youth & Young Adults",
+    unit: "Eastern Province",
+  },
+  halima: {
+    name: "Pastor Halima Bello",
+    initials: "HB",
+    department: "Youth & Young Adults",
+    unit: "Northern Province",
+  },
+}
 
 export const CURRENT_USER = {
   name: "Pastor David Adeyemi",
@@ -29,6 +118,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     department: "Youth & Young Adults",
     purpose:
       "Annual youth leadership development convention for 1,200 delegates drawn from all twelve provinces. Covers venue, delegate transport and programme materials.",
+    requester: REQUESTERS.david,
     items: [
       { id: "i1", description: "Venue rental & setup", amount: 60_000 },
       { id: "i2", description: "Graphics & publicity", amount: 20_000 },
@@ -66,6 +156,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     department: "Youth & Young Adults",
     purpose:
       "Three-day residential retreat for forty unit leaders, focused on discipleship and succession planning.",
+    requester: REQUESTERS.david,
     items: [
       { id: "i1", description: "Accommodation (40 pax, 2 nights)", amount: 120_000 },
       { id: "i2", description: "Feeding", amount: 45_000 },
@@ -107,6 +198,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     department: "Youth & Young Adults",
     purpose:
       "Refreshments and games equipment for the quarterly young adults fellowship outing.",
+    requester: REQUESTERS.david,
     items: [
       { id: "i1", description: "Refreshments", amount: 45_000 },
       { id: "i2", description: "Transport (2 coaster buses)", amount: 40_000 },
@@ -143,6 +235,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     location: "Youth Chapel, Lagos",
     department: "Youth & Young Adults",
     purpose: "Replacement of two failing monitor speakers in the youth chapel.",
+    requester: REQUESTERS.david,
     items: [
       { id: "i1", description: "Stage monitors (2 units)", amount: 120_000 },
     ],
@@ -161,6 +254,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     location: "University of Nigeria, Nsukka",
     department: "Youth & Young Adults",
     purpose: "Two-day campus outreach with the student fellowship chapter.",
+    requester: REQUESTERS.david,
     items: [
       { id: "i1", description: "Publicity materials", amount: 35_000 },
       { id: "i2", description: "Transport", amount: 55_000 },
@@ -197,6 +291,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     location: "Youth Secretariat, Abuja",
     department: "Youth & Young Adults",
     purpose: "Two editing laptops for the youth media team.",
+    requester: REQUESTERS.david,
     items: [{ id: "i1", description: "Editing laptops (2 units)", amount: 250_000 }],
     attachments: [],
     comments: [
@@ -225,6 +320,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     location: "Provincial HQ, Ibadan",
     department: "Youth & Young Adults",
     purpose: "Easter weekend rally for the provincial youth chapters.",
+    requester: REQUESTERS.david,
     items: [
       { id: "i1", description: "PA system hire", amount: 90_000 },
       { id: "i2", description: "Refreshments", amount: 60_000 },
@@ -272,6 +368,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     location: "Provincial HQ, Ibadan",
     department: "Youth & Young Adults",
     purpose: "Prizes, refreshments and adjudication for the provincial teens quiz finals.",
+    requester: REQUESTERS.david,
     items: [
       { id: "i1", description: "Prizes & trophies", amount: 48_000 },
       { id: "i2", description: "Refreshments", amount: 22_000 },
@@ -283,5 +380,76 @@ export const SEED_REQUISITIONS: Requisition[] = [
     stageDates: { submitted: "2026-09-06" },
     submittedAt: "2026-09-06",
     createdAt: "2026-09-05",
+  },
+  {
+    id: "req-0853",
+    reference: "REQ-2026-0853",
+    programme: "Lagos Teens Camp",
+    programmeDate: "2026-10-24",
+    location: "Badagry Camp Ground, Lagos",
+    department: "Youth & Young Adults",
+    purpose:
+      "Four-day residential camp for 300 teenagers drawn from the eighteen Lagos chapters.",
+    requester: REQUESTERS.ruth,
+    items: [
+      { id: "i1", description: "Camp ground hire (4 nights)", amount: 320_000 },
+      { id: "i2", description: "Feeding (300 pax)", amount: 480_000 },
+      { id: "i3", description: "Transport", amount: 150_000 },
+      { id: "i4", description: "Camp materials & branding", amount: 90_000 },
+    ],
+    attachments: [
+      { id: "a1", name: "camp_proposal.pdf", size: "2.1 MB", kind: "proposal" },
+      { id: "a2", name: "campground_quotation.pdf", size: "540 KB", kind: "quotation" },
+    ],
+    comments: [],
+    activity: [{ id: "e1", date: "2026-09-05", actor: "Pastor Ruth Nwankwo", action: "Submitted for review" }],
+    status: "under_review",
+    stageDates: { submitted: "2026-09-05" },
+    submittedAt: "2026-09-05",
+    createdAt: "2026-09-03",
+  },
+  {
+    id: "req-0854",
+    reference: "REQ-2026-0854",
+    programme: "Eastern Zone Worship Night",
+    programmeDate: "2026-09-26",
+    location: "Cathedral Grounds, Enugu",
+    department: "Youth & Young Adults",
+    purpose: "Quarterly zonal worship night for the eastern chapters.",
+    requester: REQUESTERS.samuel,
+    items: [
+      { id: "i1", description: "Sound & lighting", amount: 140_000 },
+      { id: "i2", description: "Guest minister honorarium", amount: 100_000 },
+      { id: "i3", description: "Security & stewards", amount: 45_000 },
+    ],
+    attachments: [{ id: "a1", name: "worship_night_plan.pdf", size: "880 KB", kind: "proposal" }],
+    comments: [],
+    activity: [{ id: "e1", date: "2026-09-07", actor: "Pastor Samuel Okafor", action: "Submitted for review" }],
+    status: "under_review",
+    stageDates: { submitted: "2026-09-07" },
+    submittedAt: "2026-09-07",
+    createdAt: "2026-09-06",
+  },
+  {
+    id: "req-0855",
+    reference: "REQ-2026-0855",
+    programme: "Northern Outreach Materials",
+    programmeDate: "2026-09-19",
+    location: "Kaduna & Zaria chapters",
+    department: "Youth & Young Adults",
+    purpose:
+      "Printing of Hausa-language outreach tracts and follow-up cards for the northern chapters.",
+    requester: REQUESTERS.halima,
+    items: [
+      { id: "i1", description: "Tract printing (10,000 copies)", amount: 180_000 },
+      { id: "i2", description: "Follow-up cards", amount: 35_000 },
+    ],
+    attachments: [{ id: "a1", name: "printer_quotation.pdf", size: "310 KB", kind: "quotation" }],
+    comments: [],
+    activity: [{ id: "e1", date: "2026-08-30", actor: "Pastor Halima Bello", action: "Submitted for review" }],
+    status: "under_review",
+    stageDates: { submitted: "2026-08-30" },
+    submittedAt: "2026-08-30",
+    createdAt: "2026-08-29",
   },
 ]

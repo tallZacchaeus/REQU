@@ -6,6 +6,7 @@ import { ArrowRight, Check, Clock, Mail, ShieldCheck } from "lucide-react";
 
 import { LogoTile } from "@/components/app/logo";
 import { MicroLabel } from "@/components/app/primitives";
+import { DIRECTORY } from "@/lib/data"
 import { isValidEmail, maskEmail, useSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +17,7 @@ const RESEND_SECONDS = 45;
 const STEPS = [
   "Enter the email address on your worker record",
   "Tap the secure link we send you",
-  "You land straight in your requisitions",
+  "You land straight in your workspace",
 ];
 
 export default function LoginPage() {
@@ -74,7 +75,7 @@ export default function LoginPage() {
             Welcome back
           </h1>
           <p className="text-ink-soft mt-2.5 max-w-[290px] text-[14.5px] leading-[1.55]">
-            Sign in to raise and track requisitions for your department.
+            Sign in to raise, review and track programme requisitions.
           </p>
         </div>
 
@@ -128,6 +129,40 @@ export default function LoginPage() {
               </li>
             ))}
           </ol>
+        </section>
+
+        {/* Passwordless means the address picks the role, so the prototype has
+            to hand you the two identities to try. */}
+        <section
+          className="animate-rise border-hairline mt-5 rounded-xl border border-dashed px-4 py-3.5"
+          style={{ animationDelay: "200ms" }}
+        >
+          <MicroLabel className="mb-2.5">Prototype accounts</MicroLabel>
+          <div className="flex flex-wrap gap-2">
+            {DIRECTORY.map((account) => (
+              <button
+                key={account.email}
+                type="button"
+                onClick={() => {
+                  setEmail(account.email)
+                  setError(null)
+                }}
+                className="border-hairline bg-card hover:border-primary/40 flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-[border-color,transform] duration-200 active:scale-[0.98]"
+              >
+                <span className="bg-muted text-ink-soft flex size-6 shrink-0 items-center justify-center rounded-full text-[10.5px] font-semibold">
+                  {account.initials}
+                </span>
+                <span>
+                  <span className="text-ink block text-[12.5px] leading-tight font-semibold">
+                    {account.shortName}
+                  </span>
+                  <span className="text-ink-faint block text-[10.5px] leading-tight">
+                    {account.role === "hod" ? "Head of Department" : "Assistant NYP"}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
         </section>
       </div>
 

@@ -4,16 +4,23 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { LogoMark } from "@/components/app/logo"
-import { CURRENT_USER } from "@/lib/data"
-import { useSession } from "@/lib/session"
+import { accountFor } from "@/lib/data"
+import { HOME_FOR, useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
 type Phase = "verifying" | "welcome"
 
 export default function VerifyPage() {
   const router = useRouter()
-  const { completeSignIn } = useSession()
+  const { completeSignIn, account, pendingEmail } = useSession()
   const [phase, setPhase] = useState<Phase>("verifying")
+
+  // Resolved once, from the address the link was sent to. Reading `home` off
+  // the session instead would change the moment sign-in lands, restarting the
+  // effect mid-sequence.
+  const [destination] = useState(
+    () => HOME_FOR[accountFor(pendingEmail ?? "")?.role ?? "hod"],
+  )
 
   useEffect(() => {
     // Three beats: the check runs, it resolves, then the app takes over. The
@@ -22,12 +29,12 @@ export default function VerifyPage() {
       completeSignIn()
       setPhase("welcome")
     }, 1300)
-    const toApp = setTimeout(() => router.replace("/"), 2300)
+    const toApp = setTimeout(() => router.replace(destination), 2300)
     return () => {
       clearTimeout(toWelcome)
       clearTimeout(toApp)
     }
-  }, [completeSignIn, router])
+  }, [completeSignIn, destination, router])
 
   return (
     <main className="canvas-lift flex min-h-dvh flex-col items-center justify-center px-8">
@@ -66,12 +73,12 @@ export default function VerifyPage() {
         )}
         aria-live="polite"
       >
-        {phase === "verifying" ? "Verifying your link…" : `Welcome back, ${CURRENT_USER.shortName}`}
+        {phase === "verifying" ? "Verifying your link…" : `Welcome back, ${account.shortName}`}
       </p>
       <p className="text-ink-faint mt-2 text-center text-[13px] leading-[1.5]">
         {phase === "verifying"
           ? "This link is single-use and expires shortly."
-          : "Taking you to your requisitions."}
+          : `Signed in as ${account.title}.`}
       </p>
     </main>
   )

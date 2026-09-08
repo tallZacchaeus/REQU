@@ -27,10 +27,15 @@ export function RequisitionStore({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY)
+      // Reading persisted state has to happen after mount: doing it during
+      // render would desync the server-rendered markup. The rule's cascading-
+      // render concern does not apply to a single one-shot hydration.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (stored) setRequisitions(JSON.parse(stored) as Requisition[])
     } catch {
       // Corrupt or unavailable storage just falls back to the seed set.
     }
+     
     setHydrated(true)
   }, [])
 

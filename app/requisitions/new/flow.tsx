@@ -9,6 +9,7 @@ import { DetailRow, MicroLabel, Money, StickyFooter } from "@/components/app/pri
 import { ScreenHeader } from "@/components/app/screen-header"
 import { CURRENT_USER } from "@/lib/data"
 import { amountInWords, formatDate } from "@/lib/format"
+import { isoToday, newId } from "@/lib/ids"
 import { useRequisitions } from "@/lib/store"
 import type { Attachment, ExpenseItem, Requisition } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -23,7 +24,7 @@ const UNITS = [
 ]
 
 const blankItem = (): ExpenseItem => ({
-  id: `i${Math.random().toString(36).slice(2, 9)}`,
+  id: newId("i"),
   description: "",
   amount: 0,
 })
@@ -78,7 +79,6 @@ function Flow({ existing }: { existing?: Requisition }) {
   ][step]
 
   const isResubmit = Boolean(existing && existing.status === "changes_requested")
-  const isDraft = Boolean(existing && existing.status === "draft")
 
   function next() {
     if (!stepValid) {
@@ -116,15 +116,21 @@ function Flow({ existing }: { existing?: Requisition }) {
   }
 
   function compose(status: Requisition["status"]): Requisition {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = isoToday()
     const base: Requisition = existing ?? {
-      id: `req-${Math.random().toString(36).slice(2, 8)}`,
+      id: newId("req-"),
       reference: nextReference(),
       programme: "",
       programmeDate: "",
       location: "",
       department: CURRENT_USER.department,
       purpose: "",
+      requester: {
+        name: CURRENT_USER.name,
+        initials: CURRENT_USER.initials,
+        department: CURRENT_USER.department,
+        unit: CURRENT_USER.unit,
+      },
       items: [],
       attachments: [],
       comments: [],
@@ -150,7 +156,7 @@ function Flow({ existing }: { existing?: Requisition }) {
       activity: [
         ...base.activity,
         {
-          id: `e${Math.random().toString(36).slice(2, 8)}`,
+          id: newId("e"),
           date: today,
           actor: "You",
           action: submitting
@@ -354,7 +360,7 @@ function Flow({ existing }: { existing?: Requisition }) {
                   setAttachments((current) => [
                     ...current,
                     ...files.map((file) => ({
-                      id: `a${Math.random().toString(36).slice(2, 8)}`,
+                      id: newId("a"),
                       name: file.name,
                       size:
                         file.size > 1_048_576

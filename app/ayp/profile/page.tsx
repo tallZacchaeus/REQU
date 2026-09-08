@@ -1,21 +1,17 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   AtSign,
-  Camera,
   Check,
   ChevronRight,
-  Images,
   KeyRound,
-  Lock,
   LogOut,
   Monitor,
   Pencil,
   Phone,
   ShieldCheck,
-  Trash2,
   X,
 } from "lucide-react"
 
@@ -25,51 +21,45 @@ import {
   Field,
   Group,
   ProfileStat,
-  SheetAction,
   SheetRow,
   ToggleRow,
 } from "@/components/app/settings"
 import { Sheet } from "@/components/app/sheet"
-import { CURRENT_USER } from "@/lib/data"
+import { AYP_USER } from "@/lib/data"
+import { visibleToAyp, wasRecommended, wasReturned } from "@/lib/review"
 import { maskEmail, useSession } from "@/lib/session"
-import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
 
 const CAN = [
-  "Create and save draft requisitions",
-  "Submit requisitions for review",
-  "Track status and disbursement history",
-  "Respond to requested changes",
-  "Reconcile disbursed funds with receipts",
+  "Review requisitions from every province",
+  "Recommend requisitions to the National Youth Pastor",
+  "Return requisitions to the HOD with specific changes",
+  "See the full expense breakdown and attachments",
 ]
 
 const CANNOT = [
-  "Recommend or approve requisitions",
+  "Give final approval",
   "Disburse funds",
-  "Sign off your own reconciliation",
-  "Add other HODs or workers",
-  "View other departments' requisitions",
+  "Raise a requisition of your own",
+  "Edit an HOD's figures directly",
+  "Sign off a reconciliation",
 ]
 
-export default function ProfilePage() {
+export default function AypProfilePage() {
   const router = useRouter()
   const { profile, updateProfile, signOut } = useSession()
-  const { requisitions: all } = useRequisitions()
-  const requisitions = all.filter(isMine)
+  const { requisitions } = useRequisitions()
 
   const [open, setOpen] = useState<string | null>("personal")
   const [editing, setEditing] = useState(false)
   const [phoneDraft, setPhoneDraft] = useState(profile.phone)
   const [saved, setSaved] = useState(false)
-  const [sheet, setSheet] = useState<"avatar" | "security" | "signout" | null>(null)
-  const [avatar, setAvatar] = useState<string | null>(null)
-  const fileInput = useRef<HTMLInputElement>(null)
+  const [sheet, setSheet] = useState<"security" | "signout" | null>(null)
 
-  const submitted = requisitions.filter((r) => r.status !== "draft").length
-  const disbursed = requisitions.filter((r) =>
-    ["disbursed", "reconciliation_review", "reconciled"].includes(r.status),
-  ).length
-  const closed = requisitions.filter((r) => r.status === "reconciled").length
+  const visible = requisitions.filter(visibleToAyp)
+  const recommended = visible.filter(wasRecommended).length
+  const returned = visible.filter(wasReturned).length
+  const reviewed = recommended + returned
 
   const toggle = (key: string) => setOpen((current) => (current === key ? null : key))
 
@@ -82,65 +72,44 @@ export default function ProfilePage() {
 
   return (
     <>
-      {/* Same dark crown as the dashboard, so the two roots of the app match. */}
       <header className="header-deep rounded-b-[28px] px-5 pt-5 pb-16">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.09em] text-white/60 uppercase">
             <LogoMark className="size-4 text-white/80" />
-            Your workspace
+            Review desk
           </span>
           <span className="rounded-md border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-bold tracking-[0.06em] text-white">
-            {CURRENT_USER.roleShort}
+            {AYP_USER.roleShort}
           </span>
         </div>
 
         <div className="animate-rise mt-7 flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => setSheet("avatar")}
-            aria-label="Change profile photo"
-            className="group relative shrink-0 cursor-pointer rounded-full"
-          >
-            {avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatar}
-                alt=""
-                className="size-16 rounded-full object-cover ring-2 ring-white/25"
-              />
-            ) : (
-              <span className="bg-brand/25 flex size-16 items-center justify-center rounded-full text-[19px] font-semibold tracking-[-0.01em] text-white ring-2 ring-white/25 transition-all duration-200 group-hover:ring-white/45">
-                {CURRENT_USER.initials}
-              </span>
-            )}
-            <span className="bg-brand absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full ring-[3px] ring-[#123a68] transition-transform duration-200 group-hover:scale-105 group-active:scale-90">
-              <Camera className="size-3 text-white" strokeWidth={2.4} aria-hidden />
-            </span>
-          </button>
-
+          <span className="bg-brand/25 flex size-16 shrink-0 items-center justify-center rounded-full text-[19px] font-semibold tracking-[-0.01em] text-white ring-2 ring-white/25">
+            {AYP_USER.initials}
+          </span>
           <div className="min-w-0">
             <h1 className="truncate text-[21px] leading-tight font-semibold tracking-[-0.025em] text-white">
-              {CURRENT_USER.name}
+              {AYP_USER.name}
             </h1>
-            <p className="mt-1 truncate text-[12.5px] text-white/65">
-              {CURRENT_USER.role} · {CURRENT_USER.department}
-            </p>
+            <p className="mt-1 truncate text-[12.5px] text-white/65">{AYP_USER.role}</p>
             <p className="mt-0.5 truncate text-[12px] text-white/45">{profile.email}</p>
           </div>
         </div>
       </header>
 
-      {/* Straddles the crown's edge — the seam between the two grounds. */}
       <div className="-mt-9 px-4">
         <div className="card-flat grid grid-cols-3 shadow-raised">
-          <ProfileStat label="Submitted" value={submitted} className="border-hairline border-r" />
-          <ProfileStat label="Disbursed" value={disbursed} className="border-hairline border-r" />
-          <ProfileStat label="Closed" value={closed} />
+          <ProfileStat label="Reviewed" value={reviewed} className="border-hairline border-r" />
+          <ProfileStat
+            label="Recommended"
+            value={recommended}
+            className="border-hairline border-r"
+          />
+          <ProfileStat label="Returned" value={returned} />
         </div>
       </div>
 
       <div className="space-y-3.5 px-4 pt-5 pb-8">
-
         <Group
           title="Personal Information"
           open={open === "personal"}
@@ -193,7 +162,7 @@ export default function ProfilePage() {
           }
         >
           <dl className="divide-hairline divide-y">
-            <Field label="Full name" value={CURRENT_USER.name} locked />
+            <Field label="Full name" value={AYP_USER.name} locked />
             <Field label="Email address" value={profile.email} locked />
             {editing ? (
               <div className="py-2.5">
@@ -212,39 +181,26 @@ export default function ProfilePage() {
             ) : (
               <Field label="Phone number" value={profile.phone} />
             )}
-            <Field
-              label="Department / Unit"
-              value={`${CURRENT_USER.department} · ${CURRENT_USER.unit}`}
-              locked
-            />
+            <Field label="Office" value={AYP_USER.area} locked />
           </dl>
-          <p className="text-ink-faint border-hairline mt-3 flex items-start gap-1.5 border-t pt-3 text-[11.5px] leading-[1.5]">
-            <Lock className="mt-px size-3 shrink-0" strokeWidth={2} aria-hidden />
-            Locked fields are maintained by your provincial administrator.
-          </p>
         </Group>
 
-        <Group
-          title="Role & Responsibilities"
-          open={open === "role"}
-          onToggle={() => toggle("role")}
-        >
+        <Group title="Role & Responsibilities" open={open === "role"} onToggle={() => toggle("role")}>
           <dl className="divide-hairline divide-y">
-            <Field label="Role" value={CURRENT_USER.role} />
-            <Field label="Department" value={CURRENT_USER.department} />
-            <Field label="Area" value={CURRENT_USER.area} />
-            <Field label="Parish" value={CURRENT_USER.parish} />
+            <Field label="Role" value={AYP_USER.role} />
+            <Field label="Department" value={AYP_USER.department} />
+            <Field label="Review scope" value={AYP_USER.unit} />
+            <Field label="Recommends to" value={`${AYP_USER.approver} · ${AYP_USER.approverRole}`} />
           </dl>
           <p className="text-ink-soft border-hairline mt-3 border-t pt-3 text-[12px] leading-[1.5]">
-            You raise, track and reconcile requisitions for this department. Recommendation,
-            approval and disbursement sit with the AYP, NYP and Finance; Treasury signs off the
-            reconciliation.
+            You are the first review on every requisition raised in this department. Approval sits
+            with the NYP, disbursement with Finance and Treasury.
           </p>
         </Group>
 
         <Group
           title="Contact Information"
-          meta="How reviewers reach you"
+          meta="How HODs reach you"
           open={open === "contact"}
           onToggle={() => toggle("contact")}
         >
@@ -269,20 +225,20 @@ export default function ProfilePage() {
         >
           <div className="divide-hairline divide-y">
             <ToggleRow
-              label="Status changes"
-              hint="When a requisition is recommended, approved or returned."
+              label="New submissions"
+              hint="When an HOD sends a requisition to your desk."
               checked={profile.notifyStatus}
               onChange={(value) => updateProfile({ notifyStatus: value })}
             />
             <ToggleRow
-              label="Reviewer comments"
-              hint="When the AYP or NYP leaves a comment."
+              label="Resubmissions"
+              hint="When a requisition you returned comes back."
               checked={profile.notifyComments}
               onChange={(value) => updateProfile({ notifyComments: value })}
             />
             <ToggleRow
-              label="Weekly digest"
-              hint="A Monday summary of everything in flight."
+              label="Weekly queue digest"
+              hint="A Monday summary of what is still waiting."
               checked={profile.notifyDigest}
               onChange={(value) => updateProfile({ notifyDigest: value })}
             />
@@ -338,46 +294,9 @@ export default function ProfilePage() {
         </button>
 
         <p className="text-ink-faint pt-1 text-center font-mono text-[11px]">
-          CWMS · Youth &amp; Young Adults · MVP
+          CWMS · Review Desk · MVP
         </p>
       </div>
-
-      {/* ---- Sheets ---- */}
-      <Sheet open={sheet === "avatar"} onClose={() => setSheet(null)} title="Profile photo">
-        <input
-          ref={fileInput}
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          onChange={(event) => {
-            const file = event.target.files?.[0]
-            if (file) {
-              if (avatar) URL.revokeObjectURL(avatar)
-              setAvatar(URL.createObjectURL(file))
-            }
-            event.target.value = ""
-            setSheet(null)
-          }}
-        />
-        <SheetAction icon={Camera} label="Take a photo" onClick={() => fileInput.current?.click()} />
-        <SheetAction
-          icon={Images}
-          label="Choose from library"
-          onClick={() => fileInput.current?.click()}
-        />
-        {avatar && (
-          <SheetAction
-            icon={Trash2}
-            label="Remove photo"
-            destructive
-            onClick={() => {
-              URL.revokeObjectURL(avatar)
-              setAvatar(null)
-              setSheet(null)
-            }}
-          />
-        )}
-      </Sheet>
 
       <Sheet open={sheet === "security"} onClose={() => setSheet(null)} title="Security">
         <div className="border-hairline bg-muted mb-4 flex items-start gap-2.5 rounded-lg border px-3.5 py-3">
@@ -404,7 +323,7 @@ export default function ProfilePage() {
 
       <Sheet open={sheet === "signout"} onClose={() => setSheet(null)} title="Sign out?">
         <p className="text-ink-soft text-[13.5px] leading-[1.55]">
-          You&apos;ll need a fresh sign-in link to get back in. Drafts stay saved.
+          You&apos;ll need a fresh sign-in link to get back in.
         </p>
         <div className="mt-5 flex gap-2.5">
           <button

@@ -1,12 +1,20 @@
 "use client"
 
 import Link from "next/link"
-import { ChevronDown, Paperclip, Pencil, ReceiptText, TriangleAlert } from "lucide-react"
+import { Paperclip, Pencil, ReceiptText, TriangleAlert } from "lucide-react"
 
 import { ScreenHeader } from "@/components/app/screen-header"
-import { DetailRow, MicroLabel, Money, Section, StatusBadge } from "@/components/app/primitives"
+import {
+  DetailRow,
+  Disclosure,
+  MicroLabel,
+  Money,
+  Section,
+  StatusBadge,
+} from "@/components/app/primitives"
 import { StageMeter, StageRail } from "@/components/app/stage-rail"
 import { amountInWords, formatDate, durationSince } from "@/lib/format"
+import { isMine } from "@/lib/review"
 import { buildStages, STAGE_COUNT, STATUS } from "@/lib/status"
 import { useRequisitions } from "@/lib/store"
 import { reconciledTotal, reconciliationVariance, requisitionTotal } from "@/lib/types"
@@ -14,7 +22,8 @@ import { cn } from "@/lib/utils"
 
 export function RequisitionDetail({ id }: { id: string }) {
   const { getById, hydrated } = useRequisitions()
-  const requisition = getById(id)
+  const found = getById(id)
+  const requisition = found && isMine(found) ? found : undefined
 
   if (!requisition) {
     return (
@@ -424,36 +433,5 @@ function ReconcileNotice({
         </Link>
       </div>
     </div>
-  )
-}
-
-/** Native disclosure — keyboard and screen-reader behaviour for free. */
-function Disclosure({
-  title,
-  meta,
-  defaultOpen = false,
-  children,
-}: {
-  title: string
-  meta?: string
-  defaultOpen?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <details open={defaultOpen} className="card-flat group overflow-hidden">
-      <summary className="hover:bg-muted/60 flex h-11 cursor-pointer list-none items-center justify-between px-4 transition-colors duration-200 [&::-webkit-details-marker]:hidden">
-        <MicroLabel>{title}</MicroLabel>
-        <span className="flex items-center gap-2">
-          {meta && <span className="text-ink-faint text-[12px]">{meta}</span>}
-          <ChevronDown
-            className={cn(
-              "text-ink-faint size-4 transition-transform duration-200 group-open:rotate-180",
-            )}
-            aria-hidden
-          />
-        </span>
-      </summary>
-      <div className="border-hairline border-t px-4 py-3.5">{children}</div>
-    </details>
   )
 }

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation"
 import { FileText, Plus } from "lucide-react"
 
 import { RequisitionCard } from "@/components/app/requisition-card"
+import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
 import type { RequisitionStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -34,7 +35,8 @@ const FILTERS: { key: string; label: string; match: (s: RequisitionStatus) => bo
 ]
 
 export function RequisitionsList() {
-  const { requisitions } = useRequisitions()
+  const { requisitions: all } = useRequisitions()
+  const requisitions = all.filter(isMine)
   const params = useSearchParams()
   // The dashboard stat cards deep-link straight into a filter.
   const initial = params.get("filter")

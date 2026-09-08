@@ -1,3 +1,5 @@
+import { ChevronDown } from "lucide-react"
+
 import { cn } from "@/lib/utils"
 import { formatAmount } from "@/lib/format"
 import { STATUS, TONE_CHIP, TONE_DOT, TONE_TEXT } from "@/lib/status"
@@ -131,5 +133,36 @@ export function StickyFooter({
       {note && <p className="text-ink-soft mb-2.5 text-[12px] leading-[1.45]">{note}</p>}
       {children}
     </div>
+  )
+}
+
+/** Native disclosure — keyboard and screen-reader behaviour for free. */
+export function Disclosure({
+  title,
+  meta,
+  defaultOpen = false,
+  children,
+}: {
+  title: string
+  meta?: string
+  defaultOpen?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <details open={defaultOpen} className="card-flat group overflow-hidden">
+      <summary className="hover:bg-muted/60 flex h-11 cursor-pointer list-none items-center justify-between px-4 transition-colors duration-200 [&::-webkit-details-marker]:hidden">
+        <MicroLabel>{title}</MicroLabel>
+        <span className="flex items-center gap-2">
+          {meta && <span className="text-ink-faint text-[12px]">{meta}</span>}
+          <ChevronDown
+            className={cn(
+              "text-ink-faint size-4 transition-transform duration-200 group-open:rotate-180",
+            )}
+            aria-hidden
+          />
+        </span>
+      </summary>
+      <div className="border-hairline border-t px-4 py-3.5">{children}</div>
+    </details>
   )
 }

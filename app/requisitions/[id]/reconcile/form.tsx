@@ -8,13 +8,16 @@ import { Paperclip, ReceiptText, Trash2, TriangleAlert, Upload } from "lucide-re
 import { AmountField, TextAreaField } from "@/components/app/fields"
 import { MicroLabel, Money, StickyFooter } from "@/components/app/primitives"
 import { ScreenHeader } from "@/components/app/screen-header"
+import { isoToday, newId } from "@/lib/ids"
+import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
 import { requisitionTotal, type Attachment, type Requisition } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 export function ReconcileForm({ id }: { id: string }) {
   const { getById, hydrated } = useRequisitions()
-  const requisition = getById(id)
+  const found = getById(id)
+  const requisition = found && isMine(found) ? found : undefined
 
   if (!hydrated || !requisition) {
     return (
@@ -79,7 +82,7 @@ function Form({ requisition }: { requisition: Requisition }) {
       return
     }
     setPending(true)
-    const today = new Date().toISOString().slice(0, 10)
+    const today = isoToday()
     upsert({
       ...requisition,
       status: "reconciliation_review",
@@ -87,7 +90,7 @@ function Form({ requisition }: { requisition: Requisition }) {
       activity: [
         ...requisition.activity,
         {
-          id: `e${Math.random().toString(36).slice(2, 8)}`,
+          id: newId("e"),
           date: today,
           actor: "You",
           action: "Filed reconciliation",
@@ -241,7 +244,7 @@ function Form({ requisition }: { requisition: Requisition }) {
                 setReceipts((current) => [
                   ...current,
                   ...files.map((file) => ({
-                    id: `r${Math.random().toString(36).slice(2, 8)}`,
+                    id: newId("r"),
                     name: file.name,
                     size:
                       file.size > 1_048_576
