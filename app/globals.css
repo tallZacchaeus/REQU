@@ -36,6 +36,13 @@
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
 
+  /* Brand. #0EA5E9 stays at full saturation and is never diluted; what
+     changes is what sits ON it. White would read at 2.8:1, so brand
+     surfaces carry an ink label instead.                                */
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+
+
   /* Status families. One colour per *meaning*, not per state name.      */
   --color-st-neutral: #64748b;
   --color-st-neutral-bg: #f1f3f6;
@@ -43,10 +50,13 @@
   --color-st-motion-bg: #e8eff8;
   --color-st-action: #b45309;
   --color-st-action-bg: #fdf2dc;
-  --color-st-good: #15803d;
-  --color-st-good-bg: #e7f4ec;
-  --color-st-bad: #b3261e;
+  --color-st-good: #0f7f5c;
+  --color-st-good-bg: #e4f4ef;
+  --color-st-bad: #bf3329;
   --color-st-bad-bg: #fbeceb;
+
+  --animate-rise: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade: fade 0.35s ease-out both;
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -68,10 +78,16 @@
   --ink: #0b1524;
   --ink-soft: #55606f;
   --ink-faint: #8a94a2;
-  --canvas: #f4f5f7;
-  --hairline: #e4e7ec;
+  --canvas: #f2f4f7;
+  --hairline: #e3e8ee;
 
-  --background: #f4f5f7;
+  /* Accent only — focus rings, the active-tab rule, live indicators. It is
+     never the surface of a primary button; navy carries that weight. */
+  --brand: #0ea5e9;
+  /* Brand as *text* on a light ground needs to be darker to clear 4.5:1. */
+  --brand-ink: #0369a1;
+
+  --background: #f2f4f7;
   --foreground: #0b1524;
   --card: #ffffff;
   --card-foreground: #0b1524;
@@ -88,7 +104,7 @@
   --destructive: #b3261e;
   --border: #e4e7ec;
   --input: #dde1e7;
-  --ring: #11324f;
+  --ring: #0ea5e9;
 }
 
 @layer base {
@@ -133,7 +149,48 @@
   .card-flat {
     @apply bg-card border-hairline rounded-xl border shadow-card;
   }
+
 }
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   *,

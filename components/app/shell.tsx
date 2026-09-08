@@ -1,10 +1,14 @@
 "use client"
 
+import { useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { FileText, House, User } from "lucide-react"
 
+import { useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
+
+import { LogoMark } from "./logo"
 
 const NAV = [
   { href: "/", label: "Home", icon: House },
@@ -13,10 +17,31 @@ const NAV = [
 ]
 
 /** Task flows take over the screen — no tab bar to escape through halfway. */
-const FULLSCREEN = [/^\/requisitions\/new/, /^\/requisitions\/[^/]+\/submitted/]
+const FULLSCREEN = [/^\/requisitions\/new/, /^\/requisitions\/[^/]+\/submitted/, /^\/login/]
+
+const isPublic = (pathname: string) => pathname.startsWith("/login")
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { signedIn, hydrated } = useSession()
+
+  useEffect(() => {
+    if (!hydrated) return
+    if (!signedIn && !isPublic(pathname)) router.replace("/login")
+    if (signedIn && pathname === "/login") router.replace("/")
+  }, [hydrated, signedIn, pathname, router])
+
+  // Hold a brand splash rather than flashing a screen the visitor is about to
+  // be redirected away from.
+  if (!hydrated || (!signedIn && !isPublic(pathname))) {
+    return (
+      <div className="bg-canvas mx-auto flex min-h-dvh w-full max-w-[430px] items-center justify-center">
+        <LogoMark className="text-primary animate-fade size-8" />
+      </div>
+    )
+  }
+
   const showNav = !FULLSCREEN.some((pattern) => pattern.test(pathname))
 
   return (
@@ -49,10 +74,18 @@ function BottomNav({ pathname }: { pathname: string }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-[52px] cursor-pointer flex-col items-center justify-center gap-1 pt-2 transition-colors duration-200",
+                  "relative flex min-h-[52px] cursor-pointer flex-col items-center justify-center gap-1 pt-2 transition-colors duration-200",
                   active ? "text-primary" : "text-ink-faint hover:text-ink-soft",
                 )}
               >
+                {/* The active tab is marked by a brand rule, not by colour alone. */}
+                <span
+                  className={cn(
+                    "absolute top-0 h-[2.5px] w-9 rounded-full transition-colors duration-200",
+                    active ? "bg-brand" : "bg-transparent",
+                  )}
+                  aria-hidden
+                />
                 <Icon className="size-[22px]" strokeWidth={active ? 2.2 : 1.7} aria-hidden />
                 <span className="text-[11px] leading-none font-medium tracking-[0.01em]">
                   {label}

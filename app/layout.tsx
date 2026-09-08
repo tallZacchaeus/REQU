@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { IBM_Plex_Mono, Source_Sans_3 } from "next/font/google"
 
 import { AppShell } from "@/components/app/shell"
+import { SessionProvider } from "@/lib/session"
 import { RequisitionStore } from "@/lib/store"
 
 import "./globals.css"
@@ -32,16 +33,18 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f4f5f7",
+  themeColor: "#0a1520",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sourceSans.variable} ${plexMono.variable} h-full antialiased`}>
       <body className="min-h-full">
-        <RequisitionStore>
-          <AppShell>{children}</AppShell>
-        </RequisitionStore>
+        <SessionProvider>
+          <RequisitionStore>
+            <AppShell>{children}</AppShell>
+          </RequisitionStore>
+        </SessionProvider>
       </body>
     </html>
   )
