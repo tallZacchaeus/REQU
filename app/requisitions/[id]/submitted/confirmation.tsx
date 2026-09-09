@@ -23,7 +23,7 @@ export function SubmittedConfirmation({ id }: { id: string }) {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-4 pt-16 pb-8">
+    <div className="mx-auto flex w-full max-w-[430px] flex-1 flex-col px-4 pt-16 pb-8">
       <div className="flex flex-col items-center text-center">
         <span className="bg-st-good/10 flex size-14 items-center justify-center rounded-full">
           <span className="bg-st-good flex size-9 items-center justify-center rounded-full">

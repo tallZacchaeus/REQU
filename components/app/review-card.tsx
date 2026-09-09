@@ -15,10 +15,13 @@ import { Money, StatusBadge } from "./primitives"
  */
 export function ReviewCard({
   requisition,
+  href,
   className,
   style,
 }: {
   requisition: Requisition
+  /** Whose desk this card belongs to — the AYP and NYP have separate routes. */
+  href: string
   className?: string
   style?: React.CSSProperties
 }) {
@@ -28,7 +31,7 @@ export function ReviewCard({
 
   return (
     <Link
-      href={`/ayp/requisitions/${requisition.id}`}
+      href={href}
       style={style}
       className={cn(
         "card-flat tap-card group hover:border-ink-faint/30 flex cursor-pointer items-start gap-3 px-3.5 py-3.5",

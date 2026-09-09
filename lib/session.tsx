@@ -45,7 +45,7 @@ const profileFor = (account: Account): Profile => ({
   notifyDigest: false,
 })
 
-export const HOME_FOR: Record<Role, string> = { hod: "/", ayp: "/ayp" }
+export const HOME_FOR: Record<Role, string> = { hod: "/", ayp: "/ayp", nyp: "/nyp" }
 
 const initial: Persisted = {
   signedIn: false,
@@ -65,7 +65,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       const stored = window.localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored) as Partial<Persisted>
-        const role: Role = parsed.role === "ayp" ? "ayp" : "hod"
+        const role: Role =
+          parsed.role === "ayp" || parsed.role === "nyp" ? parsed.role : "hod"
         // Reading persisted state has to happen after mount: doing it during
         // render would desync the server-rendered markup. The rule's cascading-
         // render concern does not apply to a single one-shot hydration.

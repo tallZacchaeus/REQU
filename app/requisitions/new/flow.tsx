@@ -189,7 +189,7 @@ function Flow({ existing }: { existing?: Requisition }) {
       />
 
       {/* A rule that fills, not a row of numbered circles. */}
-      <div className="border-hairline bg-card sticky top-14 z-10 border-b px-4 pt-2.5 pb-3">
+      <div className="border-hairline bg-card sticky top-14 z-10 border-b px-4 pt-2.5 pb-3 lg:static lg:mx-auto lg:w-full lg:max-w-[680px] lg:border-0 lg:bg-transparent lg:px-0 lg:pt-6">
         <div className="mb-2 flex items-baseline justify-between">
           <MicroLabel>
             Step {step + 1} of {STEPS.length} · {STEPS[step]}
@@ -204,7 +204,7 @@ function Flow({ existing }: { existing?: Requisition }) {
         </div>
       </div>
 
-      <div className="flex-1 px-4 pt-5 pb-6">
+      <div className="flex-1 px-4 pt-5 pb-6 lg:mx-auto lg:w-full lg:max-w-[680px] lg:px-0">
         {step === 0 && (
           <div className="space-y-4">
             <TextField

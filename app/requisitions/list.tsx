@@ -51,9 +51,11 @@ export function RequisitionsList() {
 
   return (
     <>
-      <header className="border-hairline bg-card sticky top-0 z-20 border-b">
-        <div className="flex h-14 items-center justify-between px-4">
-          <h1 className="text-ink text-[17px] font-semibold tracking-[-0.01em]">My Requisitions</h1>
+      <header className="border-hairline bg-card sticky top-0 z-20 border-b lg:static lg:border-0 lg:bg-transparent">
+        <div className="flex h-14 items-center justify-between px-4 lg:h-auto lg:px-0 lg:pb-4">
+          <h1 className="text-ink text-[17px] font-semibold tracking-[-0.01em] lg:text-[24px] lg:tracking-[-0.025em]">
+            My Requisitions
+          </h1>
           <Link
             href="/requisitions/new"
             className="btn-gradient -mr-1 flex h-9 cursor-pointer items-center gap-1.5 rounded-lg pr-3 pl-2.5 text-[13.5px] font-semibold text-white transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.97]"
@@ -64,8 +66,8 @@ export function RequisitionsList() {
         </div>
 
         {/* Filters scroll horizontally so the set never wraps into two rows. */}
-        <div className="overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex w-max gap-1.5">
+        <div className="overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-max gap-1.5 lg:w-auto lg:flex-wrap">
             {FILTERS.map((f) => {
               const count = requisitions.filter((r) => f.match(r.status)).length
               const selected = f.key === active
@@ -98,7 +100,7 @@ export function RequisitionsList() {
         </div>
       </header>
 
-      <div className="px-4 pt-4 pb-8">
+      <div className="px-4 pt-4 pb-8 lg:px-0 lg:pt-6">
         <p className="label-micro mb-2.5">
           {visible.length} requisition{visible.length === 1 ? "" : "s"}
         </p>
@@ -113,7 +115,7 @@ export function RequisitionsList() {
             </p>
           </div>
         ) : (
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 2xl:grid-cols-3">
             {visible.map((requisition, index) => (
               <RequisitionCard
                 key={requisition.id}

@@ -58,8 +58,8 @@ export default function DashboardPage() {
   return (
     <>
       {/* ---- Dark crown: identity, greeting and the one thing needing you ---- */}
-      <header className="header-deep rounded-b-[28px] px-4 pt-4 pb-14">
-        <div className="flex items-center justify-between gap-3">
+      <header className="header-deep rounded-b-[28px] px-4 pt-4 pb-14 lg:rounded-2xl lg:px-8 lg:pt-7 lg:pb-8">
+        <div className="flex items-center justify-between gap-3 lg:hidden">
           <div className="flex min-w-0 items-center gap-2.5">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/12 text-white ring-1 ring-white/15">
               <LogoMark className="size-[18px]" />
@@ -98,11 +98,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="animate-rise mt-7">
+        <div className="animate-rise mt-7 lg:mt-0">
           <p className="text-[13.5px] text-white/65" suppressHydrationWarning>
             {greeting()},
           </p>
-          <h1 className="mt-1 text-[26px] leading-tight font-semibold tracking-[-0.025em] text-white">
+          <h1 className="mt-1 text-[26px] leading-tight font-semibold tracking-[-0.025em] text-white lg:text-[30px]">
             {CURRENT_USER.shortName}
           </h1>
           <p className="mt-1.5 text-[12.5px] text-white/55">
@@ -114,7 +114,7 @@ export default function DashboardPage() {
           <Link
             href={`/requisitions/${needsAction[0].id}`}
             style={{ animationDelay: "80ms" }}
-            className="on-deep-panel animate-rise group mt-5 flex cursor-pointer items-center gap-3 px-3.5 py-3 transition-colors duration-200 hover:bg-white/16"
+            className="on-deep-panel animate-rise group mt-5 flex cursor-pointer items-center gap-3 px-3.5 py-3 transition-colors duration-200 hover:bg-white/16 lg:mt-6"
           >
             <span className="bg-brand/25 flex size-9 shrink-0 items-center justify-center rounded-lg text-white">
               <Megaphone className="size-[17px]" strokeWidth={2} aria-hidden />
@@ -138,7 +138,7 @@ export default function DashboardPage() {
       </header>
 
       {/* ---- Stats straddle the crown's edge ---- */}
-      <div className="-mt-9 grid grid-cols-2 gap-2.5 px-4">
+      <div className="-mt-9 grid grid-cols-2 gap-2.5 px-4 lg:mt-5 lg:grid-cols-4 lg:gap-4 lg:px-0">
         <StatCard
           icon={FileText}
           value={pending}
@@ -177,10 +177,10 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="px-4 pt-5 pb-8">
+      <div className="px-4 pt-5 pb-8 lg:px-0 lg:pt-6">
         <Link
           href="/requisitions/new"
-          className="btn-gradient group flex h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99]"
+          className="btn-gradient group flex h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99] lg:h-12 lg:w-fit lg:px-6"
         >
           <Plus className="size-[18px]" strokeWidth={2.6} aria-hidden />
           New Requisition
@@ -190,7 +190,7 @@ export default function DashboardPage() {
           />
         </Link>
 
-        <section className="mt-7">
+        <section className="mt-7 lg:mt-8">
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="text-ink text-[17px] font-semibold tracking-[-0.02em]">
               Recent Requests
@@ -207,7 +207,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
             {recent.map((requisition, index) => (
               <RequisitionCard
                 key={requisition.id}

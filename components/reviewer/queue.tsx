@@ -6,35 +6,31 @@ import { Inbox } from "lucide-react"
 
 import { MicroLabel, Money } from "@/components/app/primitives"
 import { ReviewCard } from "@/components/app/review-card"
-import {
-  byLongestWaiting,
-  isAwaitingReview,
-  visibleToAyp,
-  wasRecommended,
-  wasReturned,
-} from "@/lib/review"
+import { byLongestWaiting, visibleToReviewer } from "@/lib/review"
+import type { ReviewerConfig } from "@/lib/roles"
 import { useRequisitions } from "@/lib/store"
 import { requisitionTotal, type Requisition } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-const FILTERS: { key: string; label: string; match: (r: Requisition) => boolean }[] = [
-  { key: "awaiting", label: "Awaiting you", match: isAwaitingReview },
-  { key: "recommended", label: "Recommended", match: wasRecommended },
-  { key: "returned", label: "Returned", match: wasReturned },
-  { key: "rejected", label: "Rejected", match: (r) => r.status === "rejected" },
-  { key: "all", label: "All", match: () => true },
-]
-
-export function ReviewQueue() {
+export function ReviewerQueue({ config }: { config: ReviewerConfig }) {
   const { requisitions } = useRequisitions()
   const params = useSearchParams()
+
+  const filters: { key: string; label: string; match: (r: Requisition) => boolean }[] = [
+    { key: "awaiting", label: "Awaiting you", match: config.awaits },
+    { key: "cleared", label: config.clearedLabel, match: config.cleared },
+    { key: "returned", label: "Returned", match: (r) => r.status === "changes_requested" },
+    { key: "rejected", label: "Rejected", match: (r) => r.status === "rejected" },
+    { key: "all", label: "All", match: () => true },
+  ]
+
   const initial = params.get("filter")
   const [active, setActive] = useState(
-    FILTERS.some((f) => f.key === initial) ? (initial as string) : "awaiting",
+    filters.some((f) => f.key === initial) ? (initial as string) : "awaiting",
   )
 
-  const visible = requisitions.filter(visibleToAyp)
-  const filter = FILTERS.find((f) => f.key === active) ?? FILTERS[0]
+  const visible = requisitions.filter(visibleToReviewer)
+  const filter = filters.find((f) => f.key === active) ?? filters[0]
   // Oldest first while triaging; newest first once you are looking back.
   const rows = visible
     .filter(filter.match)
@@ -43,14 +39,16 @@ export function ReviewQueue() {
 
   return (
     <>
-      <header className="border-hairline bg-card sticky top-0 z-20 border-b">
-        <div className="flex h-14 items-center px-4">
-          <h1 className="text-ink text-[17px] font-semibold tracking-[-0.01em]">Review Queue</h1>
+      <header className="border-hairline bg-card sticky top-0 z-20 border-b lg:static lg:border-0 lg:bg-transparent">
+        <div className="flex h-14 items-center px-4 lg:h-auto lg:px-0 lg:pb-4">
+          <h1 className="text-ink text-[17px] font-semibold tracking-[-0.01em] lg:text-[24px] lg:tracking-[-0.025em]">
+            {config.queueTitle}
+          </h1>
         </div>
 
-        <div className="overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex w-max gap-1.5">
-            {FILTERS.map((f) => {
+        <div className="overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-max gap-1.5 lg:w-auto lg:flex-wrap">
+            {filters.map((f) => {
               const count = visible.filter(f.match).length
               const selected = f.key === active
               return (
@@ -60,7 +58,7 @@ export function ReviewQueue() {
                   onClick={() => setActive(f.key)}
                   aria-pressed={selected}
                   className={cn(
-                    "flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 text-[13px] font-medium transition-all duration-200 active:scale-95",
+                    "flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 text-[13px] font-medium transition-all duration-200 active:scale-95 lg:h-9 lg:px-3",
                     selected
                       ? "border-primary bg-primary text-primary-foreground shadow-card"
                       : "border-hairline bg-card text-ink-soft hover:border-ink-faint/40 hover:text-ink",
@@ -82,7 +80,7 @@ export function ReviewQueue() {
         </div>
       </header>
 
-      <div className="px-4 pt-4 pb-8">
+      <div className="px-4 pt-4 pb-8 lg:px-0 lg:pt-6">
         <div className="mb-2.5 flex items-baseline justify-between">
           <MicroLabel>
             {rows.length} requisition{rows.length === 1 ? "" : "s"}
@@ -104,11 +102,12 @@ export function ReviewQueue() {
             </p>
           </div>
         ) : (
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 2xl:grid-cols-3">
             {rows.map((requisition, index) => (
               <ReviewCard
                 key={requisition.id}
                 requisition={requisition}
+                href={config.detailHref(requisition.id)}
                 className="animate-rise"
                 style={{ animationDelay: `${Math.min(index, 6) * 50}ms` }}
               />

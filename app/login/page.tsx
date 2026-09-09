@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Clock, Mail, ShieldCheck } from "lucide-react";
 
-import { LogoTile } from "@/components/app/logo";
+import { LogoMark, LogoTile } from "@/components/app/logo";
 import { MicroLabel } from "@/components/app/primitives";
 import { DIRECTORY } from "@/lib/data"
 import { isValidEmail, maskEmail, useSession } from "@/lib/session";
@@ -67,11 +67,55 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="canvas-lift flex min-h-dvh flex-col px-5 pt-12 pb-8">
-      <div className="my-auto">
-        <div className="animate-rise flex flex-col items-center text-center">
-          <LogoTile />
-          <h1 className="text-ink mt-6 text-[30px] leading-[1.12] font-semibold tracking-[-0.03em]">
+    <main className="min-h-dvh lg:grid lg:grid-cols-2 xl:grid-cols-[1.05fr_1fr]">
+      {/* Desktop gets a brand panel: the same dark ground the signed-in app
+          uses, so the two sides of the product already look related. */}
+      <aside className="header-deep hidden flex-col justify-between p-12 xl:p-16 lg:flex">
+        <div className="flex items-center gap-3">
+          <span className="flex size-11 items-center justify-center rounded-xl bg-white/12 text-white ring-1 ring-white/15">
+            <LogoMark className="size-5" />
+          </span>
+          <span className="flex flex-col">
+            <span className="text-[15px] leading-none font-bold tracking-[0.14em] text-white">
+              CWMS
+            </span>
+            <span className="mt-1.5 text-[10.5px] leading-none font-medium tracking-[0.06em] text-white/55">
+              Youth &amp; Young Adults
+            </span>
+          </span>
+        </div>
+
+        <div>
+          <p className="max-w-[420px] text-[34px] leading-[1.15] font-semibold tracking-[-0.03em] text-white">
+            Every naira, from request to receipt.
+          </p>
+          <p className="mt-4 max-w-[380px] text-[14.5px] leading-[1.6] text-white/60">
+            Raise a requisition, watch it move through recommendation, approval and
+            disbursement, then close it with the receipts.
+          </p>
+
+          <ol className="mt-10 max-w-[400px] space-y-3.5">
+            {STEPS.map((step, index) => (
+              <li key={step} className="flex gap-3.5">
+                <span className="mt-px flex size-6 shrink-0 items-center justify-center rounded-full bg-white/10 font-mono text-[11.5px] text-white/70">
+                  {index + 1}
+                </span>
+                <span className="text-[13.5px] leading-[1.5] text-white/70">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <p className="text-[12px] text-white/40">
+          Church Worker Management System · Youth &amp; Young Adults
+        </p>
+      </aside>
+
+      <div className="canvas-lift flex min-h-dvh flex-col px-5 pt-12 pb-8 lg:px-12 xl:px-16">
+      <div className="my-auto lg:w-full lg:max-w-[420px] lg:self-center">
+        <div className="animate-rise flex flex-col items-center text-center lg:items-start lg:text-left">
+          <LogoTile className="lg:hidden" />
+          <h1 className="text-ink mt-6 text-[30px] leading-[1.12] font-semibold tracking-[-0.03em] lg:mt-0">
             Welcome back
           </h1>
           <p className="text-ink-soft mt-2.5 max-w-[290px] text-[14.5px] leading-[1.55]">
@@ -113,7 +157,7 @@ export default function LoginPage() {
 
         {/* Real content in the middle rather than padding. */}
         <section
-          className="animate-rise mt-5"
+          className="animate-rise mt-5 lg:hidden"
           style={{ animationDelay: "160ms" }}
         >
           <MicroLabel className="mb-2.5">How sign-in works</MicroLabel>
@@ -166,9 +210,10 @@ export default function LoginPage() {
         </section>
       </div>
 
-      <p className="text-ink-faint pt-8 text-center text-[12px]">
+      <p className="text-ink-faint pt-8 text-center text-[12px] lg:text-left">
         Trouble signing in? Contact your provincial administrator.
       </p>
+      </div>
     </main>
   );
 }
@@ -283,7 +328,7 @@ function CheckEmail({
   }, [left]);
 
   return (
-    <main className="canvas-lift animate-fade flex min-h-dvh flex-col px-5 pt-16 pb-8">
+    <main className="canvas-lift animate-fade mx-auto flex min-h-dvh w-full max-w-[430px] flex-col px-5 pt-16 pb-8">
       <div className="animate-rise mt-auto flex flex-col items-center text-center">
         <span className="relative flex size-14 items-center justify-center">
           <span

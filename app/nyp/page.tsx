@@ -1,8 +1,8 @@
 "use client"
 
 import { ReviewerDashboard } from "@/components/reviewer/dashboard"
-import { AYP_CONFIG } from "@/lib/roles"
+import { NYP_CONFIG } from "@/lib/roles"
 
 export default function Page() {
-  return <ReviewerDashboard config={AYP_CONFIG} />
+  return <ReviewerDashboard config={NYP_CONFIG} />
 }

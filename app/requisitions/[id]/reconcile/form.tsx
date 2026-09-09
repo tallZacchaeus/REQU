@@ -104,7 +104,7 @@ function Form({ requisition }: { requisition: Requisition }) {
     <>
       <ScreenHeader title="Reconcile Funds" back={`/requisitions/${requisition.id}`} />
 
-      <div className="flex-1 space-y-4 px-4 pt-4 pb-6">
+      <div className="flex-1 space-y-4 px-4 pt-4 pb-6 lg:mx-auto lg:w-full lg:max-w-[680px] lg:px-0">
         <div className="card-flat px-4 py-4">
           <div className="flex items-start justify-between gap-3">
             <MicroLabel>Amount Disbursed</MicroLabel>

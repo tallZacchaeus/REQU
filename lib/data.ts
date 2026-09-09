@@ -1,6 +1,6 @@
 import type { Requester, Requisition } from "./types"
 
-export type Role = "hod" | "ayp"
+export type Role = "hod" | "ayp" | "nyp"
 
 export interface Account {
   role: Role
@@ -38,6 +38,16 @@ export const DIRECTORY: Account[] = [
     scope: "Youth & Young Adults · All Provinces",
     phone: "+234 802 771 3390",
   },
+  {
+    role: "nyp",
+    name: "Pastor Emmanuel Bassey",
+    shortName: "Pastor Emmanuel",
+    initials: "EB",
+    email: "emmanuel.bassey@cwms.org",
+    title: "National Youth Pastor",
+    scope: "Youth & Young Adults · National",
+    phone: "+234 805 220 1147",
+  },
 ]
 
 export const accountFor = (email: string) =>
@@ -59,6 +69,21 @@ export const AYP_USER = {
   area: "National Secretariat, Abuja",
   approver: "Pastor Emmanuel Bassey",
   approverRole: "National Youth Pastor",
+}
+
+export const NYP_USER = {
+  name: "Pastor Emmanuel Bassey",
+  shortName: "Pastor Emmanuel",
+  initials: "EB",
+  role: "National Youth Pastor",
+  roleShort: "NYP",
+  email: "emmanuel.bassey@cwms.org",
+  phone: "+234 805 220 1147",
+  department: "Youth & Young Adults",
+  unit: "National",
+  area: "National Secretariat, Abuja",
+  recommender: "Pastor Grace Ojo",
+  recommenderRole: "Assistant National Youth Pastor",
 }
 
 /** The HODs whose requisitions reach the AYP. */
@@ -451,5 +476,70 @@ export const SEED_REQUISITIONS: Requisition[] = [
     stageDates: { submitted: "2026-08-30" },
     submittedAt: "2026-08-30",
     createdAt: "2026-08-29",
+  },
+  {
+    id: "req-0842",
+    reference: "REQ-2026-0842",
+    programme: "National Youth Choir Robes",
+    programmeDate: "2026-11-01",
+    location: "National Secretariat, Abuja",
+    department: "Youth & Young Adults",
+    purpose:
+      "Replacement robes for the eighty-voice national youth choir ahead of the convention.",
+    requester: REQUESTERS.ruth,
+    items: [
+      { id: "i1", description: "Robes (80 sets)", amount: 640_000 },
+      { id: "i2", description: "Tailoring & alterations", amount: 95_000 },
+    ],
+    attachments: [
+      { id: "a1", name: "robe_quotation_a.pdf", size: "480 KB", kind: "quotation" },
+      { id: "a2", name: "robe_quotation_b.pdf", size: "515 KB", kind: "quotation" },
+    ],
+    comments: [
+      {
+        id: "c1",
+        author: "Pastor Grace Ojo",
+        role: "Assistant National Youth Pastor",
+        date: "2026-09-04",
+        body: "Two quotations attached and the lower one was taken. Recommending.",
+      },
+    ],
+    activity: [
+      { id: "e1", date: "2026-08-31", actor: "Pastor Ruth Nwankwo", action: "Submitted for review" },
+      { id: "e2", date: "2026-09-04", actor: "Pastor Grace Ojo", action: "Recommended" },
+    ],
+    status: "awaiting_approval",
+    stageDates: { submitted: "2026-08-31", recommended: "2026-09-04" },
+    submittedAt: "2026-08-31",
+    createdAt: "2026-08-30",
+  },
+  {
+    id: "req-0845",
+    reference: "REQ-2026-0845",
+    programme: "Eastern Zone Discipleship Manuals",
+    programmeDate: "2026-10-08",
+    location: "Enugu",
+    department: "Youth & Young Adults",
+    purpose: "Printing of the revised discipleship manual for the eastern chapters.",
+    requester: REQUESTERS.samuel,
+    items: [{ id: "i1", description: "Manual printing (2,000 copies)", amount: 310_000 }],
+    attachments: [{ id: "a1", name: "manual_quotation.pdf", size: "290 KB", kind: "quotation" }],
+    comments: [
+      {
+        id: "c1",
+        author: "Pastor Grace Ojo",
+        role: "Assistant National Youth Pastor",
+        date: "2026-09-06",
+        body: "Unit cost is in line with last year's run. Recommending.",
+      },
+    ],
+    activity: [
+      { id: "e1", date: "2026-09-02", actor: "Pastor Samuel Okafor", action: "Submitted for review" },
+      { id: "e2", date: "2026-09-06", actor: "Pastor Grace Ojo", action: "Recommended" },
+    ],
+    status: "awaiting_approval",
+    stageDates: { submitted: "2026-09-02", recommended: "2026-09-06" },
+    submittedAt: "2026-09-02",
+    createdAt: "2026-09-01",
   },
 ]
