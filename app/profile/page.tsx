@@ -83,7 +83,7 @@ export default function ProfilePage() {
   return (
     <>
       {/* Same dark crown as the dashboard, so the two roots of the app match. */}
-      <header className="header-deep rounded-b-[28px] px-5 pt-5 pb-16 lg:rounded-2xl lg:px-8 lg:pt-7 lg:pb-8">
+      <header className="header-deep rounded-b-[28px] px-5 pt-5 pb-16 md:rounded-2xl md:px-7 md:pt-6 md:pb-7 lg:px-8 lg:pt-7 lg:pb-8">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.09em] text-white/60 uppercase">
             <LogoMark className="size-4 text-white/80" />
@@ -131,7 +131,7 @@ export default function ProfilePage() {
       </header>
 
       {/* Straddles the crown's edge — the seam between the two grounds. */}
-      <div className="-mt-9 px-4 lg:mt-5 lg:px-0">
+      <div className="-mt-9 px-4 lg:mt-5 md:px-0">
         <div className="card-flat grid grid-cols-3 shadow-raised">
           <ProfileStat label="Submitted" value={submitted} className="border-hairline border-r" />
           <ProfileStat label="Disbursed" value={disbursed} className="border-hairline border-r" />
@@ -139,8 +139,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="space-y-3.5 px-4 pt-5 pb-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 lg:px-0 lg:pt-6">
-
+      <div className="space-y-3.5 px-4 pt-5 pb-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 md:px-0 lg:pt-6">
         <Group
           title="Personal Information"
           open={open === "personal"}
@@ -236,9 +235,8 @@ export default function ProfilePage() {
             <Field label="Parish" value={CURRENT_USER.parish} />
           </dl>
           <p className="text-ink-soft border-hairline mt-3 border-t pt-3 text-[12px] leading-[1.5]">
-            You raise, track and reconcile requisitions for this department. Recommendation,
-            approval and disbursement sit with the AYP, NYP and Finance; Treasury signs off the
-            reconciliation.
+            You raise, track and reconcile requisitions for this department. Recommendation and
+            approval sit with the ANYP and NYP, and Finance disburses the funds.
           </p>
         </Group>
 
@@ -276,7 +274,7 @@ export default function ProfilePage() {
             />
             <ToggleRow
               label="Reviewer comments"
-              hint="When the AYP or NYP leaves a comment."
+              hint="When the ANYP or NYP leaves a comment."
               checked={profile.notifyComments}
               onChange={(value) => updateProfile({ notifyComments: value })}
             />
@@ -297,13 +295,21 @@ export default function ProfilePage() {
           <div className="space-y-2">
             {CAN.map((item) => (
               <p key={item} className="flex gap-2.5 text-[13.5px] leading-[1.45]">
-                <Check className="text-st-good mt-0.5 size-4 shrink-0" strokeWidth={2.4} aria-hidden />
+                <Check
+                  className="text-st-good mt-0.5 size-4 shrink-0"
+                  strokeWidth={2.4}
+                  aria-hidden
+                />
                 <span className="text-ink">{item}</span>
               </p>
             ))}
             {CANNOT.map((item) => (
               <p key={item} className="flex gap-2.5 text-[13.5px] leading-[1.45]">
-                <X className="text-ink-faint mt-0.5 size-4 shrink-0" strokeWidth={2.4} aria-hidden />
+                <X
+                  className="text-ink-faint mt-0.5 size-4 shrink-0"
+                  strokeWidth={2.4}
+                  aria-hidden
+                />
                 <span className="text-ink-faint">{item}</span>
               </p>
             ))}
@@ -311,36 +317,36 @@ export default function ProfilePage() {
         </Group>
 
         <div className="space-y-3.5">
-        <button
-          type="button"
-          onClick={() => setSheet("security")}
-          className="card-flat tap-card hover:border-ink-faint/40 group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5"
-        >
-          <ShieldCheck className="text-ink-faint size-4 shrink-0" strokeWidth={2} aria-hidden />
-          <span className="min-w-0 flex-1 text-left">
-            <span className="text-ink block text-[14px] font-semibold">Security</span>
-            <span className="text-ink-faint block text-[12px]">
-              Passwordless · last sign-in today
+          <button
+            type="button"
+            onClick={() => setSheet("security")}
+            className="card-flat tap-card hover:border-ink-faint/40 group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5"
+          >
+            <ShieldCheck className="text-ink-faint size-4 shrink-0" strokeWidth={2} aria-hidden />
+            <span className="min-w-0 flex-1 text-left">
+              <span className="text-ink block text-[14px] font-semibold">Security</span>
+              <span className="text-ink-faint block text-[12px]">
+                Passwordless · last sign-in today
+              </span>
             </span>
-          </span>
-          <ChevronRight
-            className="text-ink-faint size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-            aria-hidden
-          />
-        </button>
+            <ChevronRight
+              className="text-ink-faint size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setSheet("signout")}
-          className="border-hairline bg-card text-ink hover:border-st-bad/40 hover:text-st-bad flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-[14px] font-semibold transition-colors duration-200"
-        >
-          <LogOut className="size-4" strokeWidth={2} aria-hidden />
-          Sign out
-        </button>
+          <button
+            type="button"
+            onClick={() => setSheet("signout")}
+            className="border-hairline bg-card text-ink hover:border-st-bad/40 hover:text-st-bad flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-[14px] font-semibold transition-colors duration-200"
+          >
+            <LogOut className="size-4" strokeWidth={2} aria-hidden />
+            Sign out
+          </button>
 
-        <p className="text-ink-faint pt-1 text-center font-mono text-[11px]">
-          CWMS · Youth &amp; Young Adults · MVP
-        </p>
+          <p className="text-ink-faint pt-1 text-center font-mono text-[11px]">
+            CWMS · Youth &amp; Young Adults · MVP
+          </p>
         </div>
       </div>
 
@@ -361,7 +367,11 @@ export default function ProfilePage() {
             setSheet(null)
           }}
         />
-        <SheetAction icon={Camera} label="Take a photo" onClick={() => fileInput.current?.click()} />
+        <SheetAction
+          icon={Camera}
+          label="Take a photo"
+          onClick={() => fileInput.current?.click()}
+        />
         <SheetAction
           icon={Images}
           label="Choose from library"

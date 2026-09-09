@@ -34,7 +34,10 @@ export function RequisitionDetail({ id }: { id: string }) {
             {hydrated ? "Requisition not found" : "Loading…"}
           </p>
           {hydrated && (
-            <Link href="/requisitions" className="text-primary mt-2 inline-block text-[13px] font-semibold hover:underline">
+            <Link
+              href="/requisitions"
+              className="text-primary mt-2 inline-block text-[13px] font-semibold hover:underline"
+            >
               Back to my requisitions
             </Link>
           )}
@@ -55,10 +58,7 @@ export function RequisitionDetail({ id }: { id: string }) {
   const variance = reconciliationVariance(requisition)
   // Time at the live stage runs from the last stage that actually completed,
   // not from an early one that happens to have a date.
-  const enteredStageAt = Object.values(requisition.stageDates)
-    .filter(Boolean)
-    .sort()
-    .at(-1)
+  const enteredStageAt = Object.values(requisition.stageDates).filter(Boolean).sort().at(-1)
 
   return (
     <>
@@ -66,7 +66,7 @@ export function RequisitionDetail({ id }: { id: string }) {
 
       {/* Mobile keeps the summary on top; desktop moves it into a rail so
           the breakdown and the decision are visible at the same time. */}
-      <div className="flex flex-col gap-4 px-4 pt-4 pb-8 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6 lg:px-0 lg:pt-0">
+      <div className="flex flex-col gap-4 px-4 pt-4 pb-8 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6 md:px-0 lg:pt-0">
         <aside className="order-1 flex flex-col gap-4 lg:order-2 lg:sticky lg:top-6">
           {/* Amount first. It is the subject of the record, not a subtitle. */}
           <div className="card-flat px-4 py-4">
@@ -82,7 +82,9 @@ export function RequisitionDetail({ id }: { id: string }) {
 
             <div className="border-hairline mt-3.5 border-t pt-3.5">
               <div className="mb-2 flex items-baseline justify-between">
-                <MicroLabel>Stage {meta.stage + (isReturned || isRejected ? 0 : 1)} of {STAGE_COUNT}</MicroLabel>
+                <MicroLabel>
+                  Stage {meta.stage + (isReturned || isRejected ? 0 : 1)} of {STAGE_COUNT}
+                </MicroLabel>
                 {live?.state === "current" && enteredStageAt && (
                   <span className="text-ink-faint text-[11.5px]">
                     {durationSince(enteredStageAt)} at this stage
@@ -110,7 +112,7 @@ export function RequisitionDetail({ id }: { id: string }) {
             <ReconcileNotice
               id={requisition.id}
               amount={total}
-              date={requisition.stageDates.disbursed}
+              date={requisition.stageDates.disbursement}
             />
           )}
 
@@ -132,7 +134,6 @@ export function RequisitionDetail({ id }: { id: string }) {
           <Section title="Approval Workflow">
             <StageRail stages={stages} rejected={isRejected} />
           </Section>
-
         </aside>
 
         <div className="order-2 flex flex-col gap-4 lg:order-1">
@@ -234,13 +235,21 @@ export function RequisitionDetail({ id }: { id: string }) {
               <div
                 className={cn(
                   "mt-3 flex items-center justify-between gap-3 rounded-lg px-3 py-2.5",
-                  variance === 0 ? "bg-st-good-bg" : variance < 0 ? "bg-st-action-bg" : "bg-st-motion-bg",
+                  variance === 0
+                    ? "bg-st-good-bg"
+                    : variance < 0
+                      ? "bg-st-action-bg"
+                      : "bg-st-motion-bg",
                 )}
               >
                 <span
                   className={cn(
                     "text-[12.5px] font-semibold",
-                    variance === 0 ? "text-st-good" : variance < 0 ? "text-st-action" : "text-st-motion",
+                    variance === 0
+                      ? "text-st-good"
+                      : variance < 0
+                        ? "text-st-action"
+                        : "text-st-motion",
                   )}
                 >
                   {variance === 0
@@ -252,19 +261,31 @@ export function RequisitionDetail({ id }: { id: string }) {
                 <span
                   className={cn(
                     "text-[15px] font-semibold tabular-nums",
-                    variance === 0 ? "text-st-good" : variance < 0 ? "text-st-action" : "text-st-motion",
+                    variance === 0
+                      ? "text-st-good"
+                      : variance < 0
+                        ? "text-st-action"
+                        : "text-st-motion",
                   )}
                 >
                   ₦{Math.abs(variance).toLocaleString("en-NG")}
                 </span>
               </div>
 
-              <MicroLabel className="mt-4 mb-2">Receipts ({reconciliation.receipts.length})</MicroLabel>
+              <MicroLabel className="mt-4 mb-2">
+                Receipts ({reconciliation.receipts.length})
+              </MicroLabel>
               <ul className="divide-hairline divide-y">
                 {reconciliation.receipts.map((file) => (
                   <li key={file.id} className="flex items-center gap-2.5 py-2.5">
-                    <Paperclip className="text-ink-faint size-4 shrink-0" strokeWidth={1.8} aria-hidden />
-                    <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">{file.name}</span>
+                    <Paperclip
+                      className="text-ink-faint size-4 shrink-0"
+                      strokeWidth={1.8}
+                      aria-hidden
+                    />
+                    <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">
+                      {file.name}
+                    </span>
                     <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
                   </li>
                 ))}
@@ -290,8 +311,14 @@ export function RequisitionDetail({ id }: { id: string }) {
               <ul className="divide-hairline divide-y">
                 {requisition.attachments.map((file) => (
                   <li key={file.id} className="flex items-center gap-2.5 py-2.5">
-                    <Paperclip className="text-ink-faint size-4 shrink-0" strokeWidth={1.8} aria-hidden />
-                    <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">{file.name}</span>
+                    <Paperclip
+                      className="text-ink-faint size-4 shrink-0"
+                      strokeWidth={1.8}
+                      aria-hidden
+                    />
+                    <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">
+                      {file.name}
+                    </span>
                     <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
                   </li>
                 ))}
@@ -338,8 +365,8 @@ export function RequisitionDetail({ id }: { id: string }) {
           {/* Permission boundary, stated plainly rather than left implicit. */}
           <p className="text-ink-faint px-1 text-[11.5px] leading-[1.5]">
             As Head of Department you raise, track, revise and reconcile your own requisitions.
-            Recommendation, approval and disbursement are carried out by the AYP, NYP and Finance;
-            Treasury verifies the reconciliation that closes it.
+            Recommendation and approval sit with the ANYP and NYP, and Finance disburses the funds.
+            Treasury checks the reconciliation that closes it.
           </p>
         </div>
       </div>
@@ -412,10 +439,12 @@ function ReconcileNotice({
   id,
   amount,
   date,
+  reference,
 }: {
   id: string
   amount: number
   date?: string
+  reference?: string
 }) {
   return (
     <div className="border-st-action/25 bg-st-action-bg overflow-hidden rounded-xl border">
@@ -430,6 +459,13 @@ function ReconcileNotice({
           {date && <> on {formatDate(date)}</>}. Record what each line actually cost and attach the
           receipts to close this requisition.
         </p>
+
+        {reference && (
+          <p className="border-st-action/20 text-ink-soft mt-3 border-t pt-3 text-[12px]">
+            Payment reference{" "}
+            <span className="text-ink font-mono font-medium">{reference}</span>
+          </p>
+        )}
 
         <Link
           href={`/requisitions/${id}/reconcile`}

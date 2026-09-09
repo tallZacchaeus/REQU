@@ -58,7 +58,7 @@ export default function DashboardPage() {
   return (
     <>
       {/* ---- Dark crown: identity, greeting and the one thing needing you ---- */}
-      <header className="header-deep rounded-b-[28px] px-4 pt-4 pb-14 lg:rounded-2xl lg:px-8 lg:pt-7 lg:pb-8">
+      <header className="header-deep rounded-b-[28px] px-4 pt-4 pb-14 md:rounded-2xl md:px-7 md:pt-6 md:pb-7 lg:px-8 lg:pt-7 lg:pb-8">
         <div className="flex items-center justify-between gap-3 lg:hidden">
           <div className="flex min-w-0 items-center gap-2.5">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/12 text-white ring-1 ring-white/15">
@@ -138,7 +138,7 @@ export default function DashboardPage() {
       </header>
 
       {/* ---- Stats straddle the crown's edge ---- */}
-      <div className="-mt-9 grid grid-cols-2 gap-2.5 px-4 lg:mt-5 lg:grid-cols-4 lg:gap-4 lg:px-0">
+      <div className="-mt-9 grid grid-cols-2 gap-2.5 px-4 md:mt-5 md:gap-3 lg:grid-cols-4 lg:gap-4 md:px-0">
         <StatCard
           icon={FileText}
           value={pending}
@@ -177,10 +177,10 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="px-4 pt-5 pb-8 lg:px-0 lg:pt-6">
+      <div className="px-4 pt-5 pb-8 md:px-0 lg:pt-6">
         <Link
           href="/requisitions/new"
-          className="btn-gradient group flex h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99] lg:h-12 lg:w-fit lg:px-6"
+          className="btn-gradient group flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99] lg:h-11 lg:w-fit lg:px-6"
         >
           <Plus className="size-[18px]" strokeWidth={2.6} aria-hidden />
           New Requisition
@@ -207,7 +207,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+          <div className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
             {recent.map((requisition, index) => (
               <RequisitionCard
                 key={requisition.id}
@@ -278,7 +278,10 @@ function StatCard({
       <div className="bg-hairline mt-2.5 h-[3px] w-full overflow-hidden rounded-full">
         <span
           className={cn("animate-grow block h-full origin-left rounded-full", styles.bar)}
-          style={{ width: `${Math.max(share, value > 0 ? 12 : 0)}%`, animationDelay: `${delay + 150}ms` }}
+          style={{
+            width: `${Math.max(share, value > 0 ? 12 : 0)}%`,
+            animationDelay: `${delay + 150}ms`,
+          }}
           aria-hidden
         />
       </div>

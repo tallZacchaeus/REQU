@@ -18,9 +18,7 @@ export default function VerifyPage() {
   // Resolved once, from the address the link was sent to. Reading `home` off
   // the session instead would change the moment sign-in lands, restarting the
   // effect mid-sequence.
-  const [destination] = useState(
-    () => HOME_FOR[accountFor(pendingEmail ?? "")?.role ?? "hod"],
-  )
+  const [destination] = useState(() => HOME_FOR[accountFor(pendingEmail ?? "")?.role ?? "hod"])
 
   useEffect(() => {
     // Three beats: the check runs, it resolves, then the app takes over. The

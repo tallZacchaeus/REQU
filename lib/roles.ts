@@ -1,13 +1,13 @@
-import { AYP_USER, NYP_USER } from "./data"
+import { AYP_USER, FINANCE_USER, NYP_USER } from "./data"
 import type { Requisition, RequisitionStatus, StageKey } from "./types"
 
 /**
- * The AYP and NYP desks are the same screens with different authority. Rather
+ * The ANYP and NYP desks are the same screens with different authority. Rather
  * than a third copy of every view, each reviewing role is described once here
  * and the shared components read from it.
  */
 export interface ActionSpec {
-  key: "advance" | "changes" | "reject"
+  key: "advance" | "changes" | "reject" | "process"
   /** Button label on the detail screen. */
   label: string
   sheetTitle: string
@@ -25,6 +25,10 @@ export interface ActionSpec {
   /** Numbered change points — only meaningful when sending back. */
   wantsPoints: boolean
   defaultComment?: string
+  /** Payment reference, captured instead of numbered change points. */
+  reference?: { label: string; placeholder: string }
+  /** Some actions only make sense from certain states. */
+  availableWhen?: (r: Requisition) => boolean
 }
 
 /** Only what the shared reviewer screens actually render. */
@@ -42,7 +46,7 @@ export interface ReviewerPerson {
 }
 
 export interface ReviewerConfig {
-  role: "ayp" | "nyp"
+  role: "ayp" | "nyp" | "finance"
   person: ReviewerPerson
   home: string
   queueHref: string
@@ -70,8 +74,7 @@ const requestChanges = (returnsTo: (r: Requisition) => string): ActionSpec => ({
   key: "changes",
   label: "Request changes",
   sheetTitle: "Request changes",
-  blurb: (r) =>
-    `This goes back to ${returnsTo(r)}. Be specific — they can only fix what you name.`,
+  blurb: (r) => `This goes back to ${returnsTo(r)}. Be specific — they can only fix what you name.`,
   confirmLabel: "Send back",
   tone: "warn",
   nextStatus: "changes_requested",
@@ -105,7 +108,7 @@ export const AYP_CONFIG: ReviewerConfig = {
       "reconciled",
     ].includes(r.status),
   boundary:
-    "As Assistant National Youth Pastor you recommend or return requisitions. Final approval rests with the National Youth Pastor, and disbursement with Finance and Treasury.",
+    "As Assistant National Youth Pastor you recommend or return requisitions. Final approval rests with the National Youth Pastor, and Finance disburses the funds.",
   can: [
     "Review requisitions from every province",
     "Recommend requisitions to the National Youth Pastor",
@@ -156,18 +159,18 @@ export const NYP_CONFIG: ReviewerConfig = {
       r.status,
     ),
   boundary:
-    "As National Youth Pastor you give the final approval on departmental spend. Disbursement is carried out by Finance and Treasury, and the HOD accounts for the funds afterwards.",
+    "As National Youth Pastor you give the final approval on departmental spend. Finance disburses approved funds, and the HOD accounts for them afterwards.",
   can: [
-    "Approve requisitions recommended by the AYP",
+    "Approve requisitions recommended by the ANYP",
     "Return a requisition to the HOD for changes",
     "Reject a requisition outright",
-    "See the AYP's recommendation and the full breakdown",
+    "See the ANYP's recommendation and the full breakdown",
   ],
   cannot: [
     "Disburse funds",
     "Raise a requisition of your own",
     "Edit an HOD's figures directly",
-    "Approve without an AYP recommendation",
+    "Approve without an ANYP recommendation",
     "Sign off a reconciliation",
   ],
   primary: {
@@ -204,4 +207,67 @@ export const NYP_CONFIG: ReviewerConfig = {
   },
 }
 
-export const CONFIGS = { ayp: AYP_CONFIG, nyp: NYP_CONFIG } as const
+export const FINANCE_CONFIG: ReviewerConfig = {
+  role: "finance",
+  person: FINANCE_USER,
+  home: "/finance",
+  queueHref: "/finance/queue",
+  profileHref: "/finance/profile",
+  detailHref: (id) => `/finance/requisitions/${id}`,
+  deskLabel: "Payments Desk",
+  queueTitle: "Payment Queue",
+  awaitingCopy: "awaiting disbursement",
+  clearedLabel: "Disbursed",
+  awaits: (r) => r.status === "approved" || r.status === "with_finance",
+  cleared: (r) => ["disbursed", "reconciliation_review", "reconciled"].includes(r.status),
+  boundary:
+    "Finance processes and pays approved requisitions. Approval has already been given by the National Youth Pastor — Finance does not review the request again.",
+  can: [
+    "See requisitions approved by the National Youth Pastor",
+    "Mark an approved requisition as being processed",
+    "Record the disbursement with a payment reference",
+    "See the full breakdown and attachments",
+  ],
+  cannot: [
+    "Approve or reject a requisition",
+    "Return a requisition to the HOD",
+    "Change the approved amount",
+    "Raise a requisition of your own",
+    "Sign off a reconciliation",
+  ],
+  primary: {
+    key: "advance",
+    label: "Record disbursement",
+    sheetTitle: "Record disbursement",
+    blurb: (r) => `Funds go to ${r.requester.name}, who then accounts for them.`,
+    confirmLabel: "Confirm disbursement",
+    tone: "primary",
+    nextStatus: "disbursed",
+    stamp: "disbursement",
+    activity: "Disbursed",
+    commentLabel: "Note",
+    commentPlaceholder: "Payment method or any condition.",
+    commentRequired: false,
+    wantsPoints: false,
+    defaultComment: "Funds disbursed.",
+    reference: { label: "Payment reference", placeholder: "e.g. TRF-2026-00184" },
+  },
+  secondary: {
+    key: "process",
+    label: "Mark as processing",
+    sheetTitle: "Mark as processing",
+    blurb: () => "This tells the HOD that payment is in hand and being prepared.",
+    confirmLabel: "Mark as processing",
+    tone: "warn",
+    nextStatus: "with_finance",
+    activity: "Payment being processed",
+    commentLabel: "Note",
+    commentPlaceholder: "Expected payment date, if known.",
+    commentRequired: false,
+    wantsPoints: false,
+    defaultComment: "Payment is being processed.",
+    availableWhen: (r) => r.status === "approved",
+  },
+}
+
+export const CONFIGS = { ayp: AYP_CONFIG, nyp: NYP_CONFIG, finance: FINANCE_CONFIG } as const

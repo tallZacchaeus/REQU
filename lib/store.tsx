@@ -33,6 +33,20 @@ const FALLBACK_REQUESTER: Requester = {
   unit: CURRENT_USER.unit,
 }
 
+/**
+ * `finance` and `disbursed` were once separate stamps. Finance no longer
+ * verifies separately, so anything stored under either key now lands on the
+ * single disbursement stage.
+ */
+function migrateStages(
+  dates: Partial<Record<string, string>> | undefined,
+): Requisition["stageDates"] {
+  const { finance, disbursed, ...rest } = dates ?? {}
+  const stamped = rest as Requisition["stageDates"]
+  const paid = disbursed ?? finance
+  return paid ? { ...stamped, disbursement: paid } : stamped
+}
+
 function normalise(value: unknown): Requisition[] {
   if (!Array.isArray(value)) throw new Error("stored requisitions are not a list")
 
@@ -45,7 +59,7 @@ function normalise(value: unknown): Requisition[] {
       attachments: r.attachments ?? [],
       comments: r.comments ?? [],
       activity: r.activity ?? [],
-      stageDates: r.stageDates ?? {},
+      stageDates: migrateStages(r.stageDates),
     }))
 }
 
@@ -68,7 +82,7 @@ export function RequisitionStore({ children }: { children: React.ReactNode }) {
       // Corrupt, unreadable or unmigratable storage falls back to the seed set
       // rather than taking the whole app down.
     }
-     
+
     setHydrated(true)
   }, [])
 

@@ -7,7 +7,15 @@ import { cn } from "@/lib/utils"
 const CONTROL =
   "w-full rounded-lg border border-input bg-card px-3 text-[16px] text-ink placeholder:text-ink-faint/80 transition-colors duration-200 focus:border-primary focus:outline-none disabled:opacity-50"
 
-function Label({ htmlFor, children, hint }: { htmlFor: string; children: React.ReactNode; hint?: string }) {
+function Label({
+  htmlFor,
+  children,
+  hint,
+}: {
+  htmlFor: string
+  children: React.ReactNode
+  hint?: string
+}) {
   return (
     <div className="mb-1.5 flex items-baseline justify-between gap-2">
       <label htmlFor={htmlFor} className="text-ink text-[13px] font-semibold">
@@ -49,7 +57,12 @@ export function TextAreaField({
       <Label htmlFor={id} hint={hint}>
         {label}
       </Label>
-      <textarea id={id} rows={rows} className={cn(CONTROL, "resize-none py-2.5 leading-[1.5]")} {...props} />
+      <textarea
+        id={id}
+        rows={rows}
+        className={cn(CONTROL, "resize-none py-2.5 leading-[1.5]")}
+        {...props}
+      />
     </div>
   )
 }

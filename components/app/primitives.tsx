@@ -1,9 +1,9 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react"
 
-import { cn } from "@/lib/utils";
-import { formatAmount } from "@/lib/format";
-import { STATUS, TONE_CHIP, TONE_DOT, TONE_TEXT } from "@/lib/status";
-import type { RequisitionStatus } from "@/lib/types";
+import { cn } from "@/lib/utils"
+import { formatAmount } from "@/lib/format"
+import { STATUS, TONE_CHIP, TONE_DOT, TONE_TEXT } from "@/lib/status"
+import type { RequisitionStatus } from "@/lib/types"
 
 /**
  * Currency is the subject of this app, so it gets its own component: the ₦ is
@@ -14,28 +14,22 @@ export function Money({
   size = "md",
   className,
 }: {
-  value: number;
-  size?: "sm" | "md" | "lg";
-  className?: string;
+  value: number
+  size?: "sm" | "md" | "lg"
+  className?: string
 }) {
   const scale = {
     sm: "text-[15px] font-semibold tracking-[-0.01em]",
     md: "amount-md",
     lg: "amount-lg",
-  }[size];
+  }[size]
 
   return (
-    <span
-      className={cn(
-        scale,
-        "text-ink inline-flex items-baseline gap-[0.12em]",
-        className,
-      )}
-    >
+    <span className={cn(scale, "text-ink inline-flex items-baseline gap-[0.12em]", className)}>
       <span className="text-ink-faint text-[0.72em] font-medium">₦</span>
       {formatAmount(value)}
     </span>
-  );
+  )
 }
 
 /**
@@ -47,11 +41,11 @@ export function StatusBadge({
   forceChip = false,
   className,
 }: {
-  status: RequisitionStatus;
-  forceChip?: boolean;
-  className?: string;
+  status: RequisitionStatus
+  forceChip?: boolean
+  className?: string
 }) {
-  const meta = STATUS[status];
+  const meta = STATUS[status]
 
   if (forceChip || meta.emphasis === "chip") {
     return (
@@ -62,39 +56,28 @@ export function StatusBadge({
           className,
         )}
       >
-        <span
-          className={cn("size-1.5 rounded-full", TONE_DOT[meta.tone])}
-          aria-hidden
-        />
+        <span className={cn("size-1.5 rounded-full", TONE_DOT[meta.tone])} aria-hidden />
         {meta.label}
       </span>
-    );
+    )
   }
 
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 text-[12px] font-semibold",
-        className,
-      )}
-    >
-      <span
-        className={cn("size-1.5 shrink-0 rounded-full", TONE_DOT[meta.tone])}
-        aria-hidden
-      />
+    <span className={cn("inline-flex items-center gap-1.5 text-[12px] font-semibold", className)}>
+      <span className={cn("size-1.5 shrink-0 rounded-full", TONE_DOT[meta.tone])} aria-hidden />
       <span className={TONE_TEXT[meta.tone]}>{meta.label}</span>
     </span>
-  );
+  )
 }
 
 export function MicroLabel({
   children,
   className,
 }: {
-  children: React.ReactNode;
-  className?: string;
+  children: React.ReactNode
+  className?: string
 }) {
-  return <p className={cn("label-micro", className)}>{children}</p>;
+  return <p className={cn("label-micro", className)}>{children}</p>
 }
 
 /** A titled block of content. The rule under the title is the detail layer. */
@@ -104,10 +87,10 @@ export function Section({
   children,
   className,
 }: {
-  title: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
+  title: string
+  action?: React.ReactNode
+  children: React.ReactNode
+  className?: string
 }) {
   return (
     <section className={cn("card-flat overflow-hidden", className)}>
@@ -117,7 +100,7 @@ export function Section({
       </div>
       <div className="px-4 py-3.5">{children}</div>
     </section>
-  );
+  )
 }
 
 /** Label above, value below — the standard record row for this app. */
@@ -126,16 +109,16 @@ export function DetailRow({
   value,
   className,
 }: {
-  label: string;
-  value: React.ReactNode;
-  className?: string;
+  label: string
+  value: React.ReactNode
+  className?: string
 }) {
   return (
     <div className={cn("py-2.5", className)}>
       <dt className="text-ink-faint text-[12px] font-medium">{label}</dt>
       <dd className="text-ink mt-0.5 text-[15px] leading-[1.45]">{value}</dd>
     </div>
-  );
+  )
 }
 
 export function StickyFooter({
@@ -143,14 +126,14 @@ export function StickyFooter({
   note,
   className,
 }: {
-  children: React.ReactNode;
-  note?: React.ReactNode;
+  children: React.ReactNode
+  note?: React.ReactNode
   /**
    * Applied to the sticky element itself. Wrapping this component in a
    * plain div collapses the containing block, which leaves `sticky` no
    * range to travel and drops the bar below the fold.
    */
-  className?: string;
+  className?: string
 }) {
   return (
     <div
@@ -159,14 +142,10 @@ export function StickyFooter({
         className,
       )}
     >
-      {note && (
-        <p className="text-ink-soft mb-2.5 text-[12px] leading-[1.45]">
-          {note}
-        </p>
-      )}
+      {note && <p className="text-ink-soft mb-2.5 text-[12px] leading-[1.45]">{note}</p>}
       {children}
     </div>
-  );
+  )
 }
 
 /** Native disclosure — keyboard and screen-reader behaviour for free. */
@@ -176,10 +155,10 @@ export function Disclosure({
   defaultOpen = false,
   children,
 }: {
-  title: string;
-  meta?: string;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
+  title: string
+  meta?: string
+  defaultOpen?: boolean
+  children: React.ReactNode
 }) {
   return (
     <details open={defaultOpen} className="card-flat group overflow-hidden">
@@ -197,5 +176,5 @@ export function Disclosure({
       </summary>
       <div className="border-hairline border-t px-4 py-3.5">{children}</div>
     </details>
-  );
+  )
 }

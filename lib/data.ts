@@ -1,6 +1,6 @@
 import type { Requester, Requisition } from "./types"
 
-export type Role = "hod" | "ayp" | "nyp"
+export type Role = "hod" | "ayp" | "nyp" | "finance"
 
 export interface Account {
   role: Role
@@ -48,20 +48,42 @@ export const DIRECTORY: Account[] = [
     scope: "Youth & Young Adults · National",
     phone: "+234 805 220 1147",
   },
+  {
+    role: "finance",
+    name: "Mrs Ngozi Eze",
+    shortName: "Mrs Ngozi",
+    initials: "NE",
+    email: "ngozi.eze@cwms.org",
+    title: "Finance Officer",
+    scope: "Finance · National Secretariat",
+    phone: "+234 807 664 2210",
+  },
 ]
+
+export const FINANCE_USER = {
+  name: "Mrs Ngozi Eze",
+  shortName: "Mrs Ngozi",
+  initials: "NE",
+  role: "Finance Officer",
+  roleShort: "FIN",
+  email: "ngozi.eze@cwms.org",
+  phone: "+234 807 664 2210",
+  department: "Finance",
+  unit: "National Secretariat",
+  area: "National Secretariat, Abuja",
+}
 
 export const accountFor = (email: string) =>
   DIRECTORY.find((a) => a.email.toLowerCase() === email.trim().toLowerCase())
 
-export const accountByRole = (role: Role) =>
-  DIRECTORY.find((a) => a.role === role) ?? DIRECTORY[0]
+export const accountByRole = (role: Role) => DIRECTORY.find((a) => a.role === role) ?? DIRECTORY[0]
 
 export const AYP_USER = {
   name: "Pastor Grace Ojo",
   shortName: "Pastor Grace",
   initials: "GO",
   role: "Assistant National Youth Pastor",
-  roleShort: "AYP",
+  roleShort: "ANYP",
   email: "grace.ojo@cwms.org",
   phone: "+234 802 771 3390",
   department: "Youth & Young Adults",
@@ -86,7 +108,7 @@ export const NYP_USER = {
   recommenderRole: "Assistant National Youth Pastor",
 }
 
-/** The HODs whose requisitions reach the AYP. */
+/** The HODs whose requisitions reach the ANYP. */
 export const REQUESTERS: Record<string, Requester> = {
   david: {
     name: "Pastor David Adeyemi",
@@ -187,9 +209,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
       { id: "i2", description: "Feeding", amount: 45_000 },
       { id: "i3", description: "Facilitator honorarium", amount: 15_000 },
     ],
-    attachments: [
-      { id: "a1", name: "retreat_programme.pdf", size: "640 KB", kind: "proposal" },
-    ],
+    attachments: [{ id: "a1", name: "retreat_programme.pdf", size: "640 KB", kind: "proposal" }],
     comments: [
       {
         id: "c1",
@@ -203,7 +223,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
       { id: "e1", date: "2026-08-18", actor: "You", action: "Submitted for review" },
       { id: "e2", date: "2026-08-22", actor: "Pastor Grace Ojo", action: "Recommended" },
       { id: "e3", date: "2026-09-05", actor: "Pastor Emmanuel Bassey", action: "Approved" },
-      { id: "e4", date: "2026-09-06", actor: "Finance Team", action: "Received for verification" },
+      { id: "e4", date: "2026-09-06", actor: "Finance", action: "Received for disbursement" },
     ],
     status: "with_finance",
     stageDates: {
@@ -221,8 +241,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     programmeDate: "2026-09-27",
     location: "Jabi Lake Park, Abuja",
     department: "Youth & Young Adults",
-    purpose:
-      "Refreshments and games equipment for the quarterly young adults fellowship outing.",
+    purpose: "Refreshments and games equipment for the quarterly young adults fellowship outing.",
     requester: REQUESTERS.david,
     items: [
       { id: "i1", description: "Refreshments", amount: 45_000 },
@@ -261,9 +280,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     department: "Youth & Young Adults",
     purpose: "Replacement of two failing monitor speakers in the youth chapel.",
     requester: REQUESTERS.david,
-    items: [
-      { id: "i1", description: "Stage monitors (2 units)", amount: 120_000 },
-    ],
+    items: [{ id: "i1", description: "Stage monitors (2 units)", amount: 120_000 }],
     attachments: [],
     comments: [],
     activity: [{ id: "e1", date: "2026-09-07", actor: "You", action: "Created draft" }],
@@ -294,16 +311,15 @@ export const SEED_REQUISITIONS: Requisition[] = [
       { id: "e1", date: "2026-07-20", actor: "You", action: "Submitted for review" },
       { id: "e2", date: "2026-07-24", actor: "Pastor Grace Ojo", action: "Recommended" },
       { id: "e3", date: "2026-07-30", actor: "Pastor Emmanuel Bassey", action: "Approved" },
-      { id: "e4", date: "2026-08-05", actor: "Finance Team", action: "Verified" },
-      { id: "e5", date: "2026-08-08", actor: "Treasury", action: "Disbursed" },
+      { id: "e4", date: "2026-08-05", actor: "Finance", action: "Payment scheduled" },
+      { id: "e5", date: "2026-08-08", actor: "Finance", action: "Disbursed" },
     ],
     status: "disbursed",
     stageDates: {
       submitted: "2026-07-20",
       recommended: "2026-07-24",
       approval: "2026-07-30",
-      finance: "2026-08-05",
-      disbursed: "2026-08-08",
+      disbursement: "2026-08-08",
     },
     submittedAt: "2026-07-20",
     createdAt: "2026-07-18",
@@ -357,8 +373,8 @@ export const SEED_REQUISITIONS: Requisition[] = [
       { id: "e1", date: "2026-03-10", actor: "You", action: "Submitted for review" },
       { id: "e2", date: "2026-03-13", actor: "Pastor Grace Ojo", action: "Recommended" },
       { id: "e3", date: "2026-03-18", actor: "Pastor Emmanuel Bassey", action: "Approved" },
-      { id: "e4", date: "2026-03-22", actor: "Finance Team", action: "Verified" },
-      { id: "e5", date: "2026-03-25", actor: "Treasury", action: "Disbursed" },
+      { id: "e4", date: "2026-03-22", actor: "Finance", action: "Payment scheduled" },
+      { id: "e5", date: "2026-03-25", actor: "Finance", action: "Disbursed" },
       { id: "e6", date: "2026-04-14", actor: "You", action: "Filed reconciliation" },
       { id: "e7", date: "2026-04-18", actor: "Treasury", action: "Reconciliation accepted" },
     ],
@@ -367,8 +383,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
       submitted: "2026-03-10",
       recommended: "2026-03-13",
       approval: "2026-03-18",
-      finance: "2026-03-22",
-      disbursed: "2026-03-25",
+      disbursement: "2026-03-25",
       reconciled: "2026-04-18",
     },
     reconciliation: {
@@ -413,8 +428,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     programmeDate: "2026-10-24",
     location: "Badagry Camp Ground, Lagos",
     department: "Youth & Young Adults",
-    purpose:
-      "Four-day residential camp for 300 teenagers drawn from the eighteen Lagos chapters.",
+    purpose: "Four-day residential camp for 300 teenagers drawn from the eighteen Lagos chapters.",
     requester: REQUESTERS.ruth,
     items: [
       { id: "i1", description: "Camp ground hire (4 nights)", amount: 320_000 },
@@ -427,7 +441,14 @@ export const SEED_REQUISITIONS: Requisition[] = [
       { id: "a2", name: "campground_quotation.pdf", size: "540 KB", kind: "quotation" },
     ],
     comments: [],
-    activity: [{ id: "e1", date: "2026-09-05", actor: "Pastor Ruth Nwankwo", action: "Submitted for review" }],
+    activity: [
+      {
+        id: "e1",
+        date: "2026-09-05",
+        actor: "Pastor Ruth Nwankwo",
+        action: "Submitted for review",
+      },
+    ],
     status: "under_review",
     stageDates: { submitted: "2026-09-05" },
     submittedAt: "2026-09-05",
@@ -449,7 +470,14 @@ export const SEED_REQUISITIONS: Requisition[] = [
     ],
     attachments: [{ id: "a1", name: "worship_night_plan.pdf", size: "880 KB", kind: "proposal" }],
     comments: [],
-    activity: [{ id: "e1", date: "2026-09-07", actor: "Pastor Samuel Okafor", action: "Submitted for review" }],
+    activity: [
+      {
+        id: "e1",
+        date: "2026-09-07",
+        actor: "Pastor Samuel Okafor",
+        action: "Submitted for review",
+      },
+    ],
     status: "under_review",
     stageDates: { submitted: "2026-09-07" },
     submittedAt: "2026-09-07",
@@ -471,7 +499,14 @@ export const SEED_REQUISITIONS: Requisition[] = [
     ],
     attachments: [{ id: "a1", name: "printer_quotation.pdf", size: "310 KB", kind: "quotation" }],
     comments: [],
-    activity: [{ id: "e1", date: "2026-08-30", actor: "Pastor Halima Bello", action: "Submitted for review" }],
+    activity: [
+      {
+        id: "e1",
+        date: "2026-08-30",
+        actor: "Pastor Halima Bello",
+        action: "Submitted for review",
+      },
+    ],
     status: "under_review",
     stageDates: { submitted: "2026-08-30" },
     submittedAt: "2026-08-30",
@@ -484,8 +519,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
     programmeDate: "2026-11-01",
     location: "National Secretariat, Abuja",
     department: "Youth & Young Adults",
-    purpose:
-      "Replacement robes for the eighty-voice national youth choir ahead of the convention.",
+    purpose: "Replacement robes for the eighty-voice national youth choir ahead of the convention.",
     requester: REQUESTERS.ruth,
     items: [
       { id: "i1", description: "Robes (80 sets)", amount: 640_000 },
@@ -505,7 +539,12 @@ export const SEED_REQUISITIONS: Requisition[] = [
       },
     ],
     activity: [
-      { id: "e1", date: "2026-08-31", actor: "Pastor Ruth Nwankwo", action: "Submitted for review" },
+      {
+        id: "e1",
+        date: "2026-08-31",
+        actor: "Pastor Ruth Nwankwo",
+        action: "Submitted for review",
+      },
       { id: "e2", date: "2026-09-04", actor: "Pastor Grace Ojo", action: "Recommended" },
     ],
     status: "awaiting_approval",
@@ -534,12 +573,50 @@ export const SEED_REQUISITIONS: Requisition[] = [
       },
     ],
     activity: [
-      { id: "e1", date: "2026-09-02", actor: "Pastor Samuel Okafor", action: "Submitted for review" },
+      {
+        id: "e1",
+        date: "2026-09-02",
+        actor: "Pastor Samuel Okafor",
+        action: "Submitted for review",
+      },
       { id: "e2", date: "2026-09-06", actor: "Pastor Grace Ojo", action: "Recommended" },
     ],
     status: "awaiting_approval",
     stageDates: { submitted: "2026-09-02", recommended: "2026-09-06" },
     submittedAt: "2026-09-02",
     createdAt: "2026-09-01",
+  },
+  {
+    id: "req-0838",
+    reference: "REQ-2026-0838",
+    programme: "Provincial Teachers' Seminar",
+    programmeDate: "2026-10-17",
+    location: "Provincial HQ, Ibadan",
+    department: "Youth & Young Adults",
+    purpose: "Two-day training for the province's Sunday school teachers.",
+    requester: REQUESTERS.samuel,
+    items: [
+      { id: "i1", description: "Facilitator honorarium", amount: 120_000 },
+      { id: "i2", description: "Training materials", amount: 65_000 },
+    ],
+    attachments: [{ id: "a1", name: "seminar_outline.pdf", size: "420 KB", kind: "proposal" }],
+    comments: [
+      {
+        id: "c1",
+        author: "Pastor Emmanuel Bassey",
+        role: "National Youth Pastor",
+        date: "2026-09-06",
+        body: "Approved. Passing to Finance for disbursement.",
+      },
+    ],
+    activity: [
+      { id: "e1", date: "2026-08-27", actor: "Pastor Samuel Okafor", action: "Submitted for review" },
+      { id: "e2", date: "2026-08-30", actor: "Pastor Grace Ojo", action: "Recommended" },
+      { id: "e3", date: "2026-09-06", actor: "Pastor Emmanuel Bassey", action: "Approved" },
+    ],
+    status: "approved",
+    stageDates: { submitted: "2026-08-27", recommended: "2026-08-30", approval: "2026-09-06" },
+    submittedAt: "2026-08-27",
+    createdAt: "2026-08-26",
   },
 ]

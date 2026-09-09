@@ -2,7 +2,7 @@ import { CURRENT_USER } from "./data"
 import type { Requisition } from "./types"
 
 /**
- * An HOD only ever sees their own department's requisitions. The AYP reviews
+ * An HOD only ever sees their own department's requisitions. Reviewers work
  * across all of them, which is why the two sides filter differently.
  */
 export const isMine = (r: Requisition) => r.requester.name === CURRENT_USER.name

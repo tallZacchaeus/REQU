@@ -31,7 +31,7 @@ export const STATUS: Record<RequisitionStatus, StatusMeta> = {
     detail: "Not submitted yet",
   },
   under_review: {
-    label: "Under Review",
+    label: "Under ANYP Review",
     tone: "motion",
     stage: 1,
     emphasis: "dot",
@@ -42,10 +42,10 @@ export const STATUS: Record<RequisitionStatus, StatusMeta> = {
     tone: "motion",
     stage: 2,
     emphasis: "dot",
-    detail: "Recommended by the AYP, awaiting NYP approval",
+    detail: "Recommended by the ANYP, awaiting NYP approval",
   },
   awaiting_approval: {
-    label: "Awaiting Approval",
+    label: "Awaiting NYP Approval",
     tone: "motion",
     stage: 2,
     emphasis: "dot",
@@ -56,35 +56,35 @@ export const STATUS: Record<RequisitionStatus, StatusMeta> = {
     tone: "good",
     stage: 3,
     emphasis: "dot",
-    detail: "Approved, moving to Finance",
+    detail: "Approved — with Finance for disbursement",
   },
   with_finance: {
     label: "With Finance",
     tone: "motion",
     stage: 3,
     emphasis: "dot",
-    detail: "Finance is verifying the breakdown",
+    detail: "Finance is processing the payment",
   },
   /* Disbursed is no longer the end of the line: the money is out, and the
      HOD now owes an account of it. That makes it an action state. */
   disbursed: {
     label: "Disbursed",
     tone: "action",
-    stage: 5,
+    stage: 4,
     emphasis: "chip",
     detail: "Funds released — reconciliation due from you",
   },
   reconciliation_review: {
     label: "Reconciliation Filed",
     tone: "motion",
-    stage: 5,
+    stage: 4,
     emphasis: "dot",
     detail: "Treasury is checking your receipts",
   },
   reconciled: {
     label: "Reconciled",
     tone: "good",
-    stage: 6,
+    stage: 5,
     emphasis: "dot",
     detail: "Receipts accepted — this requisition is closed",
   },
@@ -98,7 +98,7 @@ export const STATUS: Record<RequisitionStatus, StatusMeta> = {
   rejected: {
     label: "Rejected",
     tone: "bad",
-    stage: 1,
+    stage: 2,
     emphasis: "dot",
     detail: "Not approved",
   },
@@ -142,26 +142,27 @@ const STAGE_DEFS: { key: StageKey; done: string; open: string; actor: string }[]
     actor: "Assistant National Youth Pastor",
   },
   { key: "approval", done: "Approved", open: "Approval", actor: "National Youth Pastor" },
-  {
-    key: "finance",
-    done: "Finance Verified",
-    open: "Finance Verification",
-    actor: "Finance Team",
-  },
-  { key: "disbursed", done: "Disbursed", open: "Disbursement", actor: "Treasury" },
+  { key: "disbursement", done: "Disbursed", open: "Disbursement", actor: "Finance" },
   { key: "reconciled", done: "Reconciled", open: "Reconciliation", actor: "You" },
 ]
 
-/** The reconciliation stage changes hands partway through. */
+/** Two stages change hands partway through, so their owner depends on state. */
 function stageActor(key: StageKey, status: RequisitionStatus, fallback: string) {
-  if (key !== "reconciled") return fallback
-  if (status === "disbursed") return "You — receipts outstanding"
-  if (status === "reconciliation_review") return "Treasury"
-  return "You & Treasury"
+  if (key === "disbursement") {
+    if (status === "approved") return "Finance — queued for payment"
+    if (status === "with_finance") return "Finance — processing payment"
+    return fallback
+  }
+  if (key === "reconciled") {
+    if (status === "disbursed") return "You — receipts outstanding"
+    if (status === "reconciliation_review") return "Treasury"
+    return "You & Treasury"
+  }
+  return fallback
 }
 
 /**
- * Builds the five-stage rail for a requisition. `dates` carries the real
+ * Builds the stage rail for a requisition. `dates` carries the real
  * completion dates that have been recorded so far; a stage without a date is
  * never shown as done.
  */

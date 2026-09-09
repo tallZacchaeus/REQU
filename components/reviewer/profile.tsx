@@ -58,7 +58,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
 
   return (
     <>
-      <header className="header-deep rounded-b-[28px] px-5 pt-5 pb-16 lg:rounded-2xl lg:px-8 lg:pt-7 lg:pb-8">
+      <header className="header-deep rounded-b-[28px] px-5 pt-5 pb-16 md:rounded-2xl md:px-7 md:pt-6 md:pb-7 lg:px-8 lg:pt-7 lg:pb-8">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.09em] text-white/60 uppercase">
             <LogoMark className="size-4 text-white/80" />
@@ -83,7 +83,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
         </div>
       </header>
 
-      <div className="-mt-9 px-4 lg:mt-5 lg:px-0">
+      <div className="-mt-9 px-4 lg:mt-5 md:px-0">
         <div className="card-flat grid grid-cols-3 shadow-raised">
           <ProfileStat label="Reviewed" value={reviewed} className="border-hairline border-r" />
           <ProfileStat
@@ -95,7 +95,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
         </div>
       </div>
 
-      <div className="space-y-3.5 px-4 pt-5 pb-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 lg:px-0 lg:pt-6">
+      <div className="space-y-3.5 px-4 pt-5 pb-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 md:px-0 lg:pt-6">
         <Group
           title="Personal Information"
           open={open === "personal"}
@@ -171,7 +171,11 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
           </dl>
         </Group>
 
-        <Group title="Role & Responsibilities" open={open === "role"} onToggle={() => toggle("role")}>
+        <Group
+          title="Role & Responsibilities"
+          open={open === "role"}
+          onToggle={() => toggle("role")}
+        >
           <dl className="divide-hairline divide-y">
             <Field label="Role" value={person.role} />
             <Field label="Department" value={person.department} />
@@ -237,13 +241,21 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
           <div className="space-y-2">
             {config.can.map((item) => (
               <p key={item} className="flex gap-2.5 text-[13.5px] leading-[1.45]">
-                <Check className="text-st-good mt-0.5 size-4 shrink-0" strokeWidth={2.4} aria-hidden />
+                <Check
+                  className="text-st-good mt-0.5 size-4 shrink-0"
+                  strokeWidth={2.4}
+                  aria-hidden
+                />
                 <span className="text-ink">{item}</span>
               </p>
             ))}
             {config.cannot.map((item) => (
               <p key={item} className="flex gap-2.5 text-[13.5px] leading-[1.45]">
-                <X className="text-ink-faint mt-0.5 size-4 shrink-0" strokeWidth={2.4} aria-hidden />
+                <X
+                  className="text-ink-faint mt-0.5 size-4 shrink-0"
+                  strokeWidth={2.4}
+                  aria-hidden
+                />
                 <span className="text-ink-faint">{item}</span>
               </p>
             ))}

@@ -39,7 +39,9 @@ export function StageRail({ stages, rejected = false }: { stages: Stage[]; rejec
                   current || blocked
                     ? cn(
                         "-mt-1 rounded-lg border px-3 py-2",
-                        blocked ? "border-st-action/30 bg-st-action-bg" : "border-primary/20 bg-st-motion-bg",
+                        blocked
+                          ? "border-st-action/30 bg-st-action-bg"
+                          : "border-primary/20 bg-st-motion-bg",
                       )
                     : "",
                 )}
@@ -98,7 +100,10 @@ function Marker({ state, rejected }: { state: Stage["state"]; rejected: boolean 
     return (
       <span className="relative flex size-5 shrink-0 items-center justify-center">
         {/* Live stage — a slow ring, so "in progress" is legible at a glance. */}
-        <span className="bg-brand/30 animate-pulse-ring absolute inset-0 rounded-full" aria-hidden />
+        <span
+          className="bg-brand/30 animate-pulse-ring absolute inset-0 rounded-full"
+          aria-hidden
+        />
         <span className="ring-primary/15 bg-card relative flex size-5 items-center justify-center rounded-full ring-4">
           <span className="border-primary size-5 rounded-full border-[3px]" aria-hidden />
         </span>
@@ -106,7 +111,9 @@ function Marker({ state, rejected }: { state: Stage["state"]; rejected: boolean 
     )
   }
 
-  return <span className="border-hairline bg-card size-5 shrink-0 rounded-full border-2" aria-hidden />
+  return (
+    <span className="border-hairline bg-card size-5 shrink-0 rounded-full border-2" aria-hidden />
+  )
 }
 
 /**

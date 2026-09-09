@@ -50,6 +50,7 @@ const NAV: Record<Role, NavItem[]> = {
   ],
   ayp: reviewerNav("/ayp", "Review"),
   nyp: reviewerNav("/nyp", "Approvals"),
+  finance: reviewerNav("/finance", "Payments"),
 }
 
 /**
@@ -60,17 +61,24 @@ const FULLSCREEN = [
   /^\/requisitions\/new/,
   /^\/requisitions\/[^/]+\/submitted/,
   /^\/requisitions\/[^/]+\/reconcile/,
-  /^\/(ayp|nyp)\/requisitions\//,
+  /^\/(ayp|nyp|finance)\/requisitions\//,
   /^\/login/,
 ]
 
 const isPublic = (pathname: string) => pathname.startsWith("/login")
 
-const ROOTS: Record<Role, string> = { hod: "/", ayp: "/ayp", nyp: "/nyp" }
+const ROOTS: Record<Role, string> = {
+  hod: "/",
+  ayp: "/ayp",
+  nyp: "/nyp",
+  finance: "/finance",
+}
+
+const DESK_ROOTS = ["/ayp", "/nyp", "/finance"]
 
 /** Each role owns a slice of the route space and cannot wander into another. */
 function inOwnSpace(role: Role, pathname: string) {
-  if (role === "hod") return !pathname.startsWith("/ayp") && !pathname.startsWith("/nyp")
+  if (role === "hod") return !DESK_ROOTS.some((root) => pathname.startsWith(root))
   return pathname.startsWith(ROOTS[role])
 }
 
@@ -107,8 +115,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="bg-canvas min-h-dvh lg:flex">
       <Sidebar items={NAV[role]} pathname={pathname} role={role} />
 
-      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col lg:mx-0 lg:min-h-0 lg:max-w-none lg:flex-1">
-        <main className="flex flex-1 flex-col lg:mx-auto lg:w-full lg:max-w-[1120px] lg:px-10 lg:py-8">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col md:max-w-none lg:mx-0 lg:min-h-0 lg:flex-1">
+        <main
+          className={cn(
+            "flex flex-1 flex-col",
+            // Content starts a fixed gutter from the sidebar instead of being
+            // centred in the remainder, which left a wide dead band beside it.
+            "md:px-6 md:py-6 lg:w-full lg:max-w-[1360px] lg:px-8 lg:py-7 xl:px-10 2xl:mx-auto",
+          )}
+        >
           {children}
         </main>
         {showTabs && <BottomNav items={NAV[role]} pathname={pathname} />}
@@ -118,15 +133,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 }
 
 /** Desktop only. Below lg the bottom tab bar carries navigation instead. */
-function Sidebar({
-  items,
-  pathname,
-  role,
-}: {
-  items: NavItem[]
-  pathname: string
-  role: Role
-}) {
+function Sidebar({ items, pathname, role }: { items: NavItem[]; pathname: string; role: Role }) {
   const account = accountByRole(role)
 
   return (
@@ -169,7 +176,11 @@ function Sidebar({
                     )}
                     aria-hidden
                   />
-                  <Icon className="size-[19px] shrink-0" strokeWidth={active ? 2.2 : 1.8} aria-hidden />
+                  <Icon
+                    className="size-[19px] shrink-0"
+                    strokeWidth={active ? 2.2 : 1.8}
+                    aria-hidden
+                  />
                   {label}
                 </Link>
               </li>

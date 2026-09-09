@@ -41,7 +41,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
 
   return (
     <>
-      <header className="header-deep rounded-b-[28px] px-4 pt-4 pb-14 lg:rounded-2xl lg:px-8 lg:pt-7 lg:pb-8">
+      <header className="header-deep rounded-b-[28px] px-4 pt-4 pb-14 md:rounded-2xl md:px-7 md:pt-6 md:pb-7 lg:px-8 lg:pt-7 lg:pb-8">
         <div className="flex items-center justify-between gap-3 lg:hidden">
           <div className="flex min-w-0 items-center gap-2.5">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/12 text-white ring-1 ring-white/15">
@@ -139,7 +139,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
         )}
       </header>
 
-      <div className="-mt-9 grid grid-cols-2 gap-2.5 px-4 lg:mt-5 lg:grid-cols-4 lg:gap-4 lg:px-0">
+      <div className="-mt-9 grid grid-cols-2 gap-2.5 px-4 md:mt-5 md:gap-3 lg:grid-cols-4 lg:gap-4 md:px-0">
         <Tile
           icon={ClipboardCheck}
           label="Awaiting you"
@@ -178,7 +178,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
         />
       </div>
 
-      <div className="px-4 pt-6 pb-8 lg:px-0 lg:pt-8">
+      <div className="px-4 pt-6 pb-8 md:px-0 lg:pt-8">
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="text-ink text-[17px] font-semibold tracking-[-0.02em]">
             Awaiting your review
@@ -204,7 +204,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
             </p>
           </div>
         ) : (
-          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+          <div className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
             {queue.slice(0, 4).map((requisition, index) => (
               <ReviewCard
                 key={requisition.id}
@@ -257,7 +257,10 @@ function Tile({
       className="card-flat tap-card animate-rise group hover:border-ink-faint/30 cursor-pointer px-3.5 py-3 lg:px-4 lg:py-4"
     >
       <div className="flex items-start justify-between">
-        <span className={cn("flex size-9 items-center justify-center rounded-xl", styles.tile)} aria-hidden>
+        <span
+          className={cn("flex size-9 items-center justify-center rounded-xl", styles.tile)}
+          aria-hidden
+        >
           <Icon className="size-[18px]" strokeWidth={2} />
         </span>
         <ChevronRight
@@ -278,7 +281,10 @@ function Tile({
       <div className="bg-hairline mt-2.5 h-[3px] w-full overflow-hidden rounded-full">
         <span
           className={cn("animate-grow block h-full origin-left rounded-full", styles.bar)}
-          style={{ width: `${Math.max(pct, share > 0 ? 12 : 0)}%`, animationDelay: `${delay + 150}ms` }}
+          style={{
+            width: `${Math.max(pct, share > 0 ? 12 : 0)}%`,
+            animationDelay: `${delay + 150}ms`,
+          }}
           aria-hidden
         />
       </div>

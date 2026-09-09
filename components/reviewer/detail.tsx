@@ -1,17 +1,9 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  Ban,
-  Check,
-  Paperclip,
-  Plus,
-  ThumbsUp,
-  Trash2,
-  Undo2,
-} from "lucide-react";
+import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { Ban, Check, Clock, Paperclip, Plus, ThumbsUp, Trash2, Undo2 } from "lucide-react"
 
 import {
   DetailRow,
@@ -21,28 +13,22 @@ import {
   Section,
   StatusBadge,
   StickyFooter,
-} from "@/components/app/primitives";
-import { ScreenHeader } from "@/components/app/screen-header";
-import { Sheet } from "@/components/app/sheet";
-import { StageRail } from "@/components/app/stage-rail";
-import { amountInWords, formatDate } from "@/lib/format";
-import { isoToday, newId } from "@/lib/ids";
-import { waitingDays } from "@/lib/review";
-import type { ActionSpec, ReviewerConfig } from "@/lib/roles";
-import { buildStages, STATUS } from "@/lib/status";
-import { useRequisitions } from "@/lib/store";
-import { requisitionTotal, type Requisition } from "@/lib/types";
-import { cn } from "@/lib/utils";
+} from "@/components/app/primitives"
+import { ScreenHeader } from "@/components/app/screen-header"
+import { Sheet } from "@/components/app/sheet"
+import { StageRail } from "@/components/app/stage-rail"
+import { amountInWords, formatDate } from "@/lib/format"
+import { isoToday, newId } from "@/lib/ids"
+import { waitingDays } from "@/lib/review"
+import type { ActionSpec, ReviewerConfig } from "@/lib/roles"
+import { buildStages, STATUS } from "@/lib/status"
+import { useRequisitions } from "@/lib/store"
+import { requisitionTotal, type Requisition } from "@/lib/types"
+import { cn } from "@/lib/utils"
 
-export function ReviewerDetail({
-  id,
-  config,
-}: {
-  id: string;
-  config: ReviewerConfig;
-}) {
-  const { getById, hydrated } = useRequisitions();
-  const requisition = getById(id);
+export function ReviewerDetail({ id, config }: { id: string; config: ReviewerConfig }) {
+  const { getById, hydrated } = useRequisitions()
+  const requisition = getById(id)
 
   if (!hydrated || !requisition || requisition.status === "draft") {
     return (
@@ -62,59 +48,56 @@ export function ReviewerDetail({
           )}
         </div>
       </>
-    );
+    )
   }
 
-  return (
-    <Detail key={requisition.id} requisition={requisition} config={config} />
-  );
+  return <Detail key={requisition.id} requisition={requisition} config={config} />
 }
 
-function Detail({
-  requisition,
-  config,
-}: {
-  requisition: Requisition;
-  config: ReviewerConfig;
-}) {
-  const router = useRouter();
-  const { upsert } = useRequisitions();
-  const [open, setOpen] = useState<ActionSpec | null>(null);
-  const [comment, setComment] = useState("");
-  const [points, setPoints] = useState<string[]>([""]);
-  const [showErrors, setShowErrors] = useState(false);
-  const [pending, setPending] = useState(false);
+function Detail({ requisition, config }: { requisition: Requisition; config: ReviewerConfig }) {
+  const router = useRouter()
+  const { upsert } = useRequisitions()
+  const [open, setOpen] = useState<ActionSpec | null>(null)
+  const [comment, setComment] = useState("")
+  const [points, setPoints] = useState<string[]>([""])
+  const [reference, setReference] = useState("")
+  const [showErrors, setShowErrors] = useState(false)
+  const [pending, setPending] = useState(false)
 
-  const total = requisitionTotal(requisition);
-  const meta = STATUS[requisition.status];
-  const stages = buildStages(requisition.status, requisition.stageDates);
-  const actionable = config.awaits(requisition);
-  const days = waitingDays(requisition);
+  const total = requisitionTotal(requisition)
+  const meta = STATUS[requisition.status]
+  const stages = buildStages(requisition.status, requisition.stageDates)
+  const actionable = config.awaits(requisition)
+  const days = waitingDays(requisition)
 
   function closeSheet() {
-    setOpen(null);
-    setComment("");
-    setPoints([""]);
-    setShowErrors(false);
+    setOpen(null)
+    setComment("")
+    setPoints([""])
+    setReference("")
+    setShowErrors(false)
   }
 
   function commit(action: ActionSpec) {
-    const body = comment.trim();
-    const list = points.map((p) => p.trim()).filter(Boolean);
+    const body = comment.trim()
+    const list = points.map((p) => p.trim()).filter(Boolean)
+    const ref = reference.trim()
     if (
       (action.commentRequired && body.length < 10) ||
-      (action.wantsPoints && list.length === 0)
+      (action.wantsPoints && list.length === 0) ||
+      (action.reference && ref.length < 3)
     ) {
-      setShowErrors(true);
-      return;
+      setShowErrors(true)
+      return
     }
-    if (pending) return;
-    setPending(true);
+    if (pending) return
+    setPending(true)
 
-    const today = isoToday();
+    const today = isoToday()
     upsert({
       ...requisition,
       status: action.nextStatus,
+      ...(action.reference ? { paymentRef: ref } : {}),
       stageDates: action.stamp
         ? { ...requisition.stageDates, [action.stamp]: today }
         : requisition.stageDates,
@@ -125,7 +108,9 @@ function Detail({
           author: config.person.name,
           role: config.person.role,
           date: today,
-          body: body || action.defaultComment || action.activity,
+          body: [body || action.defaultComment || action.activity, ref && `Reference ${ref}`]
+            .filter(Boolean)
+            .join(" "),
           ...(action.wantsPoints ? { requestedChanges: list } : {}),
         },
       ],
@@ -138,13 +123,13 @@ function Detail({
           action: action.activity,
         },
       ],
-    });
-    router.push(config.queueHref);
+    })
+    router.push(config.queueHref)
   }
 
-  const actions = [config.primary, config.secondary, config.destructive].filter(
-    Boolean,
-  ) as ActionSpec[];
+  const actions = (
+    [config.primary, config.secondary, config.destructive].filter(Boolean) as ActionSpec[]
+  ).filter((a) => !a.availableWhen || a.availableWhen(requisition))
 
   return (
     <>
@@ -170,9 +155,7 @@ function Detail({
                 <span
                   className={cn(
                     "shrink-0 rounded-md px-2 py-1 text-[11.5px] font-semibold",
-                    days >= 7
-                      ? "bg-st-action-bg text-st-action"
-                      : "bg-muted text-ink-soft",
+                    days >= 7 ? "bg-st-action-bg text-st-action" : "bg-muted text-ink-soft",
                   )}
                 >
                   {days === 0 ? "Today" : `${days}d wait`}
@@ -191,19 +174,10 @@ function Detail({
 
             <Disclosure title="Programme Details" defaultOpen>
               <dl className="divide-hairline divide-y">
-                <DetailRow
-                  label="Programme / Project"
-                  value={requisition.programme}
-                />
-                <DetailRow
-                  label="Programme date"
-                  value={formatDate(requisition.programmeDate)}
-                />
+                <DetailRow label="Programme / Project" value={requisition.programme} />
+                <DetailRow label="Programme date" value={formatDate(requisition.programmeDate)} />
                 <DetailRow label="Location" value={requisition.location} />
-                <DetailRow
-                  label="Department / Unit"
-                  value={requisition.department}
-                />
+                <DetailRow label="Department / Unit" value={requisition.department} />
                 <DetailRow label="Purpose" value={requisition.purpose} />
               </dl>
             </Disclosure>
@@ -246,10 +220,7 @@ function Detail({
               </p>
             </Disclosure>
 
-            <Disclosure
-              title="Attachments"
-              meta={`${requisition.attachments.length}`}
-            >
+            <Disclosure title="Attachments" meta={`${requisition.attachments.length}`}>
               {requisition.attachments.length === 0 ? (
                 <p className="text-ink-faint py-1 text-[13px]">
                   No documents attached — worth asking for a quotation.
@@ -257,10 +228,7 @@ function Detail({
               ) : (
                 <ul className="divide-hairline divide-y">
                   {requisition.attachments.map((file) => (
-                    <li
-                      key={file.id}
-                      className="flex items-center gap-2.5 py-2.5"
-                    >
+                    <li key={file.id} className="flex items-center gap-2.5 py-2.5">
                       <Paperclip
                         className="text-ink-faint size-4 shrink-0"
                         strokeWidth={1.8}
@@ -269,9 +237,7 @@ function Detail({
                       <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">
                         {file.name}
                       </span>
-                      <span className="text-ink-faint shrink-0 text-[11.5px]">
-                        {file.size}
-                      </span>
+                      <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
                     </li>
                   ))}
                 </ul>
@@ -288,17 +254,13 @@ function Detail({
                   {requisition.comments.map((c) => (
                     <li key={c.id} className="bg-muted rounded-lg px-3 py-2.5">
                       <div className="flex items-baseline justify-between gap-2">
-                        <p className="text-ink text-[13px] font-semibold">
-                          {c.author}
-                        </p>
+                        <p className="text-ink text-[13px] font-semibold">{c.author}</p>
                         <p className="text-ink-faint shrink-0 text-[11.5px]">
                           {formatDate(c.date)}
                         </p>
                       </div>
                       <p className="text-ink-faint text-[11.5px]">{c.role}</p>
-                      <p className="text-ink mt-1.5 text-[13.5px] leading-[1.5]">
-                        {c.body}
-                      </p>
+                      <p className="text-ink mt-1.5 text-[13.5px] leading-[1.5]">{c.body}</p>
                     </li>
                   ))}
                 </ul>
@@ -322,32 +284,19 @@ function Detail({
             </div>
 
             <Section title="Approval Workflow">
-              <StageRail
-                stages={stages}
-                rejected={requisition.status === "rejected"}
-              />
+              <StageRail stages={stages} rejected={requisition.status === "rejected"} />
             </Section>
 
             {actionable ? (
               <div className="card-flat space-y-2.5 px-4 py-4">
                 {actions.map((action) => (
-                  <ActionButton
-                    key={action.key}
-                    action={action}
-                    onClick={() => setOpen(action)}
-                  />
+                  <ActionButton key={action.key} action={action} onClick={() => setOpen(action)} />
                 ))}
-                <p className="text-ink-faint pt-1 text-[11.5px] leading-[1.5]">
-                  {config.boundary}
-                </p>
+                <p className="text-ink-faint pt-1 text-[11.5px] leading-[1.5]">{config.boundary}</p>
               </div>
             ) : (
               <p className="card-flat text-ink-soft flex items-center justify-center gap-2 px-4 py-3.5 text-[13px]">
-                <Check
-                  className="text-st-good size-4"
-                  strokeWidth={2.4}
-                  aria-hidden
-                />
+                <Check className="text-st-good size-4" strokeWidth={2.4} aria-hidden />
                 Already actioned
               </p>
             )}
@@ -356,27 +305,18 @@ function Detail({
 
         <div className="mt-4 lg:hidden">
           <Section title="Approval Workflow">
-            <StageRail
-              stages={stages}
-              rejected={requisition.status === "rejected"}
-            />
+            <StageRail stages={stages} rejected={requisition.status === "rejected"} />
           </Section>
         </div>
       </div>
 
       {/* Mobile keeps the decision pinned to the thumb. */}
       {actionable ? (
-        <StickyFooter
-          className="lg:hidden"
-          note={config.primary.blurb(requisition)}
-        >
+        <StickyFooter className="lg:hidden" note={config.primary.blurb(requisition)}>
           {/* The decision leads on its own row. Three abreast on a 390px
                 screen left every label under 115px and truncating. */}
           <div className="space-y-2.5">
-            <ActionButton
-              action={config.primary}
-              onClick={() => setOpen(config.primary)}
-            />
+            <ActionButton action={config.primary} onClick={() => setOpen(config.primary)} />
             <div className="flex gap-2.5">
               {actions.slice(1).map((action) => (
                 <ActionButton
@@ -392,28 +332,18 @@ function Detail({
       ) : (
         <StickyFooter className="lg:hidden">
           <p className="text-ink-soft flex items-center justify-center gap-2 py-1 text-[13px]">
-            <Check
-              className="text-st-good size-4"
-              strokeWidth={2.4}
-              aria-hidden
-            />
+            <Check className="text-st-good size-4" strokeWidth={2.4} aria-hidden />
             You have already actioned this requisition.
           </p>
         </StickyFooter>
       )}
 
-      <Sheet
-        open={open !== null}
-        onClose={closeSheet}
-        title={open?.sheetTitle ?? ""}
-      >
+      <Sheet open={open !== null} onClose={closeSheet} title={open?.sheetTitle ?? ""}>
         {open && (
           <>
             <p className="text-ink-soft text-[13.5px] leading-[1.55]">
-              <span className="text-ink font-medium">
-                {requisition.programme}
-              </span>{" "}
-              — <Money value={total} size="sm" />. {open.blurb(requisition)}
+              <span className="text-ink font-medium">{requisition.programme}</span> —{" "}
+              <Money value={total} size="sm" />. {open.blurb(requisition)}
             </p>
 
             <label className="mt-4 block">
@@ -430,14 +360,31 @@ function Detail({
                 placeholder={open.commentPlaceholder}
                 className={cn(
                   "bg-card text-ink placeholder:text-ink-faint/80 w-full resize-none rounded-lg border px-3 py-2.5 text-[16px] leading-[1.5] transition-[border-color,box-shadow] duration-200 outline-none focus:ring-3",
-                  showErrors &&
-                    open.commentRequired &&
-                    comment.trim().length < 10
+                  showErrors && open.commentRequired && comment.trim().length < 10
                     ? "border-st-bad focus:border-st-bad focus:ring-st-bad/15"
                     : "border-input focus:border-brand focus:ring-brand/20",
                 )}
               />
             </label>
+
+            {open.reference && (
+              <label className="mt-4 block">
+                <span className="text-ink mb-1.5 block text-[13px] font-semibold">
+                  {open.reference.label}
+                </span>
+                <input
+                  value={reference}
+                  onChange={(event) => setReference(event.target.value)}
+                  placeholder={open.reference.placeholder}
+                  className={cn(
+                    "bg-card text-ink placeholder:text-ink-faint/80 h-11 w-full rounded-lg border px-3 font-mono text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:ring-3",
+                    showErrors && reference.trim().length < 3
+                      ? "border-st-bad focus:border-st-bad focus:ring-st-bad/15"
+                      : "border-input focus:border-brand focus:ring-brand/20",
+                  )}
+                />
+              </label>
+            )}
 
             {open.wantsPoints && (
               <div className="mt-4">
@@ -451,11 +398,7 @@ function Detail({
                       <input
                         value={value}
                         onChange={(event) =>
-                          setPoints((c) =>
-                            c.map((v, i) =>
-                              i === index ? event.target.value : v,
-                            ),
-                          )
+                          setPoints((c) => c.map((v, i) => (i === index ? event.target.value : v)))
                         }
                         placeholder="e.g. Attach a second quotation"
                         className="border-input bg-card text-ink placeholder:text-ink-faint/80 focus:border-brand focus:ring-brand/20 h-11 w-full rounded-lg border px-3 text-[16px] transition-[border-color,box-shadow] duration-200 outline-none focus:ring-3"
@@ -464,16 +407,10 @@ function Detail({
                         <button
                           type="button"
                           aria-label={`Remove point ${index + 1}`}
-                          onClick={() =>
-                            setPoints((c) => c.filter((_, i) => i !== index))
-                          }
+                          onClick={() => setPoints((c) => c.filter((_, i) => i !== index))}
                           className="text-ink-faint hover:text-st-bad flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors duration-200"
                         >
-                          <Trash2
-                            className="size-3.5"
-                            strokeWidth={1.8}
-                            aria-hidden
-                          />
+                          <Trash2 className="size-3.5" strokeWidth={1.8} aria-hidden />
                         </button>
                       )}
                     </div>
@@ -496,7 +433,9 @@ function Detail({
               <p className="text-st-bad mt-3 text-[12.5px]">
                 {open.wantsPoints
                   ? "Add a comment and at least one specific change."
-                  : "Add a short reason before continuing."}
+                  : open.reference
+                    ? "Enter the payment reference before confirming."
+                    : "Add a short reason before continuing."}
               </p>
             )}
 
@@ -516,10 +455,8 @@ function Detail({
                   "flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg text-[14.5px] font-semibold transition-[opacity,background-color,transform] duration-200 active:scale-[0.99] disabled:opacity-60",
                   open.tone === "primary" &&
                     "bg-primary text-primary-foreground hover:bg-primary/90",
-                  open.tone === "warn" &&
-                    "bg-st-action text-white hover:opacity-90",
-                  open.tone === "danger" &&
-                    "bg-st-bad text-white hover:opacity-90",
+                  open.tone === "warn" && "bg-st-action text-white hover:opacity-90",
+                  open.tone === "danger" && "bg-st-bad text-white hover:opacity-90",
                 )}
               >
                 {open.confirmLabel}
@@ -529,7 +466,7 @@ function Detail({
         )}
       </Sheet>
     </>
-  );
+  )
 }
 
 function Hero({
@@ -538,10 +475,10 @@ function Hero({
   actionable,
   detail,
 }: {
-  requisition: Requisition;
-  total: number;
-  actionable: boolean;
-  detail: string;
+  requisition: Requisition
+  total: number
+  actionable: boolean
+  detail: string
 }) {
   return (
     <>
@@ -549,11 +486,7 @@ function Hero({
         <p className="text-ink-faint font-mono text-[11.5px] tracking-tight">
           {requisition.reference}
         </p>
-        <StatusBadge
-          status={requisition.status}
-          forceChip
-          className="shrink-0"
-        />
+        <StatusBadge status={requisition.status} forceChip className="shrink-0" />
       </div>
       <h2 className="text-ink mt-2 text-[17px] leading-tight font-semibold tracking-[-0.015em]">
         {requisition.programme}
@@ -563,21 +496,21 @@ function Hero({
         {actionable ? "Awaiting your decision" : detail}
       </p>
     </>
-  );
+  )
 }
 
-const ICONS = { advance: ThumbsUp, changes: Undo2, reject: Ban };
+const ICONS = { advance: ThumbsUp, changes: Undo2, reject: Ban, process: Clock }
 
 function ActionButton({
   action,
   onClick,
   compact = false,
 }: {
-  action: ActionSpec;
-  onClick: () => void;
-  compact?: boolean;
+  action: ActionSpec
+  onClick: () => void
+  compact?: boolean
 }) {
-  const Icon = ICONS[action.key];
+  const Icon = ICONS[action.key]
   return (
     <button
       type="button"
@@ -585,16 +518,13 @@ function ActionButton({
       className={cn(
         "flex h-12 cursor-pointer items-center justify-center gap-2 rounded-lg text-[14px] font-semibold transition-[background-color,border-color,transform] duration-200 active:scale-[0.99]",
         compact ? "flex-1" : "w-full",
-        action.tone === "primary" &&
-          "bg-primary text-primary-foreground hover:bg-primary/90",
-        action.tone === "warn" &&
-          "border-st-action/35 text-st-action hover:bg-st-action-bg border",
-        action.tone === "danger" &&
-          "border-st-bad/35 text-st-bad hover:bg-st-bad-bg border",
+        action.tone === "primary" && "bg-primary text-primary-foreground hover:bg-primary/90",
+        action.tone === "warn" && "border-st-action/35 text-st-action hover:bg-st-action-bg border",
+        action.tone === "danger" && "border-st-bad/35 text-st-bad hover:bg-st-bad-bg border",
       )}
     >
       <Icon className="size-4" strokeWidth={2.2} aria-hidden />
       {action.label}
     </button>
-  );
+  )
 }

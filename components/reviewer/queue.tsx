@@ -6,6 +6,10 @@ import { Inbox } from "lucide-react"
 
 import { MicroLabel, Money } from "@/components/app/primitives"
 import { ReviewCard } from "@/components/app/review-card"
+import {
+  RequisitionRow,
+  RequisitionRowHeader,
+} from "@/components/app/requisition-row"
 import { byLongestWaiting, visibleToReviewer } from "@/lib/review"
 import type { ReviewerConfig } from "@/lib/roles"
 import { useRequisitions } from "@/lib/store"
@@ -40,13 +44,13 @@ export function ReviewerQueue({ config }: { config: ReviewerConfig }) {
   return (
     <>
       <header className="border-hairline bg-card sticky top-0 z-20 border-b lg:static lg:border-0 lg:bg-transparent">
-        <div className="flex h-14 items-center px-4 lg:h-auto lg:px-0 lg:pb-4">
+        <div className="flex h-14 items-center px-4 lg:h-auto md:px-0 lg:pb-4">
           <h1 className="text-ink text-[17px] font-semibold tracking-[-0.01em] lg:text-[24px] lg:tracking-[-0.025em]">
             {config.queueTitle}
           </h1>
         </div>
 
-        <div className="overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
+        <div className="overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] lg:overflow-visible md:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
           <div className="flex w-max gap-1.5 lg:w-auto lg:flex-wrap">
             {filters.map((f) => {
               const count = visible.filter(f.match).length
@@ -80,7 +84,7 @@ export function ReviewerQueue({ config }: { config: ReviewerConfig }) {
         </div>
       </header>
 
-      <div className="px-4 pt-4 pb-8 lg:px-0 lg:pt-6">
+      <div className="px-4 pt-4 pb-8 md:px-0 lg:pt-6">
         <div className="mb-2.5 flex items-baseline justify-between">
           <MicroLabel>
             {rows.length} requisition{rows.length === 1 ? "" : "s"}
@@ -102,17 +106,33 @@ export function ReviewerQueue({ config }: { config: ReviewerConfig }) {
             </p>
           </div>
         ) : (
-          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 2xl:grid-cols-3">
-            {rows.map((requisition, index) => (
-              <ReviewCard
-                key={requisition.id}
-                requisition={requisition}
-                href={config.detailHref(requisition.id)}
-                className="animate-rise"
-                style={{ animationDelay: `${Math.min(index, 6) * 50}ms` }}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-2.5 md:hidden">
+              {rows.map((requisition, index) => (
+                <ReviewCard
+                  key={requisition.id}
+                  requisition={requisition}
+                  href={config.detailHref(requisition.id)}
+                  className="animate-rise"
+                  style={{ animationDelay: `${Math.min(index, 6) * 50}ms` }}
+                />
+              ))}
+            </div>
+
+            <div className="hidden md:block">
+              <RequisitionRowHeader requesterLabel="Raised by" />
+              <div className="space-y-1.5">
+                {rows.map((requisition) => (
+                  <RequisitionRow
+                    key={requisition.id}
+                    requisition={requisition}
+                    href={config.detailHref(requisition.id)}
+                    showWait={active === "awaiting"}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </>

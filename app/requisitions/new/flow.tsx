@@ -16,12 +16,7 @@ import { cn } from "@/lib/utils"
 
 const STEPS = ["Programme", "Expenses", "Documents", "Review"] as const
 
-const UNITS = [
-  "Central Province",
-  "Lagos Province",
-  "Eastern Province",
-  "Northern Province",
-]
+const UNITS = ["Central Province", "Lagos Province", "Eastern Province", "Northern Province"]
 
 const blankItem = (): ExpenseItem => ({
   id: newId("i"),
@@ -290,7 +285,9 @@ function Flow({ existing }: { existing?: Requisition }) {
                     value={item.description}
                     onChange={(e) =>
                       setItems((c) =>
-                        c.map((i) => (i.id === item.id ? { ...i, description: e.target.value } : i)),
+                        c.map((i) =>
+                          i.id === item.id ? { ...i, description: e.target.value } : i,
+                        ),
                       )
                     }
                   />
@@ -378,8 +375,14 @@ function Flow({ existing }: { existing?: Requisition }) {
               <ul className="card-flat divide-hairline divide-y">
                 {attachments.map((file) => (
                   <li key={file.id} className="flex items-center gap-2.5 px-3.5 py-3">
-                    <Paperclip className="text-ink-faint size-4 shrink-0" strokeWidth={1.8} aria-hidden />
-                    <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">{file.name}</span>
+                    <Paperclip
+                      className="text-ink-faint size-4 shrink-0"
+                      strokeWidth={1.8}
+                      aria-hidden
+                    />
+                    <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">
+                      {file.name}
+                    </span>
                     <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
                     <button
                       type="button"
@@ -414,7 +417,10 @@ function Flow({ existing }: { existing?: Requisition }) {
                   value={programmeDate ? formatDate(programmeDate) : "—"}
                 />
                 <DetailRow label="Location" value={location || "—"} />
-                <DetailRow label="Department / Unit" value={`${CURRENT_USER.department} · ${unit}`} />
+                <DetailRow
+                  label="Department / Unit"
+                  value={`${CURRENT_USER.department} · ${unit}`}
+                />
                 <DetailRow label="Purpose" value={purpose || "—"} />
               </dl>
             </ReviewBlock>
@@ -456,7 +462,11 @@ function Flow({ existing }: { existing?: Requisition }) {
                 <ul className="divide-hairline divide-y">
                   {attachments.map((file) => (
                     <li key={file.id} className="flex items-center gap-2.5 py-2.5">
-                      <Paperclip className="text-ink-faint size-4 shrink-0" strokeWidth={1.8} aria-hidden />
+                      <Paperclip
+                        className="text-ink-faint size-4 shrink-0"
+                        strokeWidth={1.8}
+                        aria-hidden
+                      />
                       <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">
                         {file.name}
                       </span>

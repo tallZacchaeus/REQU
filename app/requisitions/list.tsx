@@ -6,6 +6,10 @@ import { useSearchParams } from "next/navigation"
 import { FileText, Plus } from "lucide-react"
 
 import { RequisitionCard } from "@/components/app/requisition-card"
+import {
+  RequisitionRow,
+  RequisitionRowHeader,
+} from "@/components/app/requisition-row"
 import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
 import type { RequisitionStatus } from "@/lib/types"
@@ -52,7 +56,7 @@ export function RequisitionsList() {
   return (
     <>
       <header className="border-hairline bg-card sticky top-0 z-20 border-b lg:static lg:border-0 lg:bg-transparent">
-        <div className="flex h-14 items-center justify-between px-4 lg:h-auto lg:px-0 lg:pb-4">
+        <div className="flex h-14 items-center justify-between px-4 lg:h-auto md:px-0 lg:pb-4">
           <h1 className="text-ink text-[17px] font-semibold tracking-[-0.01em] lg:text-[24px] lg:tracking-[-0.025em]">
             My Requisitions
           </h1>
@@ -66,7 +70,7 @@ export function RequisitionsList() {
         </div>
 
         {/* Filters scroll horizontally so the set never wraps into two rows. */}
-        <div className="overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] lg:overflow-visible lg:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
+        <div className="overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] lg:overflow-visible md:px-0 lg:pb-0 [&::-webkit-scrollbar]:hidden">
           <div className="flex w-max gap-1.5 lg:w-auto lg:flex-wrap">
             {FILTERS.map((f) => {
               const count = requisitions.filter((r) => f.match(r.status)).length
@@ -100,7 +104,7 @@ export function RequisitionsList() {
         </div>
       </header>
 
-      <div className="px-4 pt-4 pb-8 lg:px-0 lg:pt-6">
+      <div className="px-4 pt-4 pb-8 md:px-0 lg:pt-6">
         <p className="label-micro mb-2.5">
           {visible.length} requisition{visible.length === 1 ? "" : "s"}
         </p>
@@ -115,16 +119,36 @@ export function RequisitionsList() {
             </p>
           </div>
         ) : (
-          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 2xl:grid-cols-3">
-            {visible.map((requisition, index) => (
-              <RequisitionCard
-                key={requisition.id}
-                requisition={requisition}
-                className="animate-rise"
-                style={{ animationDelay: `${Math.min(index, 6) * 50}ms` }}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-2.5 md:hidden">
+              {visible.map((requisition, index) => (
+                <RequisitionCard
+                  key={requisition.id}
+                  requisition={requisition}
+                  className="animate-rise"
+                  style={{ animationDelay: `${Math.min(index, 6) * 50}ms` }}
+                />
+              ))}
+            </div>
+
+            <div className="hidden md:block">
+              <RequisitionRowHeader requesterLabel="Location" />
+              <div className="space-y-1.5">
+                {visible.map((requisition) => (
+                  <RequisitionRow
+                    key={requisition.id}
+                    requisition={requisition}
+                    href={
+                      requisition.status === "draft"
+                        ? `/requisitions/new?edit=${requisition.id}`
+                        : `/requisitions/${requisition.id}`
+                    }
+                    showRequester={false}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </>

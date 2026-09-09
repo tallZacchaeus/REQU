@@ -105,7 +105,9 @@ export function Field({
         {label}
         {locked && <Lock className="size-3" strokeWidth={2.2} aria-label="Read only" />}
       </dt>
-      <dd className={cn("mt-0.5 text-[15px] leading-[1.45]", locked ? "text-ink-soft" : "text-ink")}>
+      <dd
+        className={cn("mt-0.5 text-[15px] leading-[1.45]", locked ? "text-ink-soft" : "text-ink")}
+      >
         {value}
       </dd>
     </div>

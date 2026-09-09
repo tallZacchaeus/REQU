@@ -20,7 +20,7 @@ export function ReviewCard({
   style,
 }: {
   requisition: Requisition
-  /** Whose desk this card belongs to — the AYP and NYP have separate routes. */
+  /** Whose desk this card belongs to — each reviewing role has its own routes. */
   href: string
   className?: string
   style?: React.CSSProperties
@@ -67,9 +67,7 @@ export function ReviewCard({
             )}
           >
             {awaiting ? (
-              <>
-                {days === 0 ? "Submitted today" : `Waiting ${days} day${days === 1 ? "" : "s"}`}
-              </>
+              <>{days === 0 ? "Submitted today" : `Waiting ${days} day${days === 1 ? "" : "s"}`}</>
             ) : (
               <>
                 {STATUS[requisition.status].label} ·{" "}

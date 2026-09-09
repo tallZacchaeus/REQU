@@ -18,8 +18,9 @@ export type StageKey =
   | "submitted"
   | "recommended"
   | "approval"
-  | "finance"
-  | "disbursed"
+  /* Finance does not re-verify an approved requisition — it processes and
+     pays it, so approval and payment are one stage, not two. */
+  | "disbursement"
   | "reconciled"
 
 export type StageState = "done" | "current" | "pending" | "blocked"
@@ -50,7 +51,7 @@ export interface Attachment {
   kind: "proposal" | "quotation" | "receipt" | "other"
 }
 
-/** Who raised the requisition. The AYP reviews across several of these. */
+/** Who raised the requisition. Reviewers work across several of these. */
 export interface Requester {
   name: string
   initials: string
@@ -101,6 +102,8 @@ export interface Requisition {
   /** Completion dates recorded per stage; absent means the stage is not done. */
   stageDates: Partial<Record<StageKey, string>>
   reconciliation?: Reconciliation
+  /** Bank or transfer reference recorded by Finance on payment. */
+  paymentRef?: string
   submittedAt?: string
   createdAt: string
 }
@@ -113,6 +116,5 @@ export const reconciledTotal = (r: Pick<Requisition, "items" | "reconciliation">
   r.items.reduce((sum, item) => sum + (r.reconciliation?.actuals[item.id] ?? 0), 0)
 
 /** Positive means unspent funds to return; negative means an overspend. */
-export const reconciliationVariance = (
-  r: Pick<Requisition, "items" | "reconciliation">,
-) => requisitionTotal(r) - reconciledTotal(r)
+export const reconciliationVariance = (r: Pick<Requisition, "items" | "reconciliation">) =>
+  requisitionTotal(r) - reconciledTotal(r)

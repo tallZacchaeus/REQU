@@ -58,9 +58,7 @@ function Form({ requisition }: { requisition: Requisition }) {
       ]),
     ),
   )
-  const [receipts, setReceipts] = useState<Attachment[]>(
-    requisition.reconciliation?.receipts ?? [],
-  )
+  const [receipts, setReceipts] = useState<Attachment[]>(requisition.reconciliation?.receipts ?? [])
   const [note, setNote] = useState(requisition.reconciliation?.note ?? "")
   const [showErrors, setShowErrors] = useState(false)
   const [pending, setPending] = useState(false)
@@ -188,21 +186,13 @@ function Form({ requisition }: { requisition: Requisition }) {
           <div
             className={cn(
               "mt-3 flex items-center justify-between gap-3 rounded-lg px-3 py-2.5",
-              variance === 0
-                ? "bg-st-good-bg"
-                : overspent
-                  ? "bg-st-action-bg"
-                  : "bg-st-motion-bg",
+              variance === 0 ? "bg-st-good-bg" : overspent ? "bg-st-action-bg" : "bg-st-motion-bg",
             )}
           >
             <span
               className={cn(
                 "text-[12.5px] font-semibold",
-                variance === 0
-                  ? "text-st-good"
-                  : overspent
-                    ? "text-st-action"
-                    : "text-st-motion",
+                variance === 0 ? "text-st-good" : overspent ? "text-st-action" : "text-st-motion",
               )}
             >
               {variance === 0
@@ -214,11 +204,7 @@ function Form({ requisition }: { requisition: Requisition }) {
             <span
               className={cn(
                 "text-[15px] font-semibold tabular-nums",
-                variance === 0
-                  ? "text-st-good"
-                  : overspent
-                    ? "text-st-action"
-                    : "text-st-motion",
+                variance === 0 ? "text-st-good" : overspent ? "text-st-action" : "text-st-motion",
               )}
             >
               ₦{Math.abs(variance).toLocaleString("en-NG")}
@@ -262,8 +248,14 @@ function Form({ requisition }: { requisition: Requisition }) {
             <ul className="card-flat divide-hairline mt-2.5 divide-y">
               {receipts.map((file) => (
                 <li key={file.id} className="flex items-center gap-2.5 px-3.5 py-3">
-                  <Paperclip className="text-ink-faint size-4 shrink-0" strokeWidth={1.8} aria-hidden />
-                  <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">{file.name}</span>
+                  <Paperclip
+                    className="text-ink-faint size-4 shrink-0"
+                    strokeWidth={1.8}
+                    aria-hidden
+                  />
+                  <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">
+                    {file.name}
+                  </span>
                   <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
                   <button
                     type="button"

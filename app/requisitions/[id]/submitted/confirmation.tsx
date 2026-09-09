@@ -15,7 +15,10 @@ export function SubmittedConfirmation({ id }: { id: string }) {
   if (!requisition) {
     return (
       <div className="flex flex-1 items-center justify-center px-4">
-        <Link href="/requisitions" className="text-primary text-[14px] font-semibold hover:underline">
+        <Link
+          href="/requisitions"
+          className="text-primary text-[14px] font-semibold hover:underline"
+        >
           Back to my requisitions
         </Link>
       </div>
