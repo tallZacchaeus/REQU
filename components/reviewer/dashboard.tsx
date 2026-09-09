@@ -15,6 +15,7 @@ import {
 import { LogoMark } from "@/components/app/logo"
 import { Money } from "@/components/app/primitives"
 import { ReviewCard } from "@/components/app/review-card"
+import { RequisitionRow } from "@/components/app/requisition-row"
 import { byLongestWaiting, visibleToReviewer, waitingDays } from "@/lib/review"
 import type { ReviewerConfig } from "@/lib/roles"
 import { useRequisitions } from "@/lib/store"
@@ -204,17 +205,30 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
             </p>
           </div>
         ) : (
-          <div className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
-            {queue.slice(0, 4).map((requisition, index) => (
-              <ReviewCard
-                key={requisition.id}
-                requisition={requisition}
-                href={config.detailHref(requisition.id)}
-                className="animate-rise"
-                style={{ animationDelay: `${index * 60}ms` }}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-2.5 md:hidden">
+              {queue.slice(0, 4).map((requisition, index) => (
+                <ReviewCard
+                  key={requisition.id}
+                  requisition={requisition}
+                  href={config.detailHref(requisition.id)}
+                  className="animate-rise"
+                  style={{ animationDelay: `${index * 60}ms` }}
+                />
+              ))}
+            </div>
+
+            <div className="hidden space-y-1.5 md:block">
+              {queue.slice(0, 4).map((requisition) => (
+                <RequisitionRow
+                  key={requisition.id}
+                  requisition={requisition}
+                  href={config.detailHref(requisition.id)}
+                  showWait
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </>

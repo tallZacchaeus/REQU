@@ -95,7 +95,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
         </div>
       </div>
 
-      <div className="space-y-3.5 px-4 pt-5 pb-8 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 md:px-0 lg:pt-6">
+      <div className="space-y-3.5 px-4 pt-5 pb-8 md:px-0 lg:block lg:columns-2 lg:gap-4 lg:space-y-0 lg:pt-6 lg:[&>*]:mb-4 lg:[&>*]:break-inside-avoid">
         <Group
           title="Personal Information"
           open={open === "personal"}

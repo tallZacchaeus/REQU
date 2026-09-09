@@ -16,6 +16,7 @@ import {
 
 import { LogoMark } from "@/components/app/logo"
 import { RequisitionCard } from "@/components/app/requisition-card"
+import { RequisitionRow } from "@/components/app/requisition-row"
 import { CURRENT_USER } from "@/lib/data"
 import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
@@ -207,13 +208,28 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0">
+          <div className="space-y-2.5 md:hidden">
             {recent.map((requisition, index) => (
               <RequisitionCard
                 key={requisition.id}
                 requisition={requisition}
                 style={{ animationDelay: `${index * 60}ms` }}
                 className="animate-rise"
+              />
+            ))}
+          </div>
+
+          <div className="hidden space-y-1.5 md:block">
+            {recent.map((requisition) => (
+              <RequisitionRow
+                key={requisition.id}
+                requisition={requisition}
+                href={
+                  requisition.status === "draft"
+                    ? `/requisitions/new?edit=${requisition.id}`
+                    : `/requisitions/${requisition.id}`
+                }
+                showRequester={false}
               />
             ))}
           </div>
