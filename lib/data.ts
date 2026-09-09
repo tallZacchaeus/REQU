@@ -376,7 +376,7 @@ export const SEED_REQUISITIONS: Requisition[] = [
       { id: "e4", date: "2026-03-22", actor: "Finance", action: "Payment scheduled" },
       { id: "e5", date: "2026-03-25", actor: "Finance", action: "Disbursed" },
       { id: "e6", date: "2026-04-14", actor: "You", action: "Filed reconciliation" },
-      { id: "e7", date: "2026-04-18", actor: "Treasury", action: "Reconciliation accepted" },
+      { id: "e7", date: "2026-04-18", actor: "Finance", action: "Reconciliation accepted" },
     ],
     status: "reconciled",
     stageDates: {
@@ -387,14 +387,14 @@ export const SEED_REQUISITIONS: Requisition[] = [
       reconciled: "2026-04-18",
     },
     reconciliation: {
-      // Came in under budget on transport; the balance went back to Treasury.
+      // Came in under budget on transport; the balance went back to Finance.
       actuals: { i1: 90_000, i2: 62_500, i3: 34_000 },
       receipts: [
         { id: "r1", name: "pa_hire_receipt.pdf", size: "410 KB", kind: "receipt" },
         { id: "r2", name: "catering_invoice.jpg", size: "1.4 MB", kind: "receipt" },
         { id: "r3", name: "transport_receipts.pdf", size: "680 KB", kind: "receipt" },
       ],
-      note: "Refreshments ran slightly over after the attendance rose to 520. Transport came in under because two chapters travelled in their own buses. Balance returned to Treasury on 16 April.",
+      note: "Refreshments ran slightly over after the attendance rose to 520. Transport came in under because two chapters travelled in their own buses. Balance returned to Finance on 16 April.",
       submittedAt: "2026-04-14",
     },
     submittedAt: "2026-03-10",

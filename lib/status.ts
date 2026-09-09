@@ -79,7 +79,7 @@ export const STATUS: Record<RequisitionStatus, StatusMeta> = {
     tone: "motion",
     stage: 4,
     emphasis: "dot",
-    detail: "Treasury is checking your receipts",
+    detail: "Finance is checking your receipts",
   },
   reconciled: {
     label: "Reconciled",
@@ -155,8 +155,8 @@ function stageActor(key: StageKey, status: RequisitionStatus, fallback: string) 
   }
   if (key === "reconciled") {
     if (status === "disbursed") return "You — receipts outstanding"
-    if (status === "reconciliation_review") return "Treasury"
-    return "You & Treasury"
+    if (status === "reconciliation_review") return "Finance"
+    return "You, checked by Finance"
   }
   return fallback
 }

@@ -69,7 +69,7 @@ function Form({ requisition }: { requisition: Requisition }) {
   )
   const variance = disbursed - spent
   const overspent = variance < 0
-  // An unexplained gap either way is what Treasury will bounce it for.
+  // An unexplained gap either way is what Finance will bounce it for.
   const needsNote = variance !== 0 && note.trim().length < 10
   const valid = spent > 0 && receipts.length > 0 && !needsNote
 
@@ -110,7 +110,7 @@ function Form({ requisition }: { requisition: Requisition }) {
           </div>
           <Money value={disbursed} size="lg" className="mt-2 block" />
           <p className="text-ink-soft mt-1.5 text-[12.5px] leading-[1.5]">
-            Enter what each line actually cost and attach the receipts. Treasury checks this before
+            Enter what each line actually cost and attach the receipts. Finance checks this before
             the requisition is closed.
           </p>
         </div>
@@ -199,7 +199,7 @@ function Form({ requisition }: { requisition: Requisition }) {
                 ? "Fully accounted for"
                 : overspent
                   ? "Overspent"
-                  : "To return to Treasury"}
+                  : "To return to Finance"}
             </span>
             <span
               className={cn(
@@ -299,7 +299,7 @@ function Form({ requisition }: { requisition: Requisition }) {
         )}
       </div>
 
-      <StickyFooter note="Treasury reviews your receipts before this requisition is closed. You can't edit it once filed.">
+      <StickyFooter note="Finance reviews your receipts before this requisition is closed. You can't edit it once filed.">
         <button
           type="button"
           onClick={submit}

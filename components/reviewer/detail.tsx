@@ -127,9 +127,11 @@ function Detail({ requisition, config }: { requisition: Requisition; config: Rev
     router.push(config.queueHref)
   }
 
-  const actions = (
-    [config.primary, config.secondary, config.destructive].filter(Boolean) as ActionSpec[]
-  ).filter((a) => !a.availableWhen || a.availableWhen(requisition))
+  // Whichever action is available first in this state leads the screen.
+  const actions = config.actions.filter(
+    (a) => !a.availableWhen || a.availableWhen(requisition),
+  )
+  const lead = actions[0]
 
   return (
     <>
@@ -287,7 +289,7 @@ function Detail({ requisition, config }: { requisition: Requisition; config: Rev
               <StageRail stages={stages} rejected={requisition.status === "rejected"} />
             </Section>
 
-            {actionable ? (
+            {actionable && actions.length > 0 ? (
               <div className="card-flat space-y-2.5 px-4 py-4">
                 {actions.map((action) => (
                   <ActionButton key={action.key} action={action} onClick={() => setOpen(action)} />
@@ -311,12 +313,12 @@ function Detail({ requisition, config }: { requisition: Requisition; config: Rev
       </div>
 
       {/* Mobile keeps the decision pinned to the thumb. */}
-      {actionable ? (
-        <StickyFooter className="lg:hidden" note={config.primary.blurb(requisition)}>
+      {actionable && lead ? (
+        <StickyFooter className="lg:hidden" note={lead.blurb(requisition)}>
           {/* The decision leads on its own row. Three abreast on a 390px
                 screen left every label under 115px and truncating. */}
           <div className="space-y-2.5">
-            <ActionButton action={config.primary} onClick={() => setOpen(config.primary)} />
+            <ActionButton action={lead} onClick={() => setOpen(lead)} />
             <div className="flex gap-2.5">
               {actions.slice(1).map((action) => (
                 <ActionButton

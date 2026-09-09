@@ -183,7 +183,7 @@ export function RequisitionDetail({ id }: { id: string }) {
           {reconciliation && (
             <Disclosure
               title="Reconciliation"
-              meta={requisition.status === "reconciled" ? "Closed" : "With Treasury"}
+              meta={requisition.status === "reconciled" ? "Closed" : "With Finance"}
               defaultOpen={requisition.status !== "reconciled"}
             >
               <table className="w-full">
@@ -256,7 +256,7 @@ export function RequisitionDetail({ id }: { id: string }) {
                     ? "Fully accounted for"
                     : variance < 0
                       ? "Overspent"
-                      : "Returned to Treasury"}
+                      : "Returned to Finance"}
                 </span>
                 <span
                   className={cn(
@@ -366,7 +366,7 @@ export function RequisitionDetail({ id }: { id: string }) {
           <p className="text-ink-faint px-1 text-[11.5px] leading-[1.5]">
             As Head of Department you raise, track, revise and reconcile your own requisitions.
             Recommendation and approval sit with the ANYP and NYP, and Finance disburses the funds.
-            Treasury checks the reconciliation that closes it.
+            Finance checks the reconciliation that closes it.
           </p>
         </div>
       </div>
