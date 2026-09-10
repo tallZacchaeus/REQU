@@ -1,37 +1,33 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import {
   ArrowRight,
   ChevronDown,
   ChevronRight,
-  CircleCheck,
-  Clock,
-  FileText,
-  Files,
+  CalendarDays,
+  TrendingDown,
+  TrendingUp,
   Megaphone,
   Plus,
 } from "lucide-react"
 
+import { AreaTrend, MonthlyBars, ShareBar } from "@/components/app/charts"
 import { LogoMark } from "@/components/app/logo"
+import { MicroLabel, Money, StatusBadge } from "@/components/app/primitives"
 import { MobileBell } from "@/components/app/notifications"
 import { MobileSearchButton } from "@/components/app/topbar"
-import { CountUp } from "@/components/app/motion"
 import { RequisitionCard } from "@/components/app/requisition-card"
 import { RequisitionRow } from "@/components/app/requisition-row"
+import { formatDate } from "@/lib/format"
+import { monthlySeries, shareSplit, trend } from "@/lib/series"
+import { requisitionTotal } from "@/lib/types"
 import { CURRENT_USER } from "@/lib/data"
 import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
 import { cn } from "@/lib/utils"
 
-const IN_FLIGHT = [
-  "under_review",
-  "recommended",
-  "awaiting_approval",
-  "approved",
-  "with_finance",
-  "reconciliation_review",
-]
 
 /* Disbursed means the money is out and the receipts are not in — the HOD is
    the only one who can move it, so it belongs with changes-requested. */
@@ -45,17 +41,26 @@ function greeting() {
 }
 
 export default function DashboardPage() {
+  const [flow, setFlow] = useState<"requested" | "disbursed">("requested")
   const { requisitions: all } = useRequisitions()
   const requisitions = all.filter(isMine)
 
-  const pending = requisitions.filter((r) => IN_FLIGHT.includes(r.status)).length
-  const closed = requisitions.filter((r) => r.status === "reconciled").length
   const needsAction = requisitions.filter((r) => NEEDS_HOD.includes(r.status))
-  const drafts = requisitions.filter((r) => r.status === "draft").length
-  const total = requisitions.length || 1
 
   const recent = [...requisitions]
     .sort((a, b) => (b.submittedAt ?? b.createdAt).localeCompare(a.submittedAt ?? a.createdAt))
+    .slice(0, 4)
+
+  const months = monthlySeries(requisitions)
+  const shares = shareSplit(requisitions)
+  const swing = trend(months)
+  const requestedTotal = months.reduce((sum, m) => sum + m.requested, 0)
+  const liveTotal = shares.reduce((sum, s) => sum + s.value, 0)
+
+  const today = new Date().toISOString().slice(0, 10)
+  const upcoming = [...requisitions]
+    .filter((r) => r.programmeDate >= today && r.status !== "rejected")
+    .sort((a, b) => a.programmeDate.localeCompare(b.programmeDate))
     .slice(0, 4)
 
   return (
@@ -127,50 +132,135 @@ export default function DashboardPage() {
         )}
       </header>
 
-      {/* ---- Stats straddle the crown's edge ---- */}
-      <div className="-mt-9 grid grid-cols-2 gap-2.5 px-4 md:mt-5 md:gap-3 lg:grid-cols-4 lg:gap-4 md:px-0">
-        <StatCard
-          icon={FileText}
-          value={pending}
-          total={total}
-          label="In progress"
-          href="/requisitions?filter=review"
-          tone="motion"
-          delay={0}
-        />
-        <StatCard
-          icon={CircleCheck}
-          value={closed}
-          total={total}
-          label="Closed"
-          href="/requisitions?filter=closed"
-          tone="good"
-          delay={60}
-        />
-        <StatCard
-          icon={Clock}
-          value={needsAction.length}
-          total={total}
-          label="Needs action"
-          href="/requisitions?filter=action"
-          tone="action"
-          delay={120}
-        />
-        <StatCard
-          icon={Files}
-          value={drafts}
-          total={total}
-          label="Drafts"
-          href="/requisitions?filter=drafts"
-          tone="neutral"
-          delay={180}
-        />
+      {/* ---- Overview: what was asked for, and where it sits ---- */}
+      <div className="-mt-9 grid gap-2.5 px-4 md:px-0 lg:mt-5 lg:grid-cols-2 lg:gap-4">
+        <section className="card-flat animate-rise px-4 py-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <MicroLabel>Requested</MicroLabel>
+              <Money value={requestedTotal} size="lg" className="mt-1.5 block" />
+            </div>
+            {swing !== null && (
+              <span
+                className={cn(
+                  "flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[12px] font-semibold",
+                  swing >= 0 ? "bg-st-good-bg text-st-good" : "bg-st-bad-bg text-st-bad",
+                )}
+              >
+                {swing >= 0 ? (
+                  <TrendingUp className="size-3.5" strokeWidth={2.4} aria-hidden />
+                ) : (
+                  <TrendingDown className="size-3.5" strokeWidth={2.4} aria-hidden />
+                )}
+                {Math.abs(swing)}%
+              </span>
+            )}
+          </div>
+          <p className="text-ink-soft mt-1 text-[12.5px]">Across {months.length} months</p>
+          <div className="mt-2">
+            <AreaTrend points={months} />
+          </div>
+        </section>
+
+        <section
+          className="card-flat animate-rise px-4 py-4"
+          style={{ animationDelay: "70ms" }}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <MicroLabel>Where it sits</MicroLabel>
+              <Money value={liveTotal} size="lg" className="mt-1.5 block" />
+            </div>
+            <Link
+              href="/reports"
+              className="text-brand-ink press hover:bg-muted shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold"
+            >
+              Reports
+            </Link>
+          </div>
+          <p className="text-ink-soft mt-1 mb-4 text-[12.5px]">
+            Everything still moving through the workflow
+          </p>
+          <ShareBar shares={shares} />
+        </section>
+      </div>
+
+      <div className="grid gap-2.5 px-4 pt-2.5 md:px-0 lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)] lg:gap-4 lg:pt-4">
+        <section className="card-flat animate-rise px-4 py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-ink text-[15px] font-semibold tracking-[-0.01em]">
+                Requisition flow
+              </h2>
+              <p className="text-ink-soft mt-0.5 text-[12.5px]">
+                {flow === "requested" ? "Raised each month" : "Paid out each month"}
+              </p>
+            </div>
+            {/* One measure at a time — two scales on one axis would lie. */}
+            <div className="bg-muted flex shrink-0 rounded-lg p-0.5">
+              {(["requested", "disbursed"] as const).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFlow(key)}
+                  aria-pressed={flow === key}
+                  className={cn(
+                    "press cursor-pointer rounded-md px-2.5 py-1.5 text-[12.5px] font-medium capitalize",
+                    flow === key ? "bg-card text-ink shadow-card" : "text-ink-soft hover:text-ink",
+                  )}
+                >
+                  {key === "requested" ? "Requested" : "Disbursed"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mt-5">
+            <MonthlyBars points={months} field={flow} />
+          </div>
+        </section>
+
+        <section className="card-flat animate-rise overflow-hidden" style={{ animationDelay: "70ms" }}>
+          <div className="border-hairline flex h-11 items-center justify-between border-b px-4">
+            <MicroLabel>Upcoming programmes</MicroLabel>
+            <span className="text-ink-faint text-[12px]">{upcoming.length}</span>
+          </div>
+          {upcoming.length === 0 ? (
+            <p className="text-ink-soft px-4 py-6 text-[13px]">
+              Nothing scheduled ahead of today.
+            </p>
+          ) : (
+            <ul className="divide-hairline divide-y">
+              {upcoming.map((r) => (
+                <li key={r.id}>
+                  <Link
+                    href={`/requisitions/${r.id}`}
+                    className="hover:bg-muted/50 press group flex cursor-pointer items-center gap-3 px-4 py-3"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="text-ink block truncate text-[13.5px] font-semibold">
+                        {r.programme}
+                      </span>
+                      <span className="text-ink-faint mt-0.5 flex items-center gap-1 text-[11.5px]">
+                        <CalendarDays className="size-3" strokeWidth={2} aria-hidden />
+                        {formatDate(r.programmeDate)}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      <Money value={requisitionTotal(r)} size="sm" className="block" />
+                      <StatusBadge status={r.status} className="mt-1" />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
 
       <div className="px-4 pt-5 pb-8 md:px-0 lg:pt-6">
         <Link
           href="/requisitions/new"
-          className="btn-gradient text-white press-wide group flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99] lg:h-11 lg:w-fit lg:px-6"
+          className="btn-gradient press-wide group mb-6 flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised hover:brightness-110 lg:h-11 lg:w-fit lg:px-6"
         >
           <Plus className="size-[18px]" strokeWidth={2.6} aria-hidden />
           New Requisition
@@ -225,71 +315,5 @@ export default function DashboardPage() {
         </section>
       </div>
     </>
-  )
-}
-
-const TONE_STYLES = {
-  motion: { tile: "bg-st-motion-bg text-st-motion", bar: "bg-st-motion" },
-  good: { tile: "bg-st-good-bg text-st-good", bar: "bg-st-good" },
-  action: { tile: "bg-st-action-bg text-st-action", bar: "bg-st-action" },
-  neutral: { tile: "bg-st-neutral-bg text-st-neutral", bar: "bg-st-neutral" },
-} as const
-
-function StatCard({
-  icon: Icon,
-  value,
-  total,
-  label,
-  href,
-  tone,
-  delay,
-}: {
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
-  value: number
-  total: number
-  label: string
-  href: string
-  tone: keyof typeof TONE_STYLES
-  delay: number
-}) {
-  const styles = TONE_STYLES[tone]
-  const share = Math.round((value / total) * 100)
-
-  return (
-    <Link
-      href={href}
-      style={{ animationDelay: `${delay}ms` }}
-      className="card-flat tap-card animate-rise group hover:border-ink-faint/30 cursor-pointer px-3.5 py-3"
-    >
-      <div className="flex items-start justify-between">
-        <span
-          className={cn("flex size-9 items-center justify-center rounded-xl", styles.tile)}
-          aria-hidden
-        >
-          <Icon className="size-[18px]" strokeWidth={2} />
-        </span>
-        <ChevronRight
-          className="text-ink-faint size-4 transition-transform duration-200 group-hover:translate-x-0.5"
-          aria-hidden
-        />
-      </div>
-
-      <p className="text-ink mt-2 text-[26px] leading-none font-semibold tracking-[-0.03em]">
-        <CountUp value={value} />
-      </p>
-      <p className="text-ink-soft mt-1 text-[12.5px]">{label}</p>
-
-      {/* Share of all requisitions, drawn in on mount. */}
-      <div className="bg-hairline mt-2.5 h-[3px] w-full overflow-hidden rounded-full">
-        <span
-          className={cn("animate-grow block h-full origin-left rounded-full", styles.bar)}
-          style={{
-            width: `${Math.max(share, value > 0 ? 12 : 0)}%`,
-            animationDelay: `${delay + 150}ms`,
-          }}
-          aria-hidden
-        />
-      </div>
-    </Link>
   )
 }
