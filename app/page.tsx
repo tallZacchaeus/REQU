@@ -18,8 +18,6 @@ import { LogoMark } from "@/components/app/logo"
 import { MicroLabel, Money, StatusBadge } from "@/components/app/primitives"
 import { MobileBell } from "@/components/app/notifications"
 import { MobileSearchButton } from "@/components/app/topbar"
-import { RequisitionCard } from "@/components/app/requisition-card"
-import { RequisitionRow } from "@/components/app/requisition-row"
 import { formatDate } from "@/lib/format"
 import { monthlySeries, shareSplit, trend } from "@/lib/series"
 import { requisitionTotal } from "@/lib/types"
@@ -27,7 +25,6 @@ import { CURRENT_USER } from "@/lib/data"
 import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
 import { cn } from "@/lib/utils"
-
 
 /* Disbursed means the money is out and the receipts are not in — the HOD is
    the only one who can move it, so it belongs with changes-requested. */
@@ -57,11 +54,6 @@ export default function DashboardPage() {
   const requestedTotal = months.reduce((sum, m) => sum + m.requested, 0)
   const liveTotal = shares.reduce((sum, s) => sum + s.value, 0)
 
-  const today = new Date().toISOString().slice(0, 10)
-  const upcoming = [...requisitions]
-    .filter((r) => r.programmeDate >= today && r.status !== "rejected")
-    .sort((a, b) => a.programmeDate.localeCompare(b.programmeDate))
-    .slice(0, 4)
 
   return (
     <>
@@ -163,7 +155,7 @@ export default function DashboardPage() {
         </section>
 
         <section
-          className="card-flat animate-rise px-4 py-3.5"
+          className="card-flat animate-rise flex flex-col px-4 py-3.5"
           style={{ animationDelay: "70ms" }}
         >
           <div className="flex items-start justify-between gap-3">
@@ -178,10 +170,16 @@ export default function DashboardPage() {
               Reports
             </Link>
           </div>
-          <p className="text-ink-soft mt-0.5 mb-3 text-[12px]">
+          <p className="text-ink-soft mt-0.5 text-[12px]">
             Everything still moving through the workflow
           </p>
-          <ShareBar shares={shares} />
+
+          {/* Pushed to the foot of the card so this sits level with the chart
+              in the card beside it, rather than both stacking at the top. */}
+          <div className="mt-auto pt-4">
+            <MicroLabel className="mb-2.5">Breakdown</MicroLabel>
+            <ShareBar shares={shares} />
+          </div>
         </section>
       </div>
 
@@ -219,22 +217,36 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="card-flat animate-rise overflow-hidden" style={{ animationDelay: "70ms" }}>
-          <div className="border-hairline flex h-11 items-center justify-between border-b px-4">
-            <MicroLabel>Upcoming programmes</MicroLabel>
-            <span className="text-ink-faint text-[12px]">{upcoming.length}</span>
+        <section
+          className="card-flat animate-rise flex flex-col overflow-hidden"
+          style={{ animationDelay: "70ms" }}
+        >
+          <div className="border-hairline flex h-11 shrink-0 items-center justify-between border-b px-4">
+            <MicroLabel>Recent requests</MicroLabel>
+            <Link
+              href="/requisitions"
+              className="text-brand-ink press group flex cursor-pointer items-center gap-1 text-[12px] font-semibold"
+            >
+              View all
+              <ChevronRight
+                className="size-3 transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </Link>
           </div>
-          {upcoming.length === 0 ? (
-            <p className="text-ink-soft px-4 py-6 text-[13px]">
-              Nothing scheduled ahead of today.
-            </p>
+          {recent.length === 0 ? (
+            <p className="text-ink-soft px-4 py-6 text-[13px]">Nothing raised yet.</p>
           ) : (
-            <ul className="divide-hairline divide-y">
-              {upcoming.map((r) => (
-                <li key={r.id}>
+            <ul className="divide-hairline flex-1 divide-y">
+              {recent.map((r) => (
+                <li key={r.id} className="flex">
                   <Link
-                    href={`/requisitions/${r.id}`}
-                    className="hover:bg-muted/50 press group flex cursor-pointer items-center gap-3 px-4 py-3"
+                    href={
+                      r.status === "draft"
+                        ? `/requisitions/new?edit=${r.id}`
+                        : `/requisitions/${r.id}`
+                    }
+                    className="hover:bg-muted/50 press group flex flex-1 cursor-pointer items-center gap-3 px-4 py-3"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="text-ink block truncate text-[13.5px] font-semibold">
@@ -269,50 +281,6 @@ export default function DashboardPage() {
             aria-hidden
           />
         </Link>
-
-        <section className="mt-7 lg:mt-8">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-ink text-[17px] font-semibold tracking-[-0.02em]">
-              Recent Requests
-            </h2>
-            <Link
-              href="/requisitions"
-              className="text-primary hover:text-primary/80 press group flex cursor-pointer items-center gap-1 text-[12.5px] font-semibold"
-            >
-              View all
-              <ChevronRight
-                className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
-                aria-hidden
-              />
-            </Link>
-          </div>
-
-          <div className="space-y-2.5 md:hidden">
-            {recent.map((requisition, index) => (
-              <RequisitionCard
-                key={requisition.id}
-                requisition={requisition}
-                style={{ animationDelay: `${index * 60}ms` }}
-                className="animate-rise"
-              />
-            ))}
-          </div>
-
-          <div className="hidden space-y-1.5 md:block">
-            {recent.map((requisition) => (
-              <RequisitionRow
-                key={requisition.id}
-                requisition={requisition}
-                href={
-                  requisition.status === "draft"
-                    ? `/requisitions/new?edit=${requisition.id}`
-                    : `/requisitions/${requisition.id}`
-                }
-                showRequester={false}
-              />
-            ))}
-          </div>
-        </section>
       </div>
     </>
   )
