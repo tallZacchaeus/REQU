@@ -14,8 +14,10 @@ import {
   StatusBadge,
   StickyFooter,
 } from "@/components/app/primitives"
+import { SkeletonRows } from "@/components/app/motion"
 import { ScreenHeader } from "@/components/app/screen-header"
 import { Sheet } from "@/components/app/sheet"
+import { useToast } from "@/components/app/toast"
 import { StageRail } from "@/components/app/stage-rail"
 import { amountInWords, formatDate } from "@/lib/format"
 import { isoToday, newId } from "@/lib/ids"
@@ -34,19 +36,21 @@ export function ReviewerDetail({ id, config }: { id: string; config: ReviewerCon
     return (
       <>
         <ScreenHeader title="Review Requisition" back={config.queueHref} />
-        <div className="px-4 py-16 text-center">
-          <p className="text-ink text-[15px] font-semibold">
-            {hydrated ? "Requisition not available" : "Loading…"}
-          </p>
-          {hydrated && (
+        {!hydrated ? (
+          <div className="px-4 pt-5">
+            <SkeletonRows rows={3} />
+          </div>
+        ) : (
+          <div className="px-4 py-16 text-center">
+            <p className="text-ink text-[15px] font-semibold">Requisition not available</p>
             <Link
               href={config.queueHref}
               className="text-primary mt-2 inline-block text-[13px] font-semibold hover:underline"
             >
               Back to the queue
             </Link>
-          )}
-        </div>
+          </div>
+        )}
       </>
     )
   }
@@ -57,6 +61,7 @@ export function ReviewerDetail({ id, config }: { id: string; config: ReviewerCon
 function Detail({ requisition, config }: { requisition: Requisition; config: ReviewerConfig }) {
   const router = useRouter()
   const { upsert } = useRequisitions()
+  const toast = useToast()
   const [open, setOpen] = useState<ActionSpec | null>(null)
   const [comment, setComment] = useState("")
   const [points, setPoints] = useState<string[]>([""])
@@ -124,13 +129,12 @@ function Detail({ requisition, config }: { requisition: Requisition; config: Rev
         },
       ],
     })
+    toast(`${requisition.programme} — ${action.activity.toLowerCase()}`)
     router.push(config.queueHref)
   }
 
   // Whichever action is available first in this state leads the screen.
-  const actions = config.actions.filter(
-    (a) => !a.availableWhen || a.availableWhen(requisition),
-  )
+  const actions = config.actions.filter((a) => !a.availableWhen || a.availableWhen(requisition))
   const lead = actions[0]
 
   return (

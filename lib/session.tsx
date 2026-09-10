@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 
 import { accountByRole, accountFor, type Account, type Role } from "./data"
 
-const STORAGE_KEY = "cwms.session.v1"
+const STORAGE_KEY = "requ.session.v1"
+const LEGACY_KEY = "cwms.session.v1"
 
 export interface Profile {
   phone: string
@@ -67,7 +68,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem(STORAGE_KEY)
+      const stored =
+        window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_KEY)
       if (stored) {
         const parsed = JSON.parse(stored) as Partial<Persisted>
         const known: Role[] = ["hod", "ayp", "nyp", "finance"]
@@ -154,7 +156,7 @@ export function useSession() {
   return context
 }
 
-/** "david.adeyemi@cwms.org" -> "da••••••••@cwms.org" */
+/** "david.adeyemi@requ.org" -> "da••••••••@requ.org" */
 export function maskEmail(email: string) {
   const [name, domain] = email.split("@")
   if (!domain) return email

@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 
 import { LogoMark } from "@/components/app/logo"
+import { CountUp } from "@/components/app/motion"
 import { RequisitionCard } from "@/components/app/requisition-card"
 import { RequisitionRow } from "@/components/app/requisition-row"
 import { CURRENT_USER } from "@/lib/data"
@@ -66,7 +67,7 @@ export default function DashboardPage() {
               <LogoMark className="size-[18px]" />
             </span>
             <span className="text-[15px] leading-none font-bold tracking-[0.12em] text-white">
-              CWMS
+              REQU
             </span>
             <span className="h-7 w-px shrink-0 bg-white/20" aria-hidden />
             <span className="min-w-0 text-[11.5px] leading-[1.35] text-white/65">
@@ -79,7 +80,7 @@ export default function DashboardPage() {
             <button
               type="button"
               aria-label="Notifications"
-              className="relative flex size-9 cursor-pointer items-center justify-center rounded-lg text-white/75 transition-colors duration-200 hover:bg-white/10 hover:text-white"
+              className="press relative flex size-9 cursor-pointer items-center justify-center rounded-lg text-white/75 hover:bg-white/10 hover:text-white"
             >
               <Bell className="size-[18px]" strokeWidth={1.9} aria-hidden />
               {needsAction.length > 0 && (
@@ -89,7 +90,7 @@ export default function DashboardPage() {
             <Link
               href="/profile"
               aria-label="Your profile"
-              className="group flex cursor-pointer items-center gap-0.5"
+              className="press group flex cursor-pointer items-center gap-0.5"
             >
               <span className="bg-brand/25 flex size-9 items-center justify-center rounded-full text-[12.5px] font-semibold text-white ring-2 ring-white/25 transition-all duration-200 group-hover:ring-white/50">
                 {CURRENT_USER.initials}
@@ -115,7 +116,7 @@ export default function DashboardPage() {
           <Link
             href={`/requisitions/${needsAction[0].id}`}
             style={{ animationDelay: "80ms" }}
-            className="on-deep-panel animate-rise group mt-5 flex cursor-pointer items-center gap-3 px-3.5 py-3 transition-colors duration-200 hover:bg-white/16 lg:mt-6"
+            className="on-deep-panel animate-rise press-wide group mt-5 flex cursor-pointer items-center gap-3 px-3.5 py-3 hover:bg-white/16 lg:mt-6"
           >
             <span className="bg-brand/25 flex size-9 shrink-0 items-center justify-center rounded-lg text-white">
               <Megaphone className="size-[17px]" strokeWidth={2} aria-hidden />
@@ -181,7 +182,7 @@ export default function DashboardPage() {
       <div className="px-4 pt-5 pb-8 md:px-0 lg:pt-6">
         <Link
           href="/requisitions/new"
-          className="btn-gradient group flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99] lg:h-11 lg:w-fit lg:px-6"
+          className="btn-gradient press-wide group flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99] lg:h-11 lg:w-fit lg:px-6"
         >
           <Plus className="size-[18px]" strokeWidth={2.6} aria-hidden />
           New Requisition
@@ -198,7 +199,7 @@ export default function DashboardPage() {
             </h2>
             <Link
               href="/requisitions"
-              className="text-primary group flex cursor-pointer items-center gap-1 text-[12.5px] font-semibold"
+              className="text-primary hover:text-primary/80 press group flex cursor-pointer items-center gap-1 text-[12.5px] font-semibold"
             >
               View all
               <ChevronRight
@@ -285,8 +286,8 @@ function StatCard({
         />
       </div>
 
-      <p className="text-ink mt-2 text-[26px] leading-none font-semibold tracking-[-0.03em] tabular-nums">
-        {value}
+      <p className="text-ink mt-2 text-[26px] leading-none font-semibold tracking-[-0.03em]">
+        <CountUp value={value} />
       </p>
       <p className="text-ink-soft mt-1 text-[12.5px]">{label}</p>
 

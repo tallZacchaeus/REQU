@@ -5,7 +5,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { CURRENT_USER, SEED_REQUISITIONS } from "./data"
 import type { Requester, Requisition } from "./types"
 
-const STORAGE_KEY = "cwms.requisitions.v1"
+const STORAGE_KEY = "requ.requisitions.v1"
+const LEGACY_KEY = "cwms.requisitions.v1"
 
 interface StoreValue {
   requisitions: Requisition[]
@@ -72,7 +73,8 @@ export function RequisitionStore({ children }: { children: React.ReactNode }) {
   // Read after mount only — reading during render would desync SSR markup.
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem(STORAGE_KEY)
+      const stored =
+        window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_KEY)
       // Reading persisted state has to happen after mount: doing it during
       // render would desync the server-rendered markup. The rule's cascading-
       // render concern does not apply to a single one-shot hydration.

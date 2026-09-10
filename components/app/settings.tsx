@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, Lock } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+import { CountUp } from "./motion"
 import { MicroLabel } from "./primitives"
 import { Switch } from "./switch"
 
@@ -18,8 +19,8 @@ export function ProfileStat({
 }) {
   return (
     <div className={cn("px-3 py-3.5 text-center", className)}>
-      <p className="text-ink text-[24px] leading-none font-semibold tracking-[-0.03em] tabular-nums">
-        {value}
+      <p className="text-ink text-[24px] leading-none font-semibold tracking-[-0.03em]">
+        <CountUp value={value} />
       </p>
       <p className="text-ink-soft mt-1.5 text-[12px]">{label}</p>
     </div>
@@ -59,7 +60,7 @@ export function Group({
             onToggle()
           }
         }}
-        className="hover:bg-muted/60 flex h-11 cursor-pointer items-center justify-between gap-2 px-4 transition-colors duration-200 select-none"
+        className="hover:bg-muted/60 press flex h-11 cursor-pointer items-center justify-between gap-2 px-4 select-none"
       >
         <MicroLabel>{title}</MicroLabel>
         <span className="flex items-center gap-2">
@@ -67,7 +68,7 @@ export function Group({
           {meta && !action && <span className="text-ink-faint text-[12px]">{meta}</span>}
           <ChevronDown
             className={cn(
-              "text-ink-faint size-4 shrink-0 transition-transform duration-300",
+              "text-ink-faint size-4 shrink-0 transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
               open && "rotate-180",
             )}
             aria-hidden
@@ -128,7 +129,7 @@ export function ContactRow({
   return (
     <a
       href={href}
-      className="border-hairline hover:border-ink-faint/40 mb-2 flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 transition-colors duration-200 last:mb-0"
+      className="border-hairline hover:border-ink-faint/40 hover:bg-muted/40 press mb-2 flex cursor-pointer items-center gap-3 rounded-lg border px-3.5 py-2.5 last:mb-0"
     >
       <Icon className="text-ink-faint size-4 shrink-0" strokeWidth={1.9} aria-hidden />
       <span className="min-w-0 flex-1">
@@ -178,7 +179,7 @@ export function SheetAction({
       type="button"
       onClick={onClick}
       className={cn(
-        "hover:bg-muted flex h-12 w-full cursor-pointer items-center gap-3 rounded-lg px-2 text-[14.5px] font-medium transition-colors duration-200",
+        "hover:bg-muted press flex h-12 w-full cursor-pointer items-center gap-3 rounded-lg px-2 text-[14.5px] font-medium",
         destructive ? "text-st-bad" : "text-ink",
       )}
     >

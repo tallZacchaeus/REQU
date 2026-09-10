@@ -13,7 +13,7 @@ import {
 } from "lucide-react"
 
 import { LogoMark } from "@/components/app/logo"
-import { Money } from "@/components/app/primitives"
+import { AnimatedMoney, CountUp } from "@/components/app/motion"
 import { ReviewCard } from "@/components/app/review-card"
 import { RequisitionRow } from "@/components/app/requisition-row"
 import { byLongestWaiting, visibleToReviewer, waitingDays } from "@/lib/review"
@@ -49,7 +49,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
               <LogoMark className="size-[18px]" />
             </span>
             <span className="text-[15px] leading-none font-bold tracking-[0.12em] text-white">
-              CWMS
+              REQU
             </span>
             <span className="h-7 w-px shrink-0 bg-white/20" aria-hidden />
             <span className="min-w-0 text-[11.5px] leading-[1.35] text-white/65">
@@ -62,7 +62,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
             <button
               type="button"
               aria-label="Notifications"
-              className="relative flex size-9 cursor-pointer items-center justify-center rounded-lg text-white/75 transition-colors duration-200 hover:bg-white/10 hover:text-white"
+              className="press relative flex size-9 cursor-pointer items-center justify-center rounded-lg text-white/75 hover:bg-white/10 hover:text-white"
             >
               <Bell className="size-[18px]" strokeWidth={1.9} aria-hidden />
               {queue.length > 0 && (
@@ -72,7 +72,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
             <Link
               href={config.profileHref}
               aria-label="Your profile"
-              className="group flex cursor-pointer items-center gap-0.5"
+              className="press group flex cursor-pointer items-center gap-0.5"
             >
               <span className="bg-brand/25 flex size-9 items-center justify-center rounded-full text-[12.5px] font-semibold text-white ring-2 ring-white/25 transition-all duration-200 group-hover:ring-white/50">
                 {config.person.initials}
@@ -112,7 +112,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
           <Link
             href={config.queueHref}
             style={{ animationDelay: "80ms" }}
-            className="on-deep-panel animate-rise group mt-5 flex cursor-pointer items-center gap-3 px-3.5 py-3 transition-colors duration-200 hover:bg-white/16 lg:mt-6"
+            className="on-deep-panel animate-rise press-wide group mt-5 flex cursor-pointer items-center gap-3 px-3.5 py-3 hover:bg-white/16 lg:mt-6"
           >
             <span className="bg-brand/25 flex size-9 shrink-0 items-center justify-center rounded-lg text-white">
               <ClipboardCheck className="size-[17px]" strokeWidth={2} aria-hidden />
@@ -186,7 +186,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
           </h2>
           <Link
             href={config.queueHref}
-            className="text-primary group flex cursor-pointer items-center gap-1 text-[12.5px] font-semibold"
+            className="text-primary hover:text-primary/80 press group flex cursor-pointer items-center gap-1 text-[12.5px] font-semibold"
           >
             View all
             <ChevronRight
@@ -284,11 +284,11 @@ function Tile({
       </div>
 
       {money === undefined ? (
-        <p className="text-ink mt-2 text-[26px] leading-none font-semibold tracking-[-0.03em] tabular-nums">
-          {value}
+        <p className="text-ink mt-2 text-[26px] leading-none font-semibold tracking-[-0.03em]">
+          <CountUp value={value ?? 0} />
         </p>
       ) : (
-        <Money value={money} size="md" className="mt-2.5 block" />
+        <AnimatedMoney value={money} size="md" className="mt-2.5 block" />
       )}
       <p className="text-ink-soft mt-1 text-[12.5px]">{label}</p>
 

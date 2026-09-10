@@ -20,13 +20,20 @@ export function StageRail({ stages, rejected = false }: { stages: Stage[]; rejec
         const blocked = stage.state === "blocked"
 
         return (
-          <li key={stage.key} className="relative flex gap-3">
+          <li
+            key={stage.key}
+            className="animate-rise relative flex gap-3"
+            style={{ animationDelay: `${index * 70}ms` }}
+          >
             {/* Rail column */}
             <div className="flex w-5 shrink-0 flex-col items-center">
               <Marker state={stage.state} rejected={rejected} />
               {!last && (
                 <span
-                  className={cn("w-px flex-1", done ? "bg-primary" : "bg-hairline")}
+                  className={cn(
+                    "w-px flex-1 transition-colors duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    done ? "bg-primary" : "bg-hairline",
+                  )}
                   aria-hidden
                 />
               )}

@@ -25,6 +25,7 @@ import {
   ToggleRow,
 } from "@/components/app/settings"
 import { Sheet } from "@/components/app/sheet"
+import { useToast } from "@/components/app/toast"
 import { visibleToReviewer } from "@/lib/review"
 import type { ReviewerConfig } from "@/lib/roles"
 import { maskEmail, useSession } from "@/lib/session"
@@ -34,6 +35,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
   const router = useRouter()
   const { profile, updateProfile, signOut } = useSession()
   const { requisitions } = useRequisitions()
+  const toast = useToast()
   const person = config.person
 
   const [open, setOpen] = useState<string | null>("personal")
@@ -51,6 +53,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
 
   function save() {
     updateProfile({ phone: phoneDraft })
+    toast("Phone number updated")
     setEditing(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 1800)
@@ -331,6 +334,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
             type="button"
             onClick={() => {
               signOut()
+              toast("Signed out", "info")
               router.replace("/login")
             }}
             className="bg-st-bad h-12 flex-1 cursor-pointer rounded-lg text-[14.5px] font-semibold text-white transition-opacity duration-200 hover:opacity-90"

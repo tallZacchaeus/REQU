@@ -9,6 +9,8 @@ import { DetailRow, MicroLabel, Money, StickyFooter } from "@/components/app/pri
 import { ScreenHeader } from "@/components/app/screen-header"
 import { CURRENT_USER } from "@/lib/data"
 import { amountInWords, formatDate } from "@/lib/format"
+import { AnimatedMoney } from "@/components/app/motion"
+import { useToast } from "@/components/app/toast"
 import { isoToday, newId } from "@/lib/ids"
 import { useRequisitions } from "@/lib/store"
 import type { Attachment, ExpenseItem, Requisition } from "@/lib/types"
@@ -47,6 +49,7 @@ export function NewRequisitionFlow() {
 function Flow({ existing }: { existing?: Requisition }) {
   const router = useRouter()
   const { upsert, nextReference } = useRequisitions()
+  const toast = useToast()
 
   const [step, setStep] = useState(0)
   const [programme, setProgramme] = useState(existing?.programme ?? "")
@@ -62,6 +65,9 @@ function Flow({ existing }: { existing?: Requisition }) {
   // Navigation to the confirmation route is async; without this the submit
   // button sits inert after the press and invites a second submission.
   const [pending, setPending] = useState<"draft" | "submit" | null>(null)
+  const [direction, setDirection] = useState<"next" | "back">("next")
+  // An item removed instantly pops out of the list; this lets it leave.
+  const [removing, setRemoving] = useState<string[]>([])
 
   const total = useMemo(() => items.reduce((sum, i) => sum + i.amount, 0), [items])
   const filledItems = items.filter((i) => i.description.trim() && i.amount > 0)
@@ -81,6 +87,7 @@ function Flow({ existing }: { existing?: Requisition }) {
       return
     }
     setShowErrors(false)
+    setDirection("next")
     setStep((s) => Math.min(s + 1, STEPS.length - 1))
     window.scrollTo({ top: 0 })
   }
@@ -90,6 +97,7 @@ function Flow({ existing }: { existing?: Requisition }) {
       router.push(existing ? `/requisitions/${existing.id}` : "/requisitions")
       return
     }
+    setDirection("back")
     setStep((s) => s - 1)
     window.scrollTo({ top: 0 })
   }
@@ -99,6 +107,7 @@ function Flow({ existing }: { existing?: Requisition }) {
     setPending("draft")
     const record = compose("draft")
     upsert(record)
+    toast("Draft saved", "info")
     router.push("/requisitions")
   }
 
@@ -189,7 +198,7 @@ function Flow({ existing }: { existing?: Requisition }) {
           <MicroLabel>
             Step {step + 1} of {STEPS.length} · {STEPS[step]}
           </MicroLabel>
-          {step === 1 && total > 0 && <Money value={total} size="sm" />}
+          {step === 1 && total > 0 && <AnimatedMoney value={total} size="sm" />}
         </div>
         <div className="bg-hairline h-[3px] w-full overflow-hidden rounded-full">
           <div
@@ -199,269 +208,200 @@ function Flow({ existing }: { existing?: Requisition }) {
         </div>
       </div>
 
-      <div className="flex-1 px-4 pt-5 pb-6 lg:mx-auto lg:w-full lg:max-w-[680px] lg:px-0">
-        {step === 0 && (
-          <div className="space-y-4">
-            <TextField
-              label="Programme / Project name"
-              placeholder="e.g. Youth Convention 2026"
-              value={programme}
-              onChange={(e) => setProgramme(e.target.value)}
-              autoFocus
-            />
-            <TextField
-              label="Programme date"
-              type="date"
-              value={programmeDate}
-              onChange={(e) => setProgrammeDate(e.target.value)}
-            />
-            <TextField
-              label="Location"
-              placeholder="e.g. National Auditorium, Abuja"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
+      <div className="flex-1 overflow-x-clip px-4 pt-5 pb-6 lg:mx-auto lg:w-full lg:max-w-[680px] lg:px-0">
+        <div
+          key={step}
+          className={direction === "next" ? "animate-step-next" : "animate-step-back"}
+        >
+          {step === 0 && (
+            <div className="space-y-4">
+              <TextField
+                label="Programme / Project name"
+                placeholder="e.g. Youth Convention 2026"
+                value={programme}
+                onChange={(e) => setProgramme(e.target.value)}
+                autoFocus
+              />
+              <TextField
+                label="Programme date"
+                type="date"
+                value={programmeDate}
+                onChange={(e) => setProgrammeDate(e.target.value)}
+              />
+              <TextField
+                label="Location"
+                placeholder="e.g. National Auditorium, Abuja"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
 
-            {/* Department is fixed to the HOD's own — they cannot raise for others. */}
-            <div>
-              <p className="text-ink mb-1.5 text-[13px] font-semibold">Department</p>
-              <div className="border-hairline bg-muted text-ink-soft flex h-11 items-center rounded-lg border px-3 text-[15px]">
-                {CURRENT_USER.department}
-              </div>
-              <p className="text-ink-faint mt-1.5 text-[11.5px]">
-                Locked to your assigned department.
-              </p>
-            </div>
-
-            <SelectField label="Unit" value={unit} onChange={(e) => setUnit(e.target.value)}>
-              {UNITS.map((u) => (
-                <option key={u}>{u}</option>
-              ))}
-            </SelectField>
-
-            <TextAreaField
-              label="Purpose / Description"
-              hint={`${purpose.length}/400`}
-              maxLength={400}
-              placeholder="Explain what these funds are needed for and how they will be used."
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
-            />
-
-            {showErrors && !stepValid && (
-              <p className="text-st-bad text-[12.5px]">
-                Programme name, date and purpose are required to continue.
-              </p>
-            )}
-          </div>
-        )}
-
-        {step === 1 && (
-          <div>
-            <MicroLabel className="mb-2.5">Expense Items</MicroLabel>
-
-            <div className="space-y-2.5">
-              {items.map((item, index) => (
-                <div key={item.id} className="card-flat px-3 py-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-ink-faint font-mono text-[11px]">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    {items.length > 1 && (
-                      <button
-                        type="button"
-                        aria-label={`Remove item ${index + 1}`}
-                        onClick={() => setItems((c) => c.filter((i) => i.id !== item.id))}
-                        className="text-ink-faint hover:bg-muted hover:text-st-bad -mr-1 flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors duration-200"
-                      >
-                        <Trash2 className="size-4" strokeWidth={1.8} aria-hidden />
-                      </button>
-                    )}
-                  </div>
-                  <TextField
-                    label={`Item ${index + 1} description`}
-                    className="[&>div]:sr-only"
-                    placeholder="e.g. Venue rental & setup"
-                    value={item.description}
-                    onChange={(e) =>
-                      setItems((c) =>
-                        c.map((i) =>
-                          i.id === item.id ? { ...i, description: e.target.value } : i,
-                        ),
-                      )
-                    }
-                  />
-                  <AmountField
-                    label={`Item ${index + 1} amount`}
-                    className="mt-2"
-                    value={item.amount}
-                    onValueChange={(amount) =>
-                      setItems((c) => c.map((i) => (i.id === item.id ? { ...i, amount } : i)))
-                    }
-                  />
+              {/* Department is fixed to the HOD's own — they cannot raise for others. */}
+              <div>
+                <p className="text-ink mb-1.5 text-[13px] font-semibold">Department</p>
+                <div className="border-hairline bg-muted text-ink-soft flex h-11 items-center rounded-lg border px-3 text-[15px]">
+                  {CURRENT_USER.department}
                 </div>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setItems((c) => [...c, blankItem()])}
-              className="border-hairline text-primary hover:border-primary/40 hover:bg-card mt-2.5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed text-[14px] font-semibold transition-colors duration-200"
-            >
-              <Plus className="size-4" strokeWidth={2.4} aria-hidden />
-              Add another item
-            </button>
-
-            <div className="card-flat mt-4 px-4 py-3.5">
-              <div className="flex items-end justify-between gap-3">
-                <MicroLabel>Total Requested</MicroLabel>
-                <Money value={total} size="lg" />
-              </div>
-              <div className="border-hairline mt-3 border-t pt-3">
-                <MicroLabel className="mb-1">Amount in words</MicroLabel>
-                <p className="text-ink text-[13.5px] leading-[1.5] italic">
-                  {total > 0 ? amountInWords(total) : "—"}
+                <p className="text-ink-faint mt-1.5 text-[11.5px]">
+                  Locked to your assigned department.
                 </p>
               </div>
-            </div>
 
-            {showErrors && !stepValid && (
-              <p className="text-st-bad mt-3 text-[12.5px]">
-                Add at least one item with a description and an amount.
-              </p>
-            )}
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-4">
-            <div>
-              <p className="text-ink text-[13px] font-semibold">Supporting documents</p>
-              <p className="text-ink-soft mt-1 text-[12.5px] leading-[1.5]">
-                Proposals, quotations or any document that supports the request. Optional, but a
-                quotation usually speeds up recommendation.
-              </p>
-            </div>
-
-            <label className="border-hairline hover:border-primary/40 hover:bg-card flex cursor-pointer flex-col items-center rounded-xl border border-dashed px-6 py-8 text-center transition-colors duration-200">
-              <Upload className="text-ink-faint size-5" strokeWidth={1.7} aria-hidden />
-              <span className="text-ink mt-2.5 text-[14px] font-semibold">Tap to attach files</span>
-              <span className="text-ink-faint mt-1 text-[12px]">PDF, JPG or PNG</span>
-              <input
-                type="file"
-                multiple
-                accept=".pdf,image/*"
-                className="sr-only"
-                onChange={(event) => {
-                  const files = Array.from(event.target.files ?? [])
-                  setAttachments((current) => [
-                    ...current,
-                    ...files.map((file) => ({
-                      id: newId("a"),
-                      name: file.name,
-                      size:
-                        file.size > 1_048_576
-                          ? `${(file.size / 1_048_576).toFixed(1)} MB`
-                          : `${Math.max(1, Math.round(file.size / 1024))} KB`,
-                      kind: "other" as const,
-                    })),
-                  ])
-                  event.target.value = ""
-                }}
-              />
-            </label>
-
-            {attachments.length > 0 && (
-              <ul className="card-flat divide-hairline divide-y">
-                {attachments.map((file) => (
-                  <li key={file.id} className="flex items-center gap-2.5 px-3.5 py-3">
-                    <Paperclip
-                      className="text-ink-faint size-4 shrink-0"
-                      strokeWidth={1.8}
-                      aria-hidden
-                    />
-                    <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">
-                      {file.name}
-                    </span>
-                    <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
-                    <button
-                      type="button"
-                      aria-label={`Remove ${file.name}`}
-                      onClick={() => setAttachments((c) => c.filter((a) => a.id !== file.id))}
-                      className="text-ink-faint hover:text-st-bad -mr-1 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors duration-200"
-                    >
-                      <Trash2 className="size-3.5" strokeWidth={1.8} aria-hidden />
-                    </button>
-                  </li>
+              <SelectField label="Unit" value={unit} onChange={(e) => setUnit(e.target.value)}>
+                {UNITS.map((u) => (
+                  <option key={u}>{u}</option>
                 ))}
-              </ul>
-            )}
-          </div>
-        )}
+              </SelectField>
 
-        {step === 3 && (
-          <div className="space-y-4">
-            <div className="card-flat px-4 py-4">
-              <MicroLabel>Total Requested</MicroLabel>
-              <Money value={total} size="lg" className="mt-1.5 block" />
-              <p className="text-ink-soft mt-1 text-[12.5px] leading-[1.5] italic">
-                {amountInWords(total)}
-              </p>
+              <TextAreaField
+                label="Purpose / Description"
+                hint={`${purpose.length}/400`}
+                maxLength={400}
+                placeholder="Explain what these funds are needed for and how they will be used."
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+              />
+
+              {showErrors && !stepValid && (
+                <p className="text-st-bad text-[12.5px]">
+                  Programme name, date and purpose are required to continue.
+                </p>
+              )}
             </div>
+          )}
 
-            <ReviewBlock title="Programme Details" onEdit={() => setStep(0)}>
-              <dl className="divide-hairline divide-y">
-                <DetailRow label="Programme / Project" value={programme || "—"} />
-                <DetailRow
-                  label="Programme date"
-                  value={programmeDate ? formatDate(programmeDate) : "—"}
+          {step === 1 && (
+            <div>
+              <MicroLabel className="mb-2.5">Expense Items</MicroLabel>
+
+              <div className="space-y-2.5">
+                {items.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      "card-flat px-3 py-3",
+                      removing.includes(item.id) ? "animate-row-out" : "animate-row-in",
+                    )}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-ink-faint font-mono text-[11px]">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      {items.length > 1 && (
+                        <button
+                          type="button"
+                          aria-label={`Remove item ${index + 1}`}
+                          onClick={() => {
+                            setRemoving((c) => [...c, item.id])
+                            setTimeout(() => {
+                              setItems((c) => c.filter((i) => i.id !== item.id))
+                              setRemoving((c) => c.filter((id) => id !== item.id))
+                            }, 200)
+                          }}
+                          className="text-ink-faint hover:bg-muted hover:text-st-bad press -mr-1 flex size-8 cursor-pointer items-center justify-center rounded-md"
+                        >
+                          <Trash2 className="size-4" strokeWidth={1.8} aria-hidden />
+                        </button>
+                      )}
+                    </div>
+                    <TextField
+                      label={`Item ${index + 1} description`}
+                      className="[&>div]:sr-only"
+                      placeholder="e.g. Venue rental & setup"
+                      value={item.description}
+                      onChange={(e) =>
+                        setItems((c) =>
+                          c.map((i) =>
+                            i.id === item.id ? { ...i, description: e.target.value } : i,
+                          ),
+                        )
+                      }
+                    />
+                    <AmountField
+                      label={`Item ${index + 1} amount`}
+                      className="mt-2"
+                      value={item.amount}
+                      onValueChange={(amount) =>
+                        setItems((c) => c.map((i) => (i.id === item.id ? { ...i, amount } : i)))
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setItems((c) => [...c, blankItem()])}
+                className="border-hairline text-primary hover:border-primary/40 hover:bg-card press-wide mt-2.5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed text-[14px] font-semibold"
+              >
+                <Plus className="size-4" strokeWidth={2.4} aria-hidden />
+                Add another item
+              </button>
+
+              <div className="card-flat mt-4 px-4 py-3.5">
+                <div className="flex items-end justify-between gap-3">
+                  <MicroLabel>Total Requested</MicroLabel>
+                  <AnimatedMoney value={total} size="lg" />
+                </div>
+                <div className="border-hairline mt-3 border-t pt-3">
+                  <MicroLabel className="mb-1">Amount in words</MicroLabel>
+                  <p className="text-ink text-[13.5px] leading-[1.5] italic">
+                    {total > 0 ? amountInWords(total) : "—"}
+                  </p>
+                </div>
+              </div>
+
+              {showErrors && !stepValid && (
+                <p className="text-st-bad mt-3 text-[12.5px]">
+                  Add at least one item with a description and an amount.
+                </p>
+              )}
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-ink text-[13px] font-semibold">Supporting documents</p>
+                <p className="text-ink-soft mt-1 text-[12.5px] leading-[1.5]">
+                  Proposals, quotations or any document that supports the request. Optional, but a
+                  quotation usually speeds up recommendation.
+                </p>
+              </div>
+
+              <label className="border-hairline hover:border-primary/40 hover:bg-card press-wide flex cursor-pointer flex-col items-center rounded-xl border border-dashed px-6 py-8 text-center">
+                <Upload className="text-ink-faint size-5" strokeWidth={1.7} aria-hidden />
+                <span className="text-ink mt-2.5 text-[14px] font-semibold">
+                  Tap to attach files
+                </span>
+                <span className="text-ink-faint mt-1 text-[12px]">PDF, JPG or PNG</span>
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,image/*"
+                  className="sr-only"
+                  onChange={(event) => {
+                    const files = Array.from(event.target.files ?? [])
+                    setAttachments((current) => [
+                      ...current,
+                      ...files.map((file) => ({
+                        id: newId("a"),
+                        name: file.name,
+                        size:
+                          file.size > 1_048_576
+                            ? `${(file.size / 1_048_576).toFixed(1)} MB`
+                            : `${Math.max(1, Math.round(file.size / 1024))} KB`,
+                        kind: "other" as const,
+                      })),
+                    ])
+                    event.target.value = ""
+                  }}
                 />
-                <DetailRow label="Location" value={location || "—"} />
-                <DetailRow
-                  label="Department / Unit"
-                  value={`${CURRENT_USER.department} · ${unit}`}
-                />
-                <DetailRow label="Purpose" value={purpose || "—"} />
-              </dl>
-            </ReviewBlock>
+              </label>
 
-            <ReviewBlock title="Expense Breakdown" onEdit={() => setStep(1)}>
-              <table className="w-full">
-                <tbody className="divide-hairline divide-y">
-                  {filledItems.map((item, index) => (
-                    <tr key={item.id}>
-                      <td className="text-ink-faint w-6 py-2.5 align-top font-mono text-[11.5px]">
-                        {index + 1}
-                      </td>
-                      <td className="text-ink py-2.5 pr-3 text-[14px] leading-[1.4]">
-                        {item.description}
-                      </td>
-                      <td className="py-2.5 text-right align-top">
-                        <Money value={item.amount} size="sm" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-ink/15 border-t-2">
-                    <td colSpan={2} className="pt-3">
-                      <MicroLabel>Total</MicroLabel>
-                    </td>
-                    <td className="pt-3 text-right">
-                      <Money value={total} size="md" />
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </ReviewBlock>
-
-            <ReviewBlock title={`Attachments (${attachments.length})`} onEdit={() => setStep(2)}>
-              {attachments.length === 0 ? (
-                <p className="text-ink-faint py-1 text-[13px]">No documents attached.</p>
-              ) : (
-                <ul className="divide-hairline divide-y">
+              {attachments.length > 0 && (
+                <ul className="card-flat divide-hairline divide-y">
                   {attachments.map((file) => (
-                    <li key={file.id} className="flex items-center gap-2.5 py-2.5">
+                    <li key={file.id} className="flex items-center gap-2.5 px-3.5 py-3">
                       <Paperclip
                         className="text-ink-faint size-4 shrink-0"
                         strokeWidth={1.8}
@@ -471,13 +411,119 @@ function Flow({ existing }: { existing?: Requisition }) {
                         {file.name}
                       </span>
                       <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${file.name}`}
+                        onClick={() => setAttachments((c) => c.filter((a) => a.id !== file.id))}
+                        className="text-ink-faint hover:text-st-bad press -mr-1 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md"
+                      >
+                        <Trash2 className="size-3.5" strokeWidth={1.8} aria-hidden />
+                      </button>
                     </li>
                   ))}
                 </ul>
               )}
-            </ReviewBlock>
-          </div>
-        )}
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-4">
+              <div className="card-flat px-4 py-4">
+                <MicroLabel>Total Requested</MicroLabel>
+                <Money value={total} size="lg" className="mt-1.5 block" />
+                <p className="text-ink-soft mt-1 text-[12.5px] leading-[1.5] italic">
+                  {amountInWords(total)}
+                </p>
+              </div>
+
+              <ReviewBlock
+                title="Programme Details"
+                onEdit={() => {
+                  setDirection("back")
+                  setStep(0)
+                }}
+              >
+                <dl className="divide-hairline divide-y">
+                  <DetailRow label="Programme / Project" value={programme || "—"} />
+                  <DetailRow
+                    label="Programme date"
+                    value={programmeDate ? formatDate(programmeDate) : "—"}
+                  />
+                  <DetailRow label="Location" value={location || "—"} />
+                  <DetailRow
+                    label="Department / Unit"
+                    value={`${CURRENT_USER.department} · ${unit}`}
+                  />
+                  <DetailRow label="Purpose" value={purpose || "—"} />
+                </dl>
+              </ReviewBlock>
+
+              <ReviewBlock
+                title="Expense Breakdown"
+                onEdit={() => {
+                  setDirection("back")
+                  setStep(1)
+                }}
+              >
+                <table className="w-full">
+                  <tbody className="divide-hairline divide-y">
+                    {filledItems.map((item, index) => (
+                      <tr key={item.id}>
+                        <td className="text-ink-faint w-6 py-2.5 align-top font-mono text-[11.5px]">
+                          {index + 1}
+                        </td>
+                        <td className="text-ink py-2.5 pr-3 text-[14px] leading-[1.4]">
+                          {item.description}
+                        </td>
+                        <td className="py-2.5 text-right align-top">
+                          <Money value={item.amount} size="sm" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-ink/15 border-t-2">
+                      <td colSpan={2} className="pt-3">
+                        <MicroLabel>Total</MicroLabel>
+                      </td>
+                      <td className="pt-3 text-right">
+                        <Money value={total} size="md" />
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </ReviewBlock>
+
+              <ReviewBlock
+                title={`Attachments (${attachments.length})`}
+                onEdit={() => {
+                  setDirection("back")
+                  setStep(2)
+                }}
+              >
+                {attachments.length === 0 ? (
+                  <p className="text-ink-faint py-1 text-[13px]">No documents attached.</p>
+                ) : (
+                  <ul className="divide-hairline divide-y">
+                    {attachments.map((file) => (
+                      <li key={file.id} className="flex items-center gap-2.5 py-2.5">
+                        <Paperclip
+                          className="text-ink-faint size-4 shrink-0"
+                          strokeWidth={1.8}
+                          aria-hidden
+                        />
+                        <span className="text-ink min-w-0 flex-1 truncate text-[13.5px]">
+                          {file.name}
+                        </span>
+                        <span className="text-ink-faint shrink-0 text-[11.5px]">{file.size}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </ReviewBlock>
+            </div>
+          )}
+        </div>
       </div>
 
       <StickyFooter

@@ -55,10 +55,33 @@
   --color-st-bad: #bf3329;
   --color-st-bad-bg: #fbeceb;
 
-  --animate-rise: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-fade: fade 0.35s ease-out both;
-  --animate-grow: grow 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-pulse-ring: pulse-ring 2s ease-out infinite;
+  /* ---- Motion system -------------------------------------------------
+     Two curves and four durations, used everywhere. `settle` overshoots
+     nothing; it decelerates hard, which reads as responsive rather than
+     bouncy. Everyday feedback is fast; only screen-level changes are slow
+     enough to notice as motion.                                          */
+  --ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-swap: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-press: 120ms;
+  --dur-state: 180ms;
+  --dur-part: 280ms;
+  --dur-screen: 420ms;
+
+  --animate-rise: rise 0.42s var(--ease-settle) both;
+  --animate-fade: fade 0.3s ease-out both;
+  --animate-grow: grow 0.7s var(--ease-settle) both;
+  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
+  --animate-page: page-in 0.36s var(--ease-settle) both;
+  --animate-step-next: step-next 0.32s var(--ease-settle) both;
+  --animate-step-back: step-back 0.32s var(--ease-settle) both;
+  --animate-row-in: row-in 0.3s var(--ease-settle) both;
+  --animate-row-out: row-out 0.22s var(--ease-swap) both;
+  --animate-toast-in: toast-in 0.34s var(--ease-settle) both;
+  --animate-toast-out: toast-out 0.2s var(--ease-swap) both;
+  --animate-sheet-in: sheet-up 0.32s var(--ease-settle) both;
+  --animate-sheet-out: sheet-down 0.2s var(--ease-swap) both;
+  --animate-emphasis: emphasis 0.5s var(--ease-settle);
+  --animate-shimmer: shimmer 1.4s linear infinite;
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -117,6 +140,7 @@
   html {
     @apply font-sans;
     color-scheme: light;
+    scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -186,7 +210,48 @@
   /* Cards that go somewhere lift very slightly; transform only, so nothing
      around them reflows. */
   .tap-card {
-    @apply transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-px hover:shadow-raised active:translate-y-0 active:scale-[0.995];
+    transition:
+      transform var(--dur-state) var(--ease-settle),
+      box-shadow var(--dur-state) var(--ease-settle),
+      border-color var(--dur-state) var(--ease-settle);
+    @apply hover:-translate-y-px hover:shadow-raised active:translate-y-0 active:scale-[0.995];
+  }
+
+  /* The base contract for anything tappable: it must visibly answer a press.
+     Applied to buttons and links that are not already cards. */
+  .press {
+    transition:
+      transform var(--dur-press) var(--ease-settle),
+      background-color var(--dur-state) var(--ease-settle),
+      border-color var(--dur-state) var(--ease-settle),
+      color var(--dur-state) var(--ease-settle),
+      opacity var(--dur-state) var(--ease-settle),
+      filter var(--dur-state) var(--ease-settle);
+    @apply active:scale-[0.97];
+  }
+
+  .press-wide {
+    transition:
+      transform var(--dur-press) var(--ease-settle),
+      background-color var(--dur-state) var(--ease-settle),
+      filter var(--dur-state) var(--ease-settle);
+    @apply active:scale-[0.99];
+  }
+
+  /* Skeleton surface for content that has not hydrated yet. */
+  .skeleton {
+    @apply bg-hairline relative overflow-hidden rounded-md;
+  }
+
+  .skeleton::after {
+    content: "";
+    @apply animate-shimmer absolute inset-0;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.65),
+      transparent
+    );
   }
 
 }
@@ -211,6 +276,112 @@
   }
 }
 
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes step-next {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes step-back {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes row-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes sheet-down {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* A total that just changed lifts a hair and settles. No bounce. */
+@keyframes emphasis {
+  0% {
+    transform: none;
+  }
+  35% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
 
 @keyframes grow {
   from {

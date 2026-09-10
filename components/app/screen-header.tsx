@@ -23,9 +23,12 @@ export function ScreenHeader({ title, back, action, className }: ScreenHeaderPro
         <Link
           href={back}
           aria-label="Go back"
-          className="text-ink-soft hover:bg-muted hover:text-ink flex size-10 cursor-pointer items-center justify-center rounded-lg transition-colors duration-200"
+          className="text-ink-soft hover:bg-muted hover:text-ink press group flex size-10 cursor-pointer items-center justify-center rounded-lg"
         >
-          <ChevronLeft className="size-5" aria-hidden />
+          <ChevronLeft
+            className="size-5 transition-transform duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-x-0.5"
+            aria-hidden
+          />
         </Link>
       ) : (
         <span className="w-2" />

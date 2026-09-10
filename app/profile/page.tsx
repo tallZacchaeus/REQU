@@ -30,6 +30,7 @@ import {
   ToggleRow,
 } from "@/components/app/settings"
 import { Sheet } from "@/components/app/sheet"
+import { useToast } from "@/components/app/toast"
 import { CURRENT_USER } from "@/lib/data"
 import { maskEmail, useSession } from "@/lib/session"
 import { isMine } from "@/lib/review"
@@ -55,6 +56,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const { profile, updateProfile, signOut } = useSession()
   const { requisitions: all } = useRequisitions()
+  const toast = useToast()
   const requisitions = all.filter(isMine)
 
   const [open, setOpen] = useState<string | null>("personal")
@@ -75,6 +77,7 @@ export default function ProfilePage() {
 
   function save() {
     updateProfile({ phone: phoneDraft })
+    toast("Phone number updated")
     setEditing(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 1800)
@@ -345,7 +348,7 @@ export default function ProfilePage() {
           </button>
 
           <p className="text-ink-faint pt-1 text-center font-mono text-[11px]">
-            CWMS · Youth &amp; Young Adults · MVP
+            REQU · Youth &amp; Young Adults · MVP
           </p>
         </div>
       </div>
@@ -430,6 +433,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => {
               signOut()
+              toast("Signed out", "info")
               router.replace("/login")
             }}
             className="bg-st-bad h-12 flex-1 cursor-pointer rounded-lg text-[14.5px] font-semibold text-white transition-opacity duration-200 hover:opacity-90"

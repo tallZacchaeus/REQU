@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { IBM_Plex_Mono, Source_Sans_3 } from "next/font/google"
 
 import { AppShell } from "@/components/app/shell"
+import { ToastProvider } from "@/components/app/toast"
 import { SessionProvider } from "@/lib/session"
 import { RequisitionStore } from "@/lib/store"
 
@@ -24,7 +25,7 @@ const plexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "CWMS · Requisitions",
+  title: "REQU · Requisitions",
   description:
     "Church Worker Management System — raise, submit and track programme funding requisitions.",
 }
@@ -42,7 +43,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full">
         <SessionProvider>
           <RequisitionStore>
-            <AppShell>{children}</AppShell>
+            <ToastProvider>
+              <AppShell>{children}</AppShell>
+            </ToastProvider>
           </RequisitionStore>
         </SessionProvider>
       </body>

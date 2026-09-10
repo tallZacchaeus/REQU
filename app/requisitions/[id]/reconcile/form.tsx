@@ -6,8 +6,11 @@ import { useRouter } from "next/navigation"
 import { Paperclip, ReceiptText, Trash2, TriangleAlert, Upload } from "lucide-react"
 
 import { AmountField, TextAreaField } from "@/components/app/fields"
+import { AnimatedMoney } from "@/components/app/motion"
+import { SkeletonRows } from "@/components/app/motion"
 import { MicroLabel, Money, StickyFooter } from "@/components/app/primitives"
 import { ScreenHeader } from "@/components/app/screen-header"
+import { useToast } from "@/components/app/toast"
 import { isoToday, newId } from "@/lib/ids"
 import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
@@ -23,19 +26,21 @@ export function ReconcileForm({ id }: { id: string }) {
     return (
       <>
         <ScreenHeader title="Reconciliation" back={`/requisitions/${id}`} />
-        <div className="px-4 py-16 text-center">
-          <p className="text-ink text-[15px] font-semibold">
-            {hydrated ? "Requisition not found" : "Loading…"}
-          </p>
-          {hydrated && (
+        {!hydrated ? (
+          <div className="px-4 pt-5">
+            <SkeletonRows rows={3} />
+          </div>
+        ) : (
+          <div className="px-4 py-16 text-center">
+            <p className="text-ink text-[15px] font-semibold">Requisition not found</p>
             <Link
               href="/requisitions"
               className="text-primary mt-2 inline-block text-[13px] font-semibold hover:underline"
             >
               Back to my requisitions
             </Link>
-          )}
-        </div>
+          </div>
+        )}
       </>
     )
   }
@@ -46,6 +51,7 @@ export function ReconcileForm({ id }: { id: string }) {
 function Form({ requisition }: { requisition: Requisition }) {
   const router = useRouter()
   const { upsert } = useRequisitions()
+  const toast = useToast()
 
   const disbursed = requisitionTotal(requisition)
   // Pre-filled with the budget: most lines land on it, so the HOD only edits
@@ -95,6 +101,7 @@ function Form({ requisition }: { requisition: Requisition }) {
         },
       ],
     })
+    toast("Reconciliation filed — Finance will check your receipts")
     router.push(`/requisitions/${requisition.id}`)
   }
 
@@ -179,7 +186,7 @@ function Form({ requisition }: { requisition: Requisition }) {
             <div className="flex items-baseline justify-between gap-3 py-2.5">
               <dt className="text-ink-soft text-[13px]">Total spent</dt>
               <dd>
-                <Money value={spent} size="sm" />
+                <AnimatedMoney value={spent} size="sm" />
               </dd>
             </div>
           </dl>
@@ -214,7 +221,7 @@ function Form({ requisition }: { requisition: Requisition }) {
 
         <section>
           <MicroLabel className="mb-2">Receipts</MicroLabel>
-          <label className="border-hairline hover:border-primary/40 hover:bg-card flex cursor-pointer flex-col items-center rounded-xl border border-dashed px-6 py-7 text-center transition-colors duration-200">
+          <label className="border-hairline hover:border-primary/40 hover:bg-card press-wide flex cursor-pointer flex-col items-center rounded-xl border border-dashed px-6 py-7 text-center">
             <Upload className="text-ink-faint size-5" strokeWidth={1.7} aria-hidden />
             <span className="text-ink mt-2.5 text-[14px] font-semibold">Attach receipts</span>
             <span className="text-ink-faint mt-1 text-[12px]">
@@ -261,7 +268,7 @@ function Form({ requisition }: { requisition: Requisition }) {
                     type="button"
                     aria-label={`Remove ${file.name}`}
                     onClick={() => setReceipts((c) => c.filter((r) => r.id !== file.id))}
-                    className="text-ink-faint hover:text-st-bad -mr-1 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors duration-200"
+                    className="text-ink-faint hover:text-st-bad press -mr-1 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md"
                   >
                     <Trash2 className="size-3.5" strokeWidth={1.8} aria-hidden />
                   </button>

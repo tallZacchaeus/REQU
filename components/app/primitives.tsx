@@ -162,13 +162,13 @@ export function Disclosure({
 }) {
   return (
     <details open={defaultOpen} className="card-flat group overflow-hidden">
-      <summary className="hover:bg-muted/60 flex h-11 cursor-pointer list-none items-center justify-between px-4 transition-colors duration-200 [&::-webkit-details-marker]:hidden">
+      <summary className="hover:bg-muted/60 press flex h-11 cursor-pointer list-none items-center justify-between px-4 [&::-webkit-details-marker]:hidden">
         <MicroLabel>{title}</MicroLabel>
         <span className="flex items-center gap-2">
           {meta && <span className="text-ink-faint text-[12px]">{meta}</span>}
           <ChevronDown
             className={cn(
-              "text-ink-faint size-4 transition-transform duration-200 group-open:rotate-180",
+              "text-ink-faint size-4 transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-open:rotate-180",
             )}
             aria-hidden
           />

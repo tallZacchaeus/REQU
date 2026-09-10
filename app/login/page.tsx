@@ -100,7 +100,7 @@ function BrandPanel() {
         </span>
         <span className="flex flex-col">
           <span className="text-[15px] leading-none font-bold tracking-[0.14em] text-white">
-            CWMS
+            REQU
           </span>
           <span className="mt-1.5 text-[10.5px] leading-none font-medium tracking-[0.06em] text-white/55">
             Youth &amp; Young Adults
@@ -130,7 +130,7 @@ function BrandPanel() {
       </div>
 
       <p className="text-[12px] text-white/40">
-        Church Worker Management System · Youth &amp; Young Adults
+        REQU · Requisition management for Youth &amp; Young Adults
       </p>
     </aside>
   )
@@ -212,7 +212,7 @@ function SignInForm({
               key={account.email}
               type="button"
               onClick={() => onEmail(account.email)}
-              className="border-hairline bg-card hover:border-primary/40 flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-[border-color,transform] duration-200 active:scale-[0.98]"
+              className="border-hairline bg-card hover:border-primary/40 hover:bg-muted/40 press flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-left"
             >
               <span className="bg-muted text-ink-soft flex size-6 shrink-0 items-center justify-center rounded-full text-[10.5px] font-semibold">
                 {account.initials}
@@ -257,7 +257,7 @@ function EmailField({
         autoComplete="email"
         autoCapitalize="none"
         spellCheck={false}
-        placeholder="you@cwms.org"
+        placeholder="you@requ.org"
         value={value}
         disabled={disabled}
         aria-invalid={error ? true : undefined}
@@ -372,12 +372,21 @@ function CheckEmail({
 
       <div className="mt-4 text-center lg:text-left">
         {left > 0 ? (
-          <p className="text-ink-faint text-[13px]">
-            Didn&apos;t receive it? Resend in{" "}
-            <span className="text-ink-soft font-mono font-medium tabular-nums">
-              0:{String(left).padStart(2, "0")}
-            </span>
-          </p>
+          <div>
+            <p className="text-ink-faint text-[13px]">
+              Didn&apos;t receive it? Resend in{" "}
+              <span className="text-ink-soft font-mono font-medium tabular-nums">
+                0:{String(left).padStart(2, "0")}
+              </span>
+            </p>
+            <div className="bg-hairline mt-2 h-[3px] w-full overflow-hidden rounded-full">
+              <span
+                className="bg-brand block h-full rounded-full transition-[width] duration-1000 ease-linear"
+                style={{ width: `${(left / RESEND_SECONDS) * 100}%` }}
+                aria-hidden
+              />
+            </div>
+          </div>
         ) : resent ? (
           <p className="text-st-good animate-fade text-[13px] font-medium">
             Link resent — check your inbox again.

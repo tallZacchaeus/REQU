@@ -124,7 +124,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             "md:px-6 md:py-6 lg:w-full lg:max-w-[1360px] lg:px-8 lg:py-7 xl:px-10 2xl:mx-auto",
           )}
         >
-          {children}
+          {/* Keyed on the route so each screen fades and lifts in rather than
+              swapping instantly. */}
+          <div key={pathname} className="animate-page flex flex-1 flex-col">
+            {children}
+          </div>
         </main>
         {showTabs && <BottomNav items={NAV[role]} pathname={pathname} />}
       </div>
@@ -144,7 +148,7 @@ function Sidebar({ items, pathname, role }: { items: NavItem[]; pathname: string
         </span>
         <span className="flex flex-col">
           <span className="text-ink text-[14px] leading-none font-bold tracking-[0.12em]">
-            CWMS
+            REQU
           </span>
           <span className="text-ink-faint mt-1.5 text-[10.5px] leading-none font-medium tracking-[0.05em]">
             Youth &amp; Young Adults
@@ -162,7 +166,7 @@ function Sidebar({ items, pathname, role }: { items: NavItem[]; pathname: string
                   href={href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "relative flex h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-[14px] font-medium transition-colors duration-200",
+                    "press relative flex h-11 cursor-pointer items-center gap-3 rounded-lg px-3 text-[14px] font-medium",
                     active
                       ? "bg-muted text-primary font-semibold"
                       : "text-ink-soft hover:bg-muted/60 hover:text-ink",
@@ -171,8 +175,8 @@ function Sidebar({ items, pathname, role }: { items: NavItem[]; pathname: string
                   {/* Brand rule marks the active item, so it is not colour alone. */}
                   <span
                     className={cn(
-                      "absolute top-1/2 left-0 h-5 w-[3px] -translate-y-1/2 rounded-full transition-colors duration-200",
-                      active ? "bg-brand" : "bg-transparent",
+                      "bg-brand absolute top-1/2 left-0 w-[3px] -translate-y-1/2 rounded-full transition-[height,opacity] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      active ? "h-5 opacity-100" : "h-0 opacity-0",
                     )}
                     aria-hidden
                   />
@@ -191,7 +195,7 @@ function Sidebar({ items, pathname, role }: { items: NavItem[]; pathname: string
 
       <Link
         href={items[items.length - 1].href}
-        className="border-hairline hover:border-ink-faint/40 flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2.5 transition-colors duration-200"
+        className="border-hairline hover:border-ink-faint/40 hover:bg-muted/50 press flex cursor-pointer items-center gap-2.5 rounded-xl border px-3 py-2.5"
       >
         <span className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-[11.5px] font-semibold">
           {account.initials}
@@ -222,18 +226,25 @@ function BottomNav({ items, pathname }: { items: NavItem[]; pathname: string }) 
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex min-h-[52px] cursor-pointer flex-col items-center justify-center gap-1 pt-2 transition-colors duration-200",
+                  "press relative flex min-h-[52px] cursor-pointer flex-col items-center justify-center gap-1 pt-2",
                   active ? "text-primary" : "text-ink-faint hover:text-ink-soft",
                 )}
               >
                 <span
                   className={cn(
-                    "absolute top-0 h-[2.5px] w-9 rounded-full transition-colors duration-200",
-                    active ? "bg-brand" : "bg-transparent",
+                    "bg-brand absolute top-0 h-[2.5px] rounded-full transition-[width,opacity] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    active ? "w-9 opacity-100" : "w-0 opacity-0",
                   )}
                   aria-hidden
                 />
-                <Icon className="size-[22px]" strokeWidth={active ? 2.2 : 1.7} aria-hidden />
+                <Icon
+                  className={cn(
+                    "size-[22px] transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+                    active && "-translate-y-px scale-105",
+                  )}
+                  strokeWidth={active ? 2.2 : 1.7}
+                  aria-hidden
+                />
                 <span className="text-[11px] leading-none font-medium tracking-[0.01em]">
                   {label}
                 </span>

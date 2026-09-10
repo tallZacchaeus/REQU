@@ -33,7 +33,7 @@ export function LogoTile({ className }: { className?: string }) {
 export function Wordmark() {
   return (
     <span className="flex flex-col">
-      <span className="text-ink text-[15px] leading-none font-bold tracking-[0.14em]">CWMS</span>
+      <span className="text-ink text-[15px] leading-none font-bold tracking-[0.14em]">REQU</span>
       <span className="text-ink-faint mt-1.5 text-[10.5px] leading-none font-medium tracking-[0.06em]">
         Youth &amp; Young Adults
       </span>
