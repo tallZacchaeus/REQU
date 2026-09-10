@@ -23,7 +23,7 @@ export function AreaTrend({
   height = 92,
 }: {
   points: MonthPoint[]
-  field?: "requested" | "disbursed"
+  field?: "requested" | "cleared"
   height?: number
 }) {
   const gradient = useId()
@@ -120,7 +120,7 @@ export function MonthlyBars({
   height = 160,
 }: {
   points: MonthPoint[]
-  field: "requested" | "disbursed"
+  field: "requested" | "cleared"
   height?: number
 }) {
   const [hover, setHover] = useState<number | null>(null)

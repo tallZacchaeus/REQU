@@ -38,7 +38,7 @@ function greeting() {
 }
 
 export default function DashboardPage() {
-  const [flow, setFlow] = useState<"requested" | "disbursed">("requested")
+  const [flow, setFlow] = useState<"requested" | "cleared">("requested")
   const { requisitions: all } = useRequisitions()
   const requisitions = all.filter(isMine)
 
@@ -196,7 +196,7 @@ export default function DashboardPage() {
             </div>
             {/* One measure at a time — two scales on one axis would lie. */}
             <div className="bg-muted flex shrink-0 rounded-lg p-0.5">
-              {(["requested", "disbursed"] as const).map((key) => (
+              {(["requested", "cleared"] as const).map((key) => (
                 <button
                   key={key}
                   type="button"
