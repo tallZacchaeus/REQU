@@ -3,7 +3,6 @@
 import Link from "next/link"
 import {
   ArrowRight,
-  Bell,
   ChevronDown,
   ChevronRight,
   CircleCheck,
@@ -13,6 +12,8 @@ import {
 } from "lucide-react"
 
 import { LogoMark } from "@/components/app/logo"
+import { MobileBell } from "@/components/app/notifications"
+import { MobileSearchButton } from "@/components/app/topbar"
 import { AnimatedMoney, CountUp } from "@/components/app/motion"
 import { ReviewCard } from "@/components/app/review-card"
 import { RequisitionRow } from "@/components/app/requisition-row"
@@ -51,24 +52,11 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
             <span className="text-[15px] leading-none font-bold tracking-[0.12em] text-white">
               REQU
             </span>
-            <span className="h-7 w-px shrink-0 bg-white/20" aria-hidden />
-            <span className="min-w-0 text-[11.5px] leading-[1.35] text-white/65">
-              Youth &amp; Young Adults
-              <span className="block">{config.deskLabel}</span>
-            </span>
           </div>
 
           <div className="flex shrink-0 items-center gap-1">
-            <button
-              type="button"
-              aria-label="Notifications"
-              className="press relative flex size-9 cursor-pointer items-center justify-center rounded-lg text-white/75 hover:bg-white/10 hover:text-white"
-            >
-              <Bell className="size-[18px]" strokeWidth={1.9} aria-hidden />
-              {queue.length > 0 && (
-                <span className="bg-st-action absolute top-1.5 right-1.5 size-2 rounded-full ring-2 ring-[#123a68]" />
-              )}
-            </button>
+            <MobileSearchButton />
+            <MobileBell />
             <Link
               href={config.profileHref}
               aria-label="Your profile"

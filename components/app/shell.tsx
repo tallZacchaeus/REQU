@@ -10,6 +10,7 @@ import { HOME_FOR, useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
 import { LogoMark } from "./logo"
+import { TopBar } from "./topbar"
 
 interface NavItem {
   href: string
@@ -112,10 +113,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const showTabs = !FULLSCREEN.some((pattern) => pattern.test(pathname))
 
   return (
-    <div className="bg-canvas min-h-dvh lg:flex">
-      <Sidebar items={NAV[role]} pathname={pathname} role={role} />
+    <div className="bg-canvas min-h-dvh">
+      <TopBar role={role} />
 
-      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col md:max-w-none lg:mx-0 lg:min-h-0 lg:flex-1">
+      <div className="lg:flex">
+        <Sidebar items={NAV[role]} pathname={pathname} role={role} />
+
+        <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col md:max-w-none lg:mx-0 lg:min-h-0 lg:flex-1">
         <main
           className={cn(
             "flex flex-1 flex-col",
@@ -130,7 +134,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </main>
-        {showTabs && <BottomNav items={NAV[role]} pathname={pathname} />}
+          {showTabs && <BottomNav items={NAV[role]} pathname={pathname} />}
+        </div>
       </div>
     </div>
   )
@@ -141,22 +146,8 @@ function Sidebar({ items, pathname, role }: { items: NavItem[]; pathname: string
   const account = accountByRole(role)
 
   return (
-    <aside className="border-hairline bg-card sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col border-r px-4 py-6 lg:flex">
-      <Link href={items[0].href} className="flex cursor-pointer items-center gap-2.5 px-2">
-        <span className="btn-gradient flex size-9 items-center justify-center rounded-xl text-white">
-          <LogoMark className="size-[18px]" />
-        </span>
-        <span className="flex flex-col">
-          <span className="text-ink text-[14px] leading-none font-bold tracking-[0.12em]">
-            REQU
-          </span>
-          <span className="text-ink-faint mt-1.5 text-[10.5px] leading-none font-medium tracking-[0.05em]">
-            Youth &amp; Young Adults
-          </span>
-        </span>
-      </Link>
-
-      <nav aria-label="Primary" className="mt-8 flex-1">
+    <aside className="border-hairline bg-card sticky top-16 hidden h-[calc(100dvh-4rem)] w-[248px] shrink-0 flex-col border-r px-4 py-5 lg:flex">
+      <nav aria-label="Primary" className="flex-1">
         <ul className="space-y-1">
           {items.map(({ href, label, icon: Icon, isActive }) => {
             const active = isActive(pathname)
