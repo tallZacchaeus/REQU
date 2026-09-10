@@ -134,11 +134,11 @@ export default function DashboardPage() {
 
       {/* ---- Overview: what was asked for, and where it sits ---- */}
       <div className="-mt-9 grid gap-2.5 px-4 md:px-0 lg:mt-5 lg:grid-cols-2 lg:gap-4">
-        <section className="card-flat animate-rise px-4 py-4">
+        <section className="card-flat animate-rise px-4 py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <MicroLabel>Requested</MicroLabel>
-              <Money value={requestedTotal} size="lg" className="mt-1.5 block" />
+              <Money value={requestedTotal} size="lg" className="mt-1 block" />
             </div>
             {swing !== null && (
               <span
@@ -156,20 +156,20 @@ export default function DashboardPage() {
               </span>
             )}
           </div>
-          <p className="text-ink-soft mt-1 text-[12.5px]">Across {months.length} months</p>
-          <div className="mt-2">
+          <p className="text-ink-soft mt-0.5 text-[12px]">Across {months.length} months</p>
+          <div className="mt-1">
             <AreaTrend points={months} />
           </div>
         </section>
 
         <section
-          className="card-flat animate-rise px-4 py-4"
+          className="card-flat animate-rise px-4 py-3.5"
           style={{ animationDelay: "70ms" }}
         >
           <div className="flex items-start justify-between gap-3">
             <div>
               <MicroLabel>Where it sits</MicroLabel>
-              <Money value={liveTotal} size="lg" className="mt-1.5 block" />
+              <Money value={liveTotal} size="lg" className="mt-1 block" />
             </div>
             <Link
               href="/reports"
@@ -178,7 +178,7 @@ export default function DashboardPage() {
               Reports
             </Link>
           </div>
-          <p className="text-ink-soft mt-1 mb-4 text-[12.5px]">
+          <p className="text-ink-soft mt-0.5 mb-3 text-[12px]">
             Everything still moving through the workflow
           </p>
           <ShareBar shares={shares} />

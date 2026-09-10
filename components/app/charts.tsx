@@ -20,7 +20,7 @@ const SHARE_FILL: Record<Share["key"], string> = {
 export function AreaTrend({
   points,
   field = "requested",
-  height = 132,
+  height = 92,
 }: {
   points: MonthPoint[]
   field?: "requested" | "disbursed"
@@ -34,10 +34,11 @@ export function AreaTrend({
   const peak = Math.max(...points.map((p) => p[field]), 1)
   const step = points.length > 1 ? (width - pad * 2) / (points.length - 1) : 0
   const x = (i: number) => pad + i * step
-  const y = (v: number) => height - 22 - (v / peak) * (height - 44)
+  const baseline = height - 16
+  const y = (v: number) => baseline - (v / peak) * (height - 32)
 
   const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${x(i)},${y(p[field])}`).join(" ")
-  const area = `${line} L${x(points.length - 1)},${height - 22} L${x(0)},${height - 22} Z`
+  const area = `${line} L${x(points.length - 1)},${baseline} L${x(0)},${baseline} Z`
   const active = hover === null ? null : points[hover]
 
   return (
@@ -63,8 +64,8 @@ export function AreaTrend({
           <line
             x1={x(hover!)}
             x2={x(hover!)}
-            y1={12}
-            y2={height - 22}
+            y1={6}
+            y2={baseline}
             stroke="var(--hairline)"
             strokeWidth="1"
           />
@@ -93,9 +94,9 @@ export function AreaTrend({
             />
             <text
               x={x(i)}
-              y={height - 6}
+              y={height - 3}
               textAnchor="middle"
-              className="fill-ink-faint text-[9px]"
+              className="fill-ink-faint text-[8.5px]"
             >
               {p.label}
             </text>
@@ -209,14 +210,14 @@ export function ShareBar({ shares }: { shares: Share[] }) {
               />
               {share.label}
             </p>
-            <p className="text-ink mt-1 text-[14px] font-semibold tabular-nums">
+            <p className="text-ink mt-0.5 text-[14px] font-semibold tabular-nums">
               ₦{formatAmount(share.value)}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="mt-3 flex h-2.5 gap-[2px] overflow-hidden rounded-full">
+      <div className="mt-2.5 flex h-2 gap-[2px] overflow-hidden rounded-full">
         {shares.map((share) => (
           <span
             key={share.key}
