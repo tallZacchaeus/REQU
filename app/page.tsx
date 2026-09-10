@@ -129,7 +129,7 @@ export default function DashboardPage() {
         <section className="card-flat animate-rise px-4 py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <MicroLabel>Requested</MicroLabel>
+              <MicroLabel>Total requested</MicroLabel>
               <Money value={requestedTotal} size="lg" className="mt-1 block" />
             </div>
             {swing !== null && (
@@ -160,7 +160,7 @@ export default function DashboardPage() {
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <MicroLabel>Where it sits</MicroLabel>
+              <MicroLabel>Active requisitions</MicroLabel>
               <Money value={liveTotal} size="lg" className="mt-1 block" />
             </div>
             <Link
@@ -171,7 +171,7 @@ export default function DashboardPage() {
             </Link>
           </div>
           <p className="text-ink-soft mt-0.5 text-[12px]">
-            Everything still moving through the workflow
+            Still moving through the workflow
           </p>
 
           {/* Pushed to the foot of the card so this sits level with the chart
@@ -272,7 +272,7 @@ export default function DashboardPage() {
       <div className="px-4 pt-5 pb-8 md:px-0 lg:pt-6">
         <Link
           href="/requisitions/new"
-          className="btn-gradient press-wide group mb-6 flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised hover:brightness-110 lg:h-11 lg:w-fit lg:px-6"
+          className="btn-gradient press-wide group flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold text-white shadow-raised hover:brightness-110 lg:hidden"
         >
           <Plus className="size-[18px]" strokeWidth={2.6} aria-hidden />
           New Requisition

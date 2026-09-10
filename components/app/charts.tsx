@@ -217,12 +217,12 @@ export function ShareBar({ shares }: { shares: Share[] }) {
         ))}
       </div>
 
-      <div className="mt-2.5 flex h-2 gap-[2px] overflow-hidden rounded-full">
+      <div className="mt-3 flex h-4 gap-[2px] overflow-hidden rounded-lg">
         {shares.map((share) => (
           <span
             key={share.key}
             title={`${share.label}: ${share.count}`}
-            className="animate-grow block h-full origin-left first:rounded-l-full last:rounded-r-full"
+            className="animate-grow block h-full origin-left first:rounded-l-lg last:rounded-r-lg"
             style={{
               width: `${Math.max((share.value / total) * 100, share.value > 0 ? 4 : 0)}%`,
               background: SHARE_FILL[share.key],
