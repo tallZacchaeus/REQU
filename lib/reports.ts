@@ -140,19 +140,19 @@ export function buildReport(role: Role, all: Requisition[]): Report {
   }
 
   return {
-    title: role === "finance" ? "Payments" : "Review throughput",
+    title: role === "finance" ? "Your payments desk" : "Your review desk",
     blurb:
       role === "finance"
-        ? "What has been paid, and what is still owed to departments."
-        : "What has passed your desk, and what is still waiting on it.",
+        ? "What you have paid out, and what is still waiting to be paid."
+        : "What you have already actioned, and what is still waiting on you.",
     figures: [
       { label: "On your desk", value: waiting.length, hint: waiting.length ? `Longest ${longest} days` : "Clear" },
       { label: "Value waiting", value: sum(waiting), money: true },
-      { label: "Cleared", value: cleared.length, hint: "Actioned by you" },
+      { label: "Actioned", value: cleared.length, hint: "You have dealt with these" },
       {
         label: "Average wait",
         value: averageWait,
-        hint: averageWait === 1 ? "day on your desk" : "days on your desk",
+        hint: averageWait === 1 ? "day waiting on you" : "days waiting on you",
       },
     ],
     bands,

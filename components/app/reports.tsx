@@ -2,30 +2,63 @@
 
 import { useMemo } from "react"
 
+import { deskFor } from "@/lib/desk"
+import { downloadCsv, reportFilename, requisitionsToCsv } from "@/lib/export"
 import { buildReport } from "@/lib/reports"
 import { TONE_DOT } from "@/lib/status"
 import { useRequisitions } from "@/lib/store"
 import { useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
+import { Download, Printer } from "lucide-react"
+
 import { CountUp } from "./motion"
 import { MicroLabel, Money } from "./primitives"
+import { useToast } from "./toast"
 
 export function Reports() {
   const { requisitions } = useRequisitions()
   const { role } = useSession()
   const report = useMemo(() => buildReport(role, requisitions), [role, requisitions])
+  const desk = deskFor(role)
+  // Exactly the records the report counts — never more than the role can see.
+  const rows = requisitions.filter(desk.visible)
+  const toast = useToast()
 
   const bandTotal = report.bands.reduce((total, band) => total + band.count, 0) || 1
   const splitTop = report.splits[0]?.value || 1
 
   return (
     <>
-      <header className="px-4 pt-5 pb-4 md:px-0 md:pt-0">
-        <h1 className="text-ink text-[20px] font-semibold tracking-[-0.025em] lg:text-[24px]">
-          {report.title}
-        </h1>
-        <p className="text-ink-soft mt-1 text-[13.5px] leading-[1.5]">{report.blurb}</p>
+      <header className="flex flex-wrap items-start justify-between gap-3 px-4 pt-5 pb-4 md:px-0 md:pt-0">
+        <div>
+          <h1 className="text-ink text-[20px] font-semibold tracking-[-0.025em] lg:text-[24px]">
+            {report.title}
+          </h1>
+          <p className="text-ink-soft mt-1 text-[13.5px] leading-[1.5]">{report.blurb}</p>
+        </div>
+
+        <div className="flex shrink-0 gap-2 print:hidden">
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="border-hairline bg-card text-ink-soft hover:border-ink-faint/40 hover:text-ink press flex h-10 cursor-pointer items-center gap-2 rounded-lg border px-3 text-[13.5px] font-semibold"
+          >
+            <Printer className="size-4" strokeWidth={2} aria-hidden />
+            Print
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              downloadCsv(reportFilename(report.title), requisitionsToCsv(rows))
+              toast(`${rows.length} rows exported`)
+            }}
+            className="btn-gradient press flex h-10 cursor-pointer items-center gap-2 rounded-lg px-3.5 text-[13.5px] font-semibold text-white hover:brightness-110"
+          >
+            <Download className="size-4" strokeWidth={2.2} aria-hidden />
+            Download CSV
+          </button>
+        </div>
       </header>
 
       <div className="grid grid-cols-2 gap-2.5 px-4 md:px-0 lg:grid-cols-4 lg:gap-4">

@@ -436,3 +436,35 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Printing a report should produce the report, not the application chrome
+   around it. Everything that is navigation drops out and the content runs
+   the full width of the page. */
+@media print {
+  aside,
+  header nav,
+  nav[aria-label="Primary"],
+  [role="status"] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .card-flat,
+  section {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .header-deep {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}
