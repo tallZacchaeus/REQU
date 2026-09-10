@@ -45,7 +45,7 @@ export function TopBar({ role }: { role: Role }) {
           href={desk.cta.kind === "create" ? "/" : `/${role}`}
           className="border-hairline hover:bg-muted/40 press flex h-16 w-[248px] shrink-0 cursor-pointer items-center gap-2.5 border-r px-4"
         >
-          <span className="btn-gradient flex size-9 shrink-0 items-center justify-center rounded-xl text-white">
+          <span className="btn-gradient flex size-9 shrink-0 items-center justify-center rounded-xl">
             <LogoMark className="size-[18px]" />
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
@@ -59,7 +59,7 @@ export function TopBar({ role }: { role: Role }) {
           <ChevronDown className="text-ink-faint size-4 shrink-0" aria-hidden />
         </Link>
 
-        <div className="flex flex-1 items-center gap-4 px-6">
+        <div className="flex w-full max-w-[1360px] flex-1 items-center gap-4 px-8 xl:px-10 2xl:mx-auto">
           <SearchTrigger label={desk.searchLabel} onOpen={() => setSearch(true)} />
 
           <div className="ml-auto flex items-center gap-2.5">
@@ -70,7 +70,7 @@ export function TopBar({ role }: { role: Role }) {
 
             <Link
               href={desk.cta.href}
-              className="btn-gradient press flex h-10 cursor-pointer items-center gap-2 rounded-xl px-4 text-[14px] font-semibold text-white hover:brightness-110"
+              className="btn-gradient press flex h-10 cursor-pointer items-center gap-2 rounded-xl px-4 text-[14px] font-semibold hover:brightness-110"
             >
               {desk.cta.kind === "create" ? (
                 <>

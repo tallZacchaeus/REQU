@@ -138,7 +138,7 @@ export function StickyFooter({
   return (
     <div
       className={cn(
-        "border-hairline bg-card sticky bottom-0 z-20 mt-auto border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-bar lg:static lg:mx-auto lg:mt-6 lg:w-full lg:max-w-[680px] lg:rounded-xl lg:border lg:p-4 lg:shadow-card",
+        "border-hairline bg-card sticky bottom-0 z-20 mt-auto border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-bar lg:static lg:mt-6 lg:rounded-xl lg:border lg:p-4 lg:shadow-card",
         className,
       )}
     >

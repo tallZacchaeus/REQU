@@ -193,7 +193,7 @@ function Flow({ existing }: { existing?: Requisition }) {
       />
 
       {/* A rule that fills, not a row of numbered circles. */}
-      <div className="border-hairline bg-card sticky top-14 z-10 border-b px-4 pt-2.5 pb-3 lg:static lg:mx-auto lg:w-full lg:max-w-[680px] lg:border-0 lg:bg-transparent lg:px-0 lg:pt-6">
+      <div className="border-hairline bg-card sticky top-14 z-10 border-b px-4 pt-2.5 pb-3 lg:static lg:border-0 lg:bg-transparent lg:px-0 lg:pt-2">
         <div className="mb-2 flex items-baseline justify-between">
           <MicroLabel>
             Step {step + 1} of {STEPS.length} · {STEPS[step]}
@@ -208,14 +208,15 @@ function Flow({ existing }: { existing?: Requisition }) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-x-clip px-4 pt-5 pb-6 lg:mx-auto lg:w-full lg:max-w-[680px] lg:px-0">
+      <div className="flex-1 overflow-x-clip px-4 pt-5 pb-6 md:px-0">
         <div
           key={step}
           className={direction === "next" ? "animate-step-next" : "animate-step-back"}
         >
           {step === 0 && (
-            <div className="space-y-4">
+            <div className="space-y-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-5 lg:gap-y-4 lg:space-y-0">
               <TextField
+                className="lg:col-span-2"
                 label="Programme / Project name"
                 placeholder="e.g. Youth Convention 2026"
                 value={programme}
@@ -253,6 +254,7 @@ function Flow({ existing }: { existing?: Requisition }) {
               </SelectField>
 
               <TextAreaField
+                className="lg:col-span-2"
                 label="Purpose / Description"
                 hint={`${purpose.length}/400`}
                 maxLength={400}
@@ -262,7 +264,7 @@ function Flow({ existing }: { existing?: Requisition }) {
               />
 
               {showErrors && !stepValid && (
-                <p className="text-st-bad text-[12.5px]">
+                <p className="text-st-bad text-[12.5px] lg:col-span-2">
                   Programme name, date and purpose are required to continue.
                 </p>
               )}
@@ -273,7 +275,7 @@ function Flow({ existing }: { existing?: Requisition }) {
             <div>
               <MicroLabel className="mb-2.5">Expense Items</MicroLabel>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
                 {items.map((item, index) => (
                   <div
                     key={item.id}
@@ -427,8 +429,8 @@ function Flow({ existing }: { existing?: Requisition }) {
           )}
 
           {step === 3 && (
-            <div className="space-y-4">
-              <div className="card-flat px-4 py-4">
+            <div className="space-y-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0">
+              <div className="card-flat px-4 py-4 lg:col-span-2">
                 <MicroLabel>Total Requested</MicroLabel>
                 <Money value={total} size="lg" className="mt-1.5 block" />
                 <p className="text-ink-soft mt-1 text-[12.5px] leading-[1.5] italic">

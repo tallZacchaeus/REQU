@@ -1,17 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 import {
   AtSign,
   Check,
   ChevronRight,
-  KeyRound,
-  LogOut,
-  Monitor,
   Pencil,
   Phone,
-  ShieldCheck,
+  Settings,
   X,
 } from "lucide-react"
 
@@ -21,19 +18,15 @@ import {
   Field,
   Group,
   ProfileStat,
-  SheetRow,
-  ToggleRow,
 } from "@/components/app/settings"
-import { Sheet } from "@/components/app/sheet"
 import { useToast } from "@/components/app/toast"
 import { visibleToReviewer } from "@/lib/review"
 import type { ReviewerConfig } from "@/lib/roles"
-import { maskEmail, useSession } from "@/lib/session"
+import { useSession } from "@/lib/session"
 import { useRequisitions } from "@/lib/store"
 
 export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
-  const router = useRouter()
-  const { profile, updateProfile, signOut } = useSession()
+  const { profile, updateProfile } = useSession()
   const { requisitions } = useRequisitions()
   const toast = useToast()
   const person = config.person
@@ -42,7 +35,6 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
   const [editing, setEditing] = useState(false)
   const [phoneDraft, setPhoneDraft] = useState(profile.phone)
   const [saved, setSaved] = useState(false)
-  const [sheet, setSheet] = useState<"security" | "signout" | null>(null)
 
   const visible = requisitions.filter(visibleToReviewer)
   const cleared = visible.filter(config.cleared).length
@@ -210,33 +202,6 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
         </Group>
 
         <Group
-          title="Notification Preferences"
-          open={open === "notify"}
-          onToggle={() => toggle("notify")}
-        >
-          <div className="divide-hairline divide-y">
-            <ToggleRow
-              label="New arrivals"
-              hint="When a requisition reaches your desk."
-              checked={profile.notifyStatus}
-              onChange={(value) => updateProfile({ notifyStatus: value })}
-            />
-            <ToggleRow
-              label="Resubmissions"
-              hint="When something you returned comes back."
-              checked={profile.notifyComments}
-              onChange={(value) => updateProfile({ notifyComments: value })}
-            />
-            <ToggleRow
-              label="Weekly queue digest"
-              hint="A Monday summary of what is still waiting."
-              checked={profile.notifyDigest}
-              onChange={(value) => updateProfile({ notifyDigest: value })}
-            />
-          </div>
-        </Group>
-
-        <Group
           title="What You Can Do"
           open={open === "permissions"}
           onToggle={() => toggle("permissions")}
@@ -266,83 +231,26 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
         </Group>
 
         <div className="space-y-3.5">
-          <button
-            type="button"
-            onClick={() => setSheet("security")}
+          {/* Account controls live in Settings; this is the way there on a
+              phone, where five tabs will not fit. */}
+          <Link
+            href={`${config.home}/settings`}
             className="card-flat tap-card hover:border-ink-faint/40 group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5"
           >
-            <ShieldCheck className="text-ink-faint size-4 shrink-0" strokeWidth={2} aria-hidden />
+            <Settings className="text-ink-faint size-4 shrink-0" strokeWidth={2} aria-hidden />
             <span className="min-w-0 flex-1 text-left">
-              <span className="text-ink block text-[14px] font-semibold">Security</span>
+              <span className="text-ink block text-[14px] font-semibold">Settings</span>
               <span className="text-ink-faint block text-[12px]">
-                Passwordless · last sign-in today
+                Notifications, security and sign out
               </span>
             </span>
             <ChevronRight
               className="text-ink-faint size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
               aria-hidden
             />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSheet("signout")}
-            className="border-hairline bg-card text-ink hover:border-st-bad/40 hover:text-st-bad flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border text-[14px] font-semibold transition-colors duration-200"
-          >
-            <LogOut className="size-4" strokeWidth={2} aria-hidden />
-            Sign out
-          </button>
+          </Link>
         </div>
       </div>
-
-      <Sheet open={sheet === "security"} onClose={() => setSheet(null)} title="Security">
-        <div className="border-hairline bg-muted mb-4 flex items-start gap-2.5 rounded-lg border px-3.5 py-3">
-          <KeyRound className="text-ink-faint mt-px size-4 shrink-0" strokeWidth={2} aria-hidden />
-          <p className="text-ink text-[13px] leading-[1.5]">
-            This account is passwordless. You sign in with a single-use link sent to{" "}
-            <span className="font-medium">{maskEmail(profile.email)}</span>.
-          </p>
-        </div>
-        <dl className="divide-hairline divide-y">
-          <SheetRow label="Sign-in method" value="Email magic link" />
-          <SheetRow label="Link validity" value="15 minutes, single use" />
-          <SheetRow label="Last sign-in" value="Today · Abuja, NG" />
-        </dl>
-        <div className="border-hairline mt-4 flex items-center gap-2.5 rounded-lg border px-3.5 py-3">
-          <Monitor className="text-ink-faint size-4 shrink-0" strokeWidth={1.8} aria-hidden />
-          <div className="min-w-0 flex-1">
-            <p className="text-ink text-[13px] font-medium">This device</p>
-            <p className="text-ink-faint text-[11.5px]">Active now</p>
-          </div>
-          <span className="bg-st-good size-2 rounded-full" aria-hidden />
-        </div>
-      </Sheet>
-
-      <Sheet open={sheet === "signout"} onClose={() => setSheet(null)} title="Sign out?">
-        <p className="text-ink-soft text-[13.5px] leading-[1.55]">
-          You&apos;ll need a fresh sign-in link to get back in.
-        </p>
-        <div className="mt-5 flex gap-2.5">
-          <button
-            type="button"
-            onClick={() => setSheet(null)}
-            className="border-input text-ink hover:bg-muted h-12 flex-1 cursor-pointer rounded-lg border text-[14.5px] font-semibold transition-colors duration-200"
-          >
-            Stay signed in
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              signOut()
-              toast("Signed out", "info")
-              router.replace("/login")
-            }}
-            className="bg-st-bad h-12 flex-1 cursor-pointer rounded-lg text-[14.5px] font-semibold text-white transition-opacity duration-200 hover:opacity-90"
-          >
-            Sign out
-          </button>
-        </div>
-      </Sheet>
     </>
   )
 }

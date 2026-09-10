@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { ClipboardCheck, FileText, House, User } from "lucide-react"
+import { ChartNoAxesColumn, ClipboardCheck, FileText, House, Settings, User } from "lucide-react"
 
 import { accountByRole, type Role } from "@/lib/data"
 import { HOME_FOR, useSession } from "@/lib/session"
@@ -17,9 +17,11 @@ interface NavItem {
   label: string
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
   isActive: (pathname: string) => boolean
+  /** Five tabs do not fit a phone; Settings is reachable from Profile there. */
+  desktopOnly?: boolean
 }
 
-/** The two reviewing desks navigate identically, only the root differs. */
+/** The reviewing desks navigate identically, only the root differs. */
 function reviewerNav(root: string, queueLabel: string): NavItem[] {
   return [
     { href: root, label: "Home", icon: House, isActive: (p) => p === root },
@@ -28,6 +30,19 @@ function reviewerNav(root: string, queueLabel: string): NavItem[] {
       label: queueLabel,
       icon: ClipboardCheck,
       isActive: (p) => p.startsWith(`${root}/queue`) || p.startsWith(`${root}/requisitions`),
+    },
+    {
+      href: `${root}/reports`,
+      label: "Reports",
+      icon: ChartNoAxesColumn,
+      isActive: (p) => p === `${root}/reports`,
+    },
+    {
+      href: `${root}/settings`,
+      label: "Settings",
+      icon: Settings,
+      isActive: (p) => p === `${root}/settings`,
+      desktopOnly: true,
     },
     {
       href: `${root}/profile`,
@@ -46,6 +61,19 @@ const NAV: Record<Role, NavItem[]> = {
       label: "Requisitions",
       icon: FileText,
       isActive: (p) => p.startsWith("/requisitions"),
+    },
+    {
+      href: "/reports",
+      label: "Reports",
+      icon: ChartNoAxesColumn,
+      isActive: (p) => p === "/reports",
+    },
+    {
+      href: "/settings",
+      label: "Settings",
+      icon: Settings,
+      isActive: (p) => p === "/settings",
+      desktopOnly: true,
     },
     { href: "/profile", label: "Profile", icon: User, isActive: (p) => p === "/profile" },
   ],
@@ -134,7 +162,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </main>
-          {showTabs && <BottomNav items={NAV[role]} pathname={pathname} />}
+            {showTabs && (
+            <BottomNav
+              items={NAV[role].filter((item) => !item.desktopOnly)}
+              pathname={pathname}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -208,7 +241,7 @@ function BottomNav({ items, pathname }: { items: NavItem[]; pathname: string }) 
       aria-label="Primary"
       className="border-hairline bg-card/95 sticky bottom-0 z-30 border-t backdrop-blur-sm lg:hidden"
     >
-      <ul className="grid grid-cols-3 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <ul className="grid grid-cols-4 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {items.map(({ href, label, icon: Icon, isActive }) => {
           const active = isActive(pathname)
           return (
