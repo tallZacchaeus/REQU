@@ -45,7 +45,7 @@ export function TopBar({ role }: { role: Role }) {
           href={desk.cta.kind === "create" ? "/" : `/${role}`}
           className="border-hairline hover:bg-muted/40 press flex h-16 w-[248px] shrink-0 cursor-pointer items-center gap-2.5 border-r px-4"
         >
-          <span className="btn-gradient flex size-9 shrink-0 items-center justify-center rounded-xl">
+          <span className="btn-gradient text-white flex size-9 shrink-0 items-center justify-center rounded-xl">
             <LogoMark className="size-[18px]" />
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
@@ -70,7 +70,7 @@ export function TopBar({ role }: { role: Role }) {
 
             <Link
               href={desk.cta.href}
-              className="btn-gradient press flex h-10 cursor-pointer items-center gap-2 rounded-xl px-4 text-[14px] font-semibold hover:brightness-110"
+              className="btn-gradient text-white press flex h-10 cursor-pointer items-center gap-2 rounded-xl px-4 text-[14px] font-semibold hover:brightness-110"
             >
               {desk.cta.kind === "create" ? (
                 <>

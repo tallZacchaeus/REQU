@@ -339,7 +339,7 @@ function CheckEmail({
       <div className="animate-rise flex flex-col items-center text-center lg:items-start lg:text-left">
         <span className="relative flex size-14 items-center justify-center">
           <span className="bg-brand/20 animate-pulse-ring absolute inset-0 rounded-2xl" aria-hidden />
-          <span className="btn-gradient relative flex size-14 items-center justify-center rounded-2xl shadow-[0_14px_30px_-10px_rgb(18_58_104_/_0.6)]">
+          <span className="btn-gradient text-white relative flex size-14 items-center justify-center rounded-2xl shadow-[0_14px_30px_-10px_rgb(18_58_104_/_0.6)]">
             <Mail className="size-6" strokeWidth={1.8} aria-hidden />
           </span>
         </span>
@@ -364,7 +364,7 @@ function CheckEmail({
       <button
         type="button"
         onClick={onOpen}
-        className="btn-gradient mt-5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-[15px] font-semibold shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99]"
+        className="btn-gradient text-white mt-5 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-[15px] font-semibold shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99]"
       >
         <Mail className="size-[17px]" strokeWidth={2.2} aria-hidden />
         Open email app

@@ -62,7 +62,7 @@ export function RequisitionsList() {
           </h1>
           <Link
             href="/requisitions/new"
-            className="btn-gradient -mr-1 flex h-9 cursor-pointer items-center gap-1.5 rounded-lg pr-3 pl-2.5 text-[13.5px] font-semibold transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.97]"
+            className="btn-gradient text-white -mr-1 flex h-9 cursor-pointer items-center gap-1.5 rounded-lg pr-3 pl-2.5 text-[13.5px] font-semibold transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.97]"
           >
             <Plus className="size-4" strokeWidth={2.6} aria-hidden />
             New

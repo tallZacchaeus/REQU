@@ -170,7 +170,7 @@ export default function DashboardPage() {
       <div className="px-4 pt-5 pb-8 md:px-0 lg:pt-6">
         <Link
           href="/requisitions/new"
-          className="btn-gradient press-wide group flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99] lg:h-11 lg:w-fit lg:px-6"
+          className="btn-gradient text-white press-wide group flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl text-[15.5px] font-semibold shadow-raised transition-[filter,transform] duration-200 hover:brightness-110 active:scale-[0.99] lg:h-11 lg:w-fit lg:px-6"
         >
           <Plus className="size-[18px]" strokeWidth={2.6} aria-hidden />
           New Requisition
