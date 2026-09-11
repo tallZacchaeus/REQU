@@ -4,7 +4,7 @@ Requisition management for a church Youth & Young Adults department. A Head of
 Department raises a funding request; it travels through recommendation,
 approval and payment, and closes when the receipts are accounted for.
 
-**Live:** https://church-worker-management-system.vercel.app
+**Live:** https://requ-rubyddesigner.vercel.app
 **Testing notes:** [TESTING.md](TESTING.md)
 
 ## The workflow
@@ -31,7 +31,8 @@ department's requisition; a reviewer never sees a draft.
 
 ## Running it
 
-Requires Node 20.9+.
+Requires Node 20.9+. There are no environment variables and no services to
+stand up — clone and run.
 
 ```bash
 npm install
@@ -59,6 +60,16 @@ lib/                 domain types, workflow, formatting, derived reports
 The three reviewing desks are one set of screens driven by config, not three
 copies. `lib/roles.ts` describes what each desk sees and which actions it may
 take.
+
+## Deploying
+
+`main` is wired to Vercel: pushing to it rebuilds the site.
+
+One caveat on the current Vercel plan — **only the account owner's commits
+trigger a build.** A push authored by anyone else is rejected with "the commit
+author doesn't have permission to create deployments for this project." Until
+the project moves to a Vercel team, other contributors should open pull
+requests and let the owner merge, which re-authors the merge commit.
 
 ## Not production ready
 
