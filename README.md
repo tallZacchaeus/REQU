@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# REQU
 
-## Getting Started
+Requisition management for a church Youth & Young Adults department. A Head of
+Department raises a funding request; it travels through recommendation,
+approval and payment, and closes when the receipts are accounted for.
 
-First, run the development server:
+**Live:** https://church-worker-management-system.vercel.app
+**Testing notes:** [TESTING.md](TESTING.md)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## The workflow
+
+```
+HOD raises  →  ANYP recommends  →  NYP approves  →  Finance disburses  →  HOD reconciles
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Finance pays and later checks the receipts that close the requisition. A
+reviewer can send a request back to the HOD with specific changes at any point
+before payment.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Roles
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Role | Does |
+| --- | --- |
+| Head of Department | Raises requisitions, tracks them, files reconciliations |
+| Assistant National Youth Pastor | Recommends or returns |
+| National Youth Pastor | Approves, returns or rejects |
+| Finance | Disburses funds and closes reconciliations |
 
-## Learn More
+Each role sees only its own slice of the app. An HOD cannot open another
+department's requisition; a reviewer never sees a draft.
 
-To learn more about Next.js, take a look at the following resources:
+## Running it
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Requires Node 20.9+.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
+Then open http://localhost:3000. The sign-in screen lists prototype accounts —
+tap one rather than typing an address.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## How it is built
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js 16 (App Router, Turbopack), React 19, Tailwind v4, TypeScript.
+
+There is no backend. All state lives in the browser's `localStorage`, seeded
+from `lib/data.ts`. That keeps the prototype self-contained, and it means two
+people cannot collaborate on one requisition — see TESTING.md.
+
+```
+app/                 routes, one folder per role
+components/app/      shared UI and the design system's parts
+components/reviewer/ the review desks, rendered from lib/roles.ts
+lib/                 domain types, workflow, formatting, derived reports
+```
+
+The three reviewing desks are one set of screens driven by config, not three
+copies. `lib/roles.ts` describes what each desk sees and which actions it may
+take.
+
+## Not production ready
+
+- No authentication. The magic link is simulated and anyone can pick a role.
+- No file storage. Attachments record a name and size only.
+- All figures are invented.
