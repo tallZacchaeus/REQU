@@ -113,9 +113,11 @@ async function main() {
       }
       for (const cm of r.comments ?? []) {
         const author = await c.query<{ id: number }>("select id from people where full_name=$1 limit 1", [cm.author])
+        // The casts matter: with a null first argument Postgres cannot infer a type for
+        // coalesce and falls back to text, which the integer column then rejects.
         await c.query(
           `insert into comments(requisition_id, author_id, body, requested_changes, created_at)
-           values ($1, coalesce($2,$3), $4, $5, $6)`,
+           values ($1, coalesce($2::int, $3::int), $4, $5, $6)`,
           [id, author.rows[0]?.id ?? null, requester, cm.body, cm.requestedChanges ?? [], cm.date],
         )
       }
