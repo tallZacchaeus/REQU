@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+.claude
+README.md
+TESTING.md
+AGENTS.md
+CLAUDE.md

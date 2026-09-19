@@ -1,0 +1,10 @@
+# REQU on the shared VPS. Bound to loopback only: Caddy owns 80/443 for every hostname
+# on this box and proxies to here, so this port is never exposed to the internet.
+name: requ
+services:
+  web:
+    build:
+      context: ./src
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3200:3000"
