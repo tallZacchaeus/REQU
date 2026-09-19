@@ -29,6 +29,31 @@ before payment.
 Each role sees only its own slice of the app. An HOD cannot open another
 department's requisition; a reviewer never sees a draft.
 
+## The database
+
+Phase 1 of making this real. The schema lives in `db/migrations`, and follows `lib/types.ts`
+closely — the model the prototype was built around was a good one, and 29 screens are already
+written against it.
+
+```bash
+export DATABASE_URL=postgres://user:pass@host:5432/requ
+npm run db:migrate            # apply anything not yet applied; safe to re-run
+npm run db:seed               # departments and the four accounts
+npm run db:seed -- --samples  # plus the 14 sample requisitions (refuses under NODE_ENV=production)
+```
+
+Two things worth knowing before building on it:
+
+- **Money is whole naira in a bigint.** Minor units are the usual habit, but nothing in this
+  workflow deals in kobo, and a units mismatch across those screens is a likelier bug than the
+  precision is a need.
+- **`activity` is append-only.** No update or delete path should ever be written against it.
+  When a process ends in a payment, the record of who did what has to be the one thing nobody
+  can quietly tidy afterwards.
+
+**The screens do not read from this yet** — they still use the browser's own storage. Wiring
+them up, along with real sign-in and permissions enforced on the server, is phases 2 and 3.
+
 ## Running it
 
 Requires Node 20.9+. There are no environment variables and no services to
