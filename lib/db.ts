@@ -1,4 +1,4 @@
-import { Pool } from "pg"
+import { Pool, type QueryResultRow } from "pg"
 
 /**
  * One pool for the process. Next reloads modules in development, so it is stashed on
@@ -17,7 +17,7 @@ export const pool =
 if (process.env.NODE_ENV !== "production") globalForDb.requPool = pool
 
 /** Run a statement. Thin on purpose: the queries live with the code that needs them. */
-export async function q<T extends Record<string, unknown> = Record<string, unknown>>(
+export async function q<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params: unknown[] = [],
 ) {

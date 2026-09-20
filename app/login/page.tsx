@@ -41,6 +41,25 @@ export default function LoginPage() {
 
     setError(null)
     setStatus("sending")
+
+    // Ask the server for a real link. It answers the same way whether or not the address
+    // belongs to anybody, so there is nothing here to tell a stranger who works here.
+    void fetch("/api/auth/request-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: value }),
+    })
+      .then(async (r) => {
+        if (r.ok) return
+        const body = (await r.json().catch(() => ({}))) as { error?: string }
+        setError(body.error ?? "We could not send the email just now. Please try again.")
+        setStatus("idle")
+      })
+      .catch(() => {
+        setError("Could not reach the server. Please try again in a moment.")
+        setStatus("idle")
+      })
+
     // Two beats: the send, then a held confirmation so the button resolves
     // before the screen changes under the reader.
     timers.current.push(
