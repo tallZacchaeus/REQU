@@ -97,7 +97,10 @@ becomes `reconciled`, or queries it back.
 
 ## 5. What the screens cannot do yet
 
-- **Sign-in does not verify anybody.** Choosing an account signs you in as that person.
+- **Two sign-in paths exist side by side.** The email field is real: it asks the server for a
+  single-use link, which arrives by email and opens a genuine session. The **prototype account
+  buttons still sign you in as anyone**, because the screens do not read the database until
+  phase 3 and removing that path would break the review in progress.
 - **Data is per-browser.** Two people never see the same requisition.
 - **Attachments are names only.** No file is ever uploaded or stored.
 - **Nothing is emailed.** The "single-use link" is not sent.

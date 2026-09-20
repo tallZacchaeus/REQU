@@ -9,7 +9,7 @@
 | **0 — Prototype** | 29 screens across four role areas, the domain model, the workflow, reports with CSV and print | `app/`, `components/`, `lib/types.ts`, `lib/status.ts`, `lib/roles.ts` | **Done** (by the designer) |
 | **Infra** | Containerised, behind Caddy at `requisition.rccgyayang.org`, loopback-only, deploy with rollback, in monitoring, holding password | `Dockerfile`, `docker-compose.yml`, `infra/deploy-from-git.sh` | **Done** |
 | **1 — Database** | Schema, migration runner, seed; verified against PostgreSQL 16 | `db/migrations/001_core.sql`, `db/migrate.ts`, `db/seed.ts`, `lib/db.ts` | **Done** — *not yet wired to the screens* |
-| **2 — Sign-in** | Single-use emailed links through the parish mail server, Redis sessions, accounts, rate limits | — | **Pending** |
+| **2 — Sign-in** | Single-use emailed links through the parish mail server, sessions, accounts, rate limits | `db/migrations/002_auth.sql`, `lib/auth.ts`, `lib/mailer.ts`, `app/api/auth/*`, `app/api/me`, `db/verify-auth.mts` | **Done** — *screens still read the browser* |
 | **3 — Permissions & transitions** | Every rule re-stated on the server; legal state moves only; screens read the database | — | **Pending** |
 | **4 — Attachments** | Real upload, ClamAV scanning, storage, reconciliation against receipts | — | **Pending** |
 | **5 — Notifications & reports** | Email what is waiting on someone; server-side aggregation | — | **Pending** |
@@ -52,8 +52,13 @@ that matters.
    list must come from the church before phase 2.
 5. **Accessibility unaudited.** Focus states, contrast and a keyboard pass are all untested —
    see [04-UI-UX-Design-Brief.md](04-UI-UX-Design-Brief.md).
-6. **No tests yet.** The mail app's suite is a reasonable model: unit tests around the parts
-   where a quiet mistake is expensive, which here means transitions and permissions.
+6. **Thin tests.** `npm run verify:auth` covers the sign-in machinery against a real database
+   — replay, forged and tampered sessions, limits, expiry. Nothing else is covered; transitions
+   and permissions need the same treatment in phase 3.
+7. **The seeded accounts are fiction.** They are `@requ.org` addresses, a domain the church does
+   not own, so no sign-in link can reach anyone. Real people with real `@rccgyayang.org`
+   addresses must be loaded before sign-in works for a single person — the mail server now has
+   those mailboxes.
 
 ## Decisions needed from leadership
 

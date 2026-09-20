@@ -13,10 +13,15 @@
 | Fonts | Source Sans 3 (text), IBM Plex Mono (figures) | `next/font/google`, self-hosted at build |
 | Database | **PostgreSQL 16** | shared instance on the VPS |
 | DB access | `pg` with hand-written SQL | same idiom as the mail app; no ORM |
-| Sessions | **Redis** *(planned, phase 2)* | the instance the mail app already runs |
+| Sessions & tokens | **PostgreSQL** | see below — not Redis, deliberately |
 
 **No ORM is deliberate.** The mail application on the same box uses raw SQL and a small
 migration runner. One idiom across both projects means one set of habits to debug at 11pm.
+
+**No Redis is also deliberate**, and a change from the original plan. The mail app keeps
+sessions in Redis, but that instance sits on another Docker network, and REQU is one small
+app on one box serving tens of people. A second service to plumb, watch and back up buys
+nothing here, while one database means one backup covers everything.
 
 ## 2. Hosting
 
@@ -70,8 +75,10 @@ clarity matter far more than throughput.
 | Variable | Purpose |
 | --- | --- |
 | `DATABASE_URL` | PostgreSQL connection string |
-| `REDIS_URL` | *planned, phase 2* — sessions and rate limits |
-| `SMTP_*` / `MASTER_USER` / `MASTER_PASSWORD` | *planned, phase 2* — sending through the mail server |
+| `SESSION_SECRET` | **Required.** Signs session cookies; at least 32 characters, no default |
+| `APP_URL` | Base for the links put in emails (default `https://requisition.rccgyayang.org`) |
+| `MAIL_HOST`, `SMTP_PORT`, `MAIL_FROM` | Where sign-in emails go out from |
+| `MASTER_USER`, `MASTER_PASSWORD` | Dovecot master user, so no mailbox password is needed |
 
 Local development reads `.env.local` (gitignored). There are currently no secrets in the
 repository, and the public repo must stay that way.

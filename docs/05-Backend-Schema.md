@@ -46,6 +46,9 @@ erDiagram
 | `requisition_stages` | `(requisition_id, stage)`, `completed_at`, `note` — a row exists only once the stage is done |
 | `reconciliations` | `requisition_id` (pk), `note`, `submitted_at` |
 | `reconciliation_actuals` | `(requisition_id, expense_item_id)`, `amount` (naira) |
+| `login_tokens` | `token_hash` (pk), `person_id`, `expires_at`, `used_at`, `requested_ip` — only the hash is stored, and the row is kept after use so a replay can be told from a link that never existed |
+| `sessions` | `id` (pk), `person_id`, `created_at`, `last_seen_at`, `expires_at`, `user_agent`, `ip` |
+| `rate_limits` | `(key, window_start)`, `count` |
 
 **Roles:** `hod`, `ayp`, `nyp`, `finance`.
 **Statuses:** `draft`, `under_review`, `recommended`, `awaiting_approval`, `approved`,
@@ -67,16 +70,18 @@ npm run db:seed -- --samples  # plus 14 sample requisitions; refuses under NODE_
 The seed reads [`lib/data.ts`](../lib/data.ts) rather than restating it, so the prototype and
 the database cannot drift apart while both exist.
 
-## 4. API surface — *planned, none of this exists yet*
+## 4. API surface
 
-There are no route handlers in the application today. Phases 2 and 3 introduce them.
+The four authentication endpoints are **built and checked** (`npm run verify:auth`). Everything
+below them is still planned — a documented endpoint that does not exist is worse than none,
+so the phase column says which is which.
 
 | Method & path | Purpose | Phase |
 | --- | --- | --- |
-| `POST /api/auth/request-link` | Email a single-use sign-in link | 2 |
-| `GET /api/auth/verify` | Exchange the link for a session | 2 |
-| `POST /api/auth/signout` | End the session | 2 |
-| `GET /api/me` | Who is signed in, and their role | 2 |
+| `POST /api/auth/request-link` | Email a single-use sign-in link | **built** |
+| `GET /api/auth/verify` | Exchange the link for a session | **built** |
+| `POST /api/auth/signout` | End the session | **built** |
+| `GET /api/me` | Who is signed in, and their role | **built** |
 | `GET /api/requisitions` | List, scoped to the caller's role | 3 |
 | `POST /api/requisitions` | Create a draft | 3 |
 | `GET /api/requisitions/:id` | Detail, if the caller may see it | 3 |
