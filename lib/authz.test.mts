@@ -15,7 +15,7 @@ const ok = (pass: boolean, what: string) => { if (!pass) failed++; console.log(`
 
 const ALL: RequisitionStatus[] = ["draft","under_review","recommended","awaiting_approval","approved",
   "with_finance","disbursed","changes_requested","rejected","reconciliation_review","reconciled"]
-const ROLES: Role[] = ["hod","ayp","nyp","finance"]
+const ROLES: Role[] = ["hod","ayp","nyp","finance","super_admin"]
 
 const owner: Actor   = { id: 1, role: "hod", departmentId: 10 }
 const colleague: Actor = { id: 2, role: "hod", departmentId: 10 }   // same department
@@ -65,6 +65,14 @@ ok(!canTransition(stranger, subj("draft"), "under_review").ok, "someone who cann
 ok(!canTransition(owner, subj("rejected"), "under_review").ok, "a rejected requisition cannot be quietly revived")
 ok(!canTransition(owner, subj("reconciled"), "under_review").ok, "a closed requisition cannot be reopened")
 ok(!canTransition(fin, subj("approved"), "disbursed").ok, "Finance cannot skip its own processing step")
+
+/* ── The platform administrator ─────────────────────────────── */
+const admin: Actor = { id: 7, role: "super_admin", departmentId: null }
+ok(ALL.every((s) => canSee(admin, subj(s))), "the administrator sees everything, drafts included")
+ok(ALL.every((s) => !canEdit(admin, subj(s))), "the administrator can never edit the figures")
+ok(ALL.every((from) => ALL.every((to) => !canTransition(admin, subj(from), to).ok)),
+   "the administrator cannot make a single move in the workflow")
+ok(allowedTransitions(admin, subj("awaiting_approval")).length === 0, "nothing is offered to them to approve")
 
 /* ── The happy path, in order ───────────────────────────────── */
 ok(canTransition(owner, subj("draft"), "under_review").ok, "HOD submits")

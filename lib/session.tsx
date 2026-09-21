@@ -51,6 +51,8 @@ export const HOME_FOR: Record<Role, string> = {
   ayp: "/ayp",
   nyp: "/nyp",
   finance: "/finance",
+  // The administrator has no desk of their own; they look at the same overview.
+  super_admin: "/",
 }
 
 const initial: Persisted = {

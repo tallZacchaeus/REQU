@@ -32,7 +32,18 @@ export function deskFor(role: Role): Desk {
     }
   }
 
-  const config = CONFIGS[role]
+  // Only the three reviewer roles have a desk. An administrator is not one of them, and
+  // indexing CONFIGS with their role would hand back undefined at runtime.
+  const config = CONFIGS[role as keyof typeof CONFIGS]
+  if (!config) {
+    return {
+      visible: () => true,
+      hrefFor: (r) => `/requisitions/${r.id}`,
+      needsMe: () => false,
+      cta: { label: "Requisitions", href: "/requisitions", kind: "queue" },
+      searchLabel: "Search every requisition",
+    }
+  }
   return {
     visible: visibleToReviewer,
     hrefFor: (r) => config.detailHref(r.id),

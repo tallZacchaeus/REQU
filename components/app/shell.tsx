@@ -80,6 +80,25 @@ const NAV: Record<Role, NavItem[]> = {
   ayp: reviewerNav("/ayp", "Review"),
   nyp: reviewerNav("/nyp", "Approvals"),
   finance: reviewerNav("/finance", "Payments"),
+  // The administrator reads; they take no part in the workflow, and the server refuses
+  // anything they might try. No "New Requisition" here, because it would only be rejected.
+  super_admin: [
+    { href: "/", label: "Home", icon: House, isActive: (p) => p === "/" },
+    {
+      href: "/requisitions",
+      label: "Requisitions",
+      icon: FileText,
+      isActive: (p) => p.startsWith("/requisitions"),
+    },
+    {
+      href: "/reports",
+      label: "Reports",
+      icon: ChartNoAxesColumn,
+      isActive: (p) => p === "/reports",
+    },
+    { href: "/settings", label: "Settings", icon: Settings, isActive: (p) => p === "/settings" },
+    { href: "/profile", label: "Profile", icon: User, isActive: (p) => p === "/profile" },
+  ]
 }
 
 /**
@@ -101,6 +120,7 @@ const ROOTS: Record<Role, string> = {
   ayp: "/ayp",
   nyp: "/nyp",
   finance: "/finance",
+  super_admin: "/",
 }
 
 const DESK_ROOTS = ["/ayp", "/nyp", "/finance"]

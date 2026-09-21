@@ -1,6 +1,7 @@
 import type { Requester, Requisition } from "./types"
 
-export type Role = "hod" | "ayp" | "nyp" | "finance"
+/** `super_admin` runs the platform. It takes no part in the workflow — see lib/authz.ts. */
+export type Role = "hod" | "ayp" | "nyp" | "finance" | "super_admin"
 
 export interface Account {
   role: Role

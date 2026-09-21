@@ -67,12 +67,25 @@ const REVIEWERS: ReadonlyArray<Role> = ["ayp", "nyp", "finance"]
 export const isReviewer = (role: Role) => REVIEWERS.includes(role)
 
 /**
+ * The platform administrator. Sees everything so they can answer "where has my requisition
+ * gone?", and can do nothing to it: no role appears against them in TRANSITIONS, and they
+ * fail canEdit like every other non-owner. An administrator who could approve would put back
+ * the very hole this workflow exists to close.
+ *
+ * Drafts are included in what they can see. They have direct access to the database in any
+ * case, so hiding drafts in the interface would be a courtesy rather than a control — and
+ * it is better that this is written down than quietly true.
+ */
+export const isAdmin = (role: Role) => role === "super_admin"
+
+/**
  * May this person open this requisition at all?
  *
  * A HOD sees their own work and their department's. Reviewers see everything that has been
  * submitted — but never a draft, which belongs to the person still writing it.
  */
 export function canSee(actor: Actor, r: Subject): boolean {
+  if (isAdmin(actor.role)) return true
   if (isReviewer(actor.role)) return r.status !== "draft"
   if (actor.role === "hod") {
     if (r.requesterId === actor.id) return true
@@ -119,6 +132,7 @@ export function allowedTransitions(actor: Actor, r: Subject): RequisitionStatus[
 
 /** A SQL fragment scoping a list to what the actor may see. Parameters: $1 = actor id, $2 = department. */
 export function visibilityClause(actor: Actor) {
+  if (isAdmin(actor.role)) return { sql: "true", params: [] as unknown[] }
   if (isReviewer(actor.role)) return { sql: "r.status <> 'draft'", params: [] as unknown[] }
   if (actor.role === "hod") {
     return {

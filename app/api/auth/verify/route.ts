@@ -5,7 +5,7 @@ import type { Role } from "@/lib/data"
 export const runtime = "nodejs"
 
 /** Where each role lands once signed in. */
-const HOME: Record<Role, string> = { hod: "/", ayp: "/ayp", nyp: "/nyp", finance: "/finance" }
+const HOME: Record<Role, string> = { hod: "/", ayp: "/ayp", nyp: "/nyp", finance: "/finance", super_admin: "/" }
 
 export async function GET(req: Request) {
   const url = new URL(req.url)
