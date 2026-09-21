@@ -1,10 +1,24 @@
 # REQU on the shared VPS. Bound to loopback only: Caddy owns 80/443 for every hostname
 # on this box and proxies to here, so this port is never exposed to the internet.
+#
+# It joins the mail server's network as well as its own, purely to reach PostgreSQL.
+# Its own database on that shared instance — it reads nothing of the mail server's.
 name: requ
 services:
   web:
     build:
       context: ./src
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
       - "127.0.0.1:3200:3000"
+    networks:
+      - default
+      - mail
+
+networks:
+  default:
+  mail:
+    external: true
+    name: rccg-mail_default
