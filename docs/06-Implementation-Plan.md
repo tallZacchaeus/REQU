@@ -10,7 +10,7 @@
 | **Infra** | Containerised, behind Caddy at `requisition.rccgyayang.org`, loopback-only, deploy with rollback, in monitoring, holding password | `Dockerfile`, `docker-compose.yml`, `infra/deploy-from-git.sh` | **Done** |
 | **1 — Database** | Schema, migration runner, seed; verified against PostgreSQL 16 | `db/migrations/001_core.sql`, `db/migrate.ts`, `db/seed.ts`, `lib/db.ts` | **Done** — *not yet wired to the screens* |
 | **2 — Sign-in** | Single-use emailed links through the parish mail server, sessions, accounts, rate limits | `db/migrations/002_auth.sql`, `lib/auth.ts`, `lib/mailer.ts`, `app/api/auth/*`, `app/api/me`, `db/verify-auth.mts` | **Done** — *screens still read the browser* |
-| **3 — Permissions & transitions** | Every rule re-stated on the server; legal state moves only; screens read the database | — | **Pending** |
+| **3 — Permissions & transitions** | Every rule re-stated on the server; legal state moves only; screens read the database | `lib/authz.ts`, `lib/requisitions.ts`, `lib/api-actor.ts`, `app/api/requisitions/*`, `lib/authz.test.mts`, `db/verify-workflow.mts` | **Server side done and verified.** Screens still read the browser — see below |
 | **4 — Attachments** | Real upload, ClamAV scanning, storage, reconciliation against receipts | — | **Pending** |
 | **5 — Notifications & reports** | Email what is waiting on someone; server-side aggregation | — | **Pending** |
 | **6 — Hardening** | Append-only audit trail in anger, backups, accessibility audit, pilot fixes | — | **Pending** |
@@ -55,10 +55,17 @@ that matters.
 6. **Thin tests.** `npm run verify:auth` covers the sign-in machinery against a real database
    — replay, forged and tampered sessions, limits, expiry. Nothing else is covered; transitions
    and permissions need the same treatment in phase 3.
-7. **The seeded accounts are fiction.** They are `@requ.org` addresses, a domain the church does
-   not own, so no sign-in link can reach anyone. Real people with real `@rccgyayang.org`
-   addresses must be loaded before sign-in works for a single person — the mail server now has
-   those mailboxes.
+7. **The seeded accounts are fiction, and this now blocks phase 3.** They are `@requ.org`
+   addresses, a domain the church does not own, so no sign-in link can reach anybody. The
+   server side of phase 3 is built and verified, but pointing the screens at it would leave
+   the app unusable: nobody could sign in, and the prototype account buttons the office is
+   currently reviewing with would stop working.
+
+   The mail server now holds 73 real `@rccgyayang.org` mailboxes for the EXCO, so the
+   addresses exist. What is missing is a decision: **who is a Head of Department, who reviews,
+   who approves, and who is Finance.** That is not a technical choice and is set out in the
+   scope document. Once it is answered, seeding real people and switching the screens over is
+   a small change — the store has only four write sites.
 
 ## Decisions needed from leadership
 

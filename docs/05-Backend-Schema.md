@@ -82,19 +82,19 @@ so the phase column says which is which.
 | `GET /api/auth/verify` | Exchange the link for a session | **built** |
 | `POST /api/auth/signout` | End the session | **built** |
 | `GET /api/me` | Who is signed in, and their role | **built** |
-| `GET /api/requisitions` | List, scoped to the caller's role | 3 |
-| `POST /api/requisitions` | Create a draft | 3 |
-| `GET /api/requisitions/:id` | Detail, if the caller may see it | 3 |
-| `PATCH /api/requisitions/:id` | Edit while draft or returned | 3 |
-| `POST /api/requisitions/:id/submit` | Draft → under review | 3 |
-| `POST /api/requisitions/:id/recommend` | ANYP | 3 |
-| `POST /api/requisitions/:id/approve` | NYP | 3 |
-| `POST /api/requisitions/:id/return` | Return with named changes | 3 |
-| `POST /api/requisitions/:id/reject` | NYP | 3 |
-| `POST /api/requisitions/:id/disburse` | Finance, with payment reference | 3 |
+| `GET /api/requisitions` | List, scoped to the caller's role | **built** |
+| `POST /api/requisitions` | Create a draft | **built** |
+| `GET /api/requisitions/:id` | Detail, if the caller may see it | **built** |
+| `PATCH /api/requisitions/:id` | Edit while draft or returned, and make a move | **built** |
 | `POST /api/requisitions/:id/reconcile` | Actual spend and receipts | 4 |
 | `POST /api/requisitions/:id/attachments` | Upload, scan, store | 4 |
 | `GET /api/reports` | Server-side aggregation | 5 |
 
-**Every one of these must check permission on the server.** The rules currently in
-`lib/review.ts` and `lib/roles.ts` run in the browser and decide only what is *drawn*.
+Moves are made through `PATCH` with a `to` status rather than one endpoint per verb: the
+screens save a requisition as a whole, and a single guarded entry point is easier to be sure
+about than nine.
+
+**The rules live in [`lib/authz.ts`](../lib/authz.ts)** — one table of every legal move, with
+the role permitted to make it. Anything absent is refused. `lib/review.ts` and `lib/roles.ts`
+still run in the browser, but they now decide only what is *drawn*; nothing depends on them
+for safety.
