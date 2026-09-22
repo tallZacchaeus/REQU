@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 
 import { LogoMark } from "@/components/app/logo"
+import { ROLE_LABEL } from "@/lib/data"
 import { MobileBell } from "@/components/app/notifications"
 import { MobileSearchButton } from "@/components/app/topbar"
 import { AreaTrend, MonthlyBars, ShareBar } from "@/components/app/charts"
@@ -21,6 +22,7 @@ import { deskSplit, monthlySeries, trend } from "@/lib/series"
 import type { StageKey } from "@/lib/types"
 import { byLongestWaiting, visibleToReviewer, waitingDays } from "@/lib/review"
 import type { ReviewerConfig } from "@/lib/roles"
+import { useSession } from "@/lib/session"
 import { useRequisitions } from "@/lib/store"
 import { requisitionTotal } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -33,6 +35,7 @@ function greeting() {
 }
 
 export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
+  const { account, role } = useSession()
   const [flow, setFlow] = useState<"requested" | "cleared">("requested")
   const { requisitions } = useRequisitions()
 
@@ -71,7 +74,7 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
               className="press group flex cursor-pointer items-center gap-0.5"
             >
               <span className="bg-brand/25 flex size-9 items-center justify-center rounded-full text-[12.5px] font-semibold text-white ring-2 ring-white/25 transition-all duration-200 group-hover:ring-white/50">
-                {config.person.initials}
+                {account.initials}
               </span>
               <ChevronDown className="size-3.5 text-white/50" aria-hidden />
             </Link>
@@ -84,10 +87,10 @@ export function ReviewerDashboard({ config }: { config: ReviewerConfig }) {
               {greeting()},
             </p>
             <h1 className="mt-1 text-[26px] leading-tight font-semibold tracking-[-0.025em] text-white lg:text-[30px]">
-              {config.person.shortName}
+              {(account.shortName || account.name)}
             </h1>
             <p className="mt-1.5 text-[12.5px] text-white/55">
-              {config.person.role} · {config.person.unit}
+              {ROLE_LABEL[role]} · {account.scope}
             </p>
           </div>
 

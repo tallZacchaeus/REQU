@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Paperclip, Plus, Trash2, Upload } from "lucide-react"
 
 import { AmountField, SelectField, TextAreaField, TextField } from "@/components/app/fields"
+import { useSession } from "@/lib/session"
 import { DetailRow, MicroLabel, Money, StickyFooter } from "@/components/app/primitives"
 import { ScreenHeader } from "@/components/app/screen-header"
-import { CURRENT_USER } from "@/lib/data"
 import { amountInWords, formatDate } from "@/lib/format"
 import { AnimatedMoney } from "@/components/app/motion"
 import { useToast } from "@/components/app/toast"
@@ -47,6 +47,7 @@ export function NewRequisitionFlow() {
 }
 
 function Flow({ existing }: { existing?: Requisition }) {
+  const { account } = useSession()
   const router = useRouter()
   const { create, saveDraft: persistDraft, moveTo } = useRequisitions()
   const toast = useToast()
@@ -55,7 +56,7 @@ function Flow({ existing }: { existing?: Requisition }) {
   const [programme, setProgramme] = useState(existing?.programme ?? "")
   const [programmeDate, setProgrammeDate] = useState(existing?.programmeDate ?? "")
   const [location, setLocation] = useState(existing?.location ?? "")
-  const [unit, setUnit] = useState(CURRENT_USER.unit)
+  const [unit, setUnit] = useState((account.scope || ""))
   const [purpose, setPurpose] = useState(existing?.purpose ?? "")
   const [items, setItems] = useState<ExpenseItem[]>(
     existing?.items.length ? existing.items : [blankItem(), blankItem()],
@@ -208,7 +209,7 @@ function Flow({ existing }: { existing?: Requisition }) {
               <div>
                 <p className="text-ink mb-1.5 text-[13px] font-semibold">Department</p>
                 <div className="border-hairline bg-muted text-ink-soft flex h-11 items-center rounded-lg border px-3 text-[15px]">
-                  {CURRENT_USER.department}
+                  {(account.scope || "")}
                 </div>
                 <p className="text-ink-faint mt-1.5 text-[11.5px]">
                   Locked to your assigned department.
@@ -422,7 +423,7 @@ function Flow({ existing }: { existing?: Requisition }) {
                   <DetailRow label="Location" value={location || "—"} />
                   <DetailRow
                     label="Department / Unit"
-                    value={`${CURRENT_USER.department} · ${unit}`}
+                    value={`${(account.scope || "")} · ${unit}`}
                   />
                   <DetailRow label="Purpose" value={purpose || "—"} />
                 </dl>
@@ -499,7 +500,7 @@ function Flow({ existing }: { existing?: Requisition }) {
       <StickyFooter
         note={
           step === 3
-            ? `Once submitted, this request goes to ${CURRENT_USER.reviewer}, your ${CURRENT_USER.reviewerRole}, for recommendation. You will not be able to edit it unless it is returned to you.`
+            ? `Once submitted, this request goes to ${(account.scope || "")}, your ${(account.scope || "")}, for recommendation. You will not be able to edit it unless it is returned to you.`
             : undefined
         }
       >

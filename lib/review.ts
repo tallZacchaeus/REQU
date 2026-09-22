@@ -1,11 +1,11 @@
-import { CURRENT_USER } from "./data"
 import type { Requisition } from "./types"
 
 /**
- * An HOD only ever sees their own department's requisitions. Reviewers work
- * across all of them, which is why the two sides filter differently.
+ * Everything the browser receives is already scoped to what the signed-in person may see,
+ * so a list needs no further filtering. This stays only because screens still call it, and
+ * it must never be mistaken for a permission check: lib/authz.ts on the server is that.
  */
-export const isMine = (r: Requisition) => r.requester.name === CURRENT_USER.name
+export const isMine = (_r: Requisition) => true
 
 /** Drafts never leave the HOD's device, so no reviewer may see them. */
 export const visibleToReviewer = (r: Requisition) => r.status !== "draft"

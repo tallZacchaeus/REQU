@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 
 import { LogoMark } from "@/components/app/logo"
+import { ROLE_LABEL, ROLE_SHORT } from "@/lib/data"
 import {
   ContactRow,
   Field,
@@ -26,10 +27,11 @@ import { useSession } from "@/lib/session"
 import { useRequisitions } from "@/lib/store"
 
 export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
+  const { account, role } = useSession()
   const { profile, updateProfile } = useSession()
   const { requisitions } = useRequisitions()
   const toast = useToast()
-  const person = config.person
+  const person = account
 
   const [open, setOpen] = useState<string | null>("personal")
   const [editing, setEditing] = useState(false)
@@ -60,7 +62,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
             {config.deskLabel}
           </span>
           <span className="rounded-md border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-bold tracking-[0.06em] text-white">
-            {person.roleShort}
+            {ROLE_SHORT[role]}
           </span>
         </div>
 
@@ -162,7 +164,7 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
             ) : (
               <Field label="Phone number" value={profile.phone} />
             )}
-            <Field label="Office" value={person.area} locked />
+            <Field label="Office" value={(account.scope || "Not set")} locked />
           </dl>
         </Group>
 
@@ -173,8 +175,8 @@ export function ReviewerProfile({ config }: { config: ReviewerConfig }) {
         >
           <dl className="divide-hairline divide-y">
             <Field label="Role" value={person.role} />
-            <Field label="Department" value={person.department} />
-            <Field label="Review scope" value={person.unit} />
+            <Field label="Department" value={(account.scope || "Not set")} />
+            <Field label="Review scope" value={(account.scope || "Not set")} />
           </dl>
           <p className="text-ink-soft border-hairline mt-3 border-t pt-3 text-[12px] leading-[1.5]">
             {config.boundary}

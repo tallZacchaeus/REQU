@@ -141,7 +141,7 @@ export function useSession() {
   return context
 }
 
-/** "david.adeyemi@requ.org" -> "da••••••••@requ.org" */
+/** "grace.okafor@rccgyayang.org" -> "gr••••••••@rccgyayang.org" */
 export function maskEmail(email: string) {
   const [name, domain] = email.split("@")
   if (!domain) return email

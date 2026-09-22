@@ -4,7 +4,6 @@ import Link from "next/link"
 import { Check } from "lucide-react"
 
 import { MicroLabel, Money, StatusBadge } from "@/components/app/primitives"
-import { CURRENT_USER } from "@/lib/data"
 import { useRequisitions } from "@/lib/store"
 import { requisitionTotal } from "@/lib/types"
 
@@ -37,7 +36,7 @@ export function SubmittedConfirmation({ id }: { id: string }) {
           Requisition submitted
         </h1>
         <p className="text-ink-soft mt-2 max-w-[300px] text-[13.5px] leading-[1.55]">
-          Your request has been sent to {CURRENT_USER.reviewer}, your {CURRENT_USER.reviewerRole},
+          Your request has been sent to the Assistant National Youth Pastor for recommendation,
           for recommendation.
         </p>
       </div>

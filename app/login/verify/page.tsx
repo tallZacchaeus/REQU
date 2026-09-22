@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { LogoMark } from "@/components/app/logo"
-import { accountFor } from "@/lib/data"
 import { HOME_FOR, useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
@@ -18,7 +17,8 @@ export default function VerifyPage() {
   // Resolved once, from the address the link was sent to. Reading `home` off
   // the session instead would change the moment sign-in lands, restarting the
   // effect mid-sequence.
-  const [destination] = useState(() => HOME_FOR[accountFor(pendingEmail ?? "")?.role ?? "hod"])
+  // Where they land is the server's to decide, from the role on their account.
+  const [destination] = useState("/")
 
   useEffect(() => {
     // Three beats: the check runs, it resolves, then the app takes over. The

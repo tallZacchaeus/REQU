@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { ChartNoAxesColumn, ClipboardCheck, FileText, House, Settings, User } from "lucide-react"
 
-import { accountByRole, type Role } from "@/lib/data"
+import { type Role } from "@/lib/data"
 import { HOME_FOR, useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
@@ -200,7 +200,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 /** Desktop only. Below lg the bottom tab bar carries navigation instead. */
 function Sidebar({ items, pathname, role }: { items: NavItem[]; pathname: string; role: Role }) {
-  const account = accountByRole(role)
+  // Whoever is actually signed in; the shell used to look one up by role.
+  const { account } = useSession()
 
   return (
     <aside className="border-hairline bg-card sticky top-16 hidden h-[calc(100dvh-4rem)] w-[248px] shrink-0 flex-col border-r px-4 py-5 lg:flex">

@@ -26,7 +26,7 @@ import {
 } from "@/components/app/settings"
 import { Sheet } from "@/components/app/sheet"
 import { useToast } from "@/components/app/toast"
-import { CURRENT_USER } from "@/lib/data"
+import { ROLE_LABEL, ROLE_SHORT } from "@/lib/data"
 import { useSession } from "@/lib/session"
 import { isMine } from "@/lib/review"
 import { useRequisitions } from "@/lib/store"
@@ -48,7 +48,7 @@ const CANNOT = [
 ]
 
 export default function ProfilePage() {
-  const { profile, updateProfile } = useSession()
+  const { profile, updateProfile, account, role } = useSession()
   const { requisitions: all } = useRequisitions()
   const toast = useToast()
   const requisitions = all.filter(isMine)
@@ -87,7 +87,7 @@ export default function ProfilePage() {
             Your workspace
           </span>
           <span className="rounded-md border border-white/20 bg-white/10 px-2 py-1 text-[11px] font-bold tracking-[0.06em] text-white">
-            {CURRENT_USER.roleShort}
+            {ROLE_SHORT[role]}
           </span>
         </div>
 
@@ -107,7 +107,7 @@ export default function ProfilePage() {
               />
             ) : (
               <span className="bg-brand/25 flex size-16 items-center justify-center rounded-full text-[19px] font-semibold tracking-[-0.01em] text-white ring-2 ring-white/25 transition-all duration-200 group-hover:ring-white/45">
-                {CURRENT_USER.initials}
+                {account.initials}
               </span>
             )}
             <span className="bg-brand absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full ring-[3px] ring-[#123a68] transition-transform duration-200 group-hover:scale-105 group-active:scale-90">
@@ -117,10 +117,10 @@ export default function ProfilePage() {
 
           <div className="min-w-0">
             <h1 className="truncate text-[21px] leading-tight font-semibold tracking-[-0.025em] text-white">
-              {CURRENT_USER.name}
+              {account.name}
             </h1>
             <p className="mt-1 truncate text-[12.5px] text-white/65">
-              {CURRENT_USER.role} · {CURRENT_USER.department}
+              {ROLE_LABEL[role]}{account.scope ? ` · ${account.scope}` : ""}
             </p>
             <p className="mt-0.5 truncate text-[12px] text-white/45">{profile.email}</p>
           </div>
@@ -189,7 +189,7 @@ export default function ProfilePage() {
           }
         >
           <dl className="divide-hairline divide-y">
-            <Field label="Full name" value={CURRENT_USER.name} locked />
+            <Field label="Full name" value={account.name} locked />
             <Field label="Email address" value={profile.email} locked />
             {editing ? (
               <div className="py-2.5">
@@ -210,7 +210,7 @@ export default function ProfilePage() {
             )}
             <Field
               label="Department / Unit"
-              value={`${CURRENT_USER.department} · ${CURRENT_USER.unit}`}
+              value={account.scope || "Not set"}
               locked
             />
           </dl>
@@ -226,10 +226,8 @@ export default function ProfilePage() {
           onToggle={() => toggle("role")}
         >
           <dl className="divide-hairline divide-y">
-            <Field label="Role" value={CURRENT_USER.role} />
-            <Field label="Department" value={CURRENT_USER.department} />
-            <Field label="Area" value={CURRENT_USER.area} />
-            <Field label="Parish" value={CURRENT_USER.parish} />
+            <Field label="Role" value={ROLE_LABEL[role]} />
+            <Field label="Department" value={account.scope || "Not set"} />
           </dl>
           <p className="text-ink-soft border-hairline mt-3 border-t pt-3 text-[12px] leading-[1.5]">
             You raise, track and reconcile requisitions for this department. Recommendation and

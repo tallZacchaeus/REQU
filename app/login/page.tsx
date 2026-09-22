@@ -6,7 +6,6 @@ import { ArrowRight, Check, Clock, Mail, ShieldCheck } from "lucide-react"
 
 import { LogoMark, LogoTile } from "@/components/app/logo"
 import { MicroLabel } from "@/components/app/primitives"
-import { DIRECTORY } from "@/lib/data"
 import { isValidEmail, maskEmail, useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
@@ -247,7 +246,7 @@ function EmailField({
         autoComplete="email"
         autoCapitalize="none"
         spellCheck={false}
-        placeholder="you@requ.org"
+        placeholder="you@rccgyayang.org"
         value={value}
         disabled={disabled}
         aria-invalid={error ? true : undefined}

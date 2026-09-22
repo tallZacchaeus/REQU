@@ -1,4 +1,3 @@
-import { AYP_USER, FINANCE_USER, NYP_USER } from "./data"
 import type { Requisition, RequisitionStatus, StageKey } from "./types"
 
 /**
@@ -47,7 +46,6 @@ export interface ReviewerPerson {
 
 export interface ReviewerConfig {
   role: "ayp" | "nyp" | "finance"
-  person: ReviewerPerson
   home: string
   queueHref: string
   profileHref: string
@@ -86,7 +84,7 @@ const requestChanges = (returnsTo: (r: Requisition) => string): ActionSpec => ({
 
 export const AYP_CONFIG: ReviewerConfig = {
   role: "ayp",
-  person: AYP_USER,
+
   home: "/ayp",
   queueHref: "/ayp/queue",
   profileHref: "/ayp/profile",
@@ -126,7 +124,7 @@ export const AYP_CONFIG: ReviewerConfig = {
       key: "advance",
       label: "Recommend",
       sheetTitle: "Recommend requisition",
-      blurb: () => `This goes to ${AYP_USER.approver} for approval.`,
+      blurb: () => `This goes to the National Youth Pastor for approval.`,
       confirmLabel: "Recommend",
       tone: "primary",
       nextStatus: "awaiting_approval",
@@ -145,7 +143,7 @@ export const AYP_CONFIG: ReviewerConfig = {
 
 export const NYP_CONFIG: ReviewerConfig = {
   role: "nyp",
-  person: NYP_USER,
+
   home: "/nyp",
   queueHref: "/nyp/queue",
   profileHref: "/nyp/profile",
@@ -212,7 +210,7 @@ export const NYP_CONFIG: ReviewerConfig = {
 
 export const FINANCE_CONFIG: ReviewerConfig = {
   role: "finance",
-  person: FINANCE_USER,
+
   home: "/finance",
   queueHref: "/finance/queue",
   profileHref: "/finance/profile",

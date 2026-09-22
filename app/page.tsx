@@ -21,8 +21,9 @@ import { MobileSearchButton } from "@/components/app/topbar"
 import { formatDate } from "@/lib/format"
 import { monthlySeries, shareSplit, trend } from "@/lib/series"
 import { requisitionTotal } from "@/lib/types"
-import { CURRENT_USER } from "@/lib/data"
+
 import { isMine } from "@/lib/review"
+import { useSession } from "@/lib/session"
 import { useRequisitions } from "@/lib/store"
 import { cn } from "@/lib/utils"
 
@@ -38,6 +39,7 @@ function greeting() {
 }
 
 export default function DashboardPage() {
+  const { account } = useSession()
   const [flow, setFlow] = useState<"requested" | "cleared">("requested")
   const { requisitions: all } = useRequisitions()
   const requisitions = all.filter(isMine)
@@ -78,7 +80,7 @@ export default function DashboardPage() {
               className="press group flex cursor-pointer items-center gap-0.5"
             >
               <span className="bg-brand/25 flex size-9 items-center justify-center rounded-full text-[12.5px] font-semibold text-white ring-2 ring-white/25 transition-all duration-200 group-hover:ring-white/50">
-                {CURRENT_USER.initials}
+                {account.initials}
               </span>
               <ChevronDown className="size-3.5 text-white/50" aria-hidden />
             </Link>
@@ -90,10 +92,10 @@ export default function DashboardPage() {
             {greeting()},
           </p>
           <h1 className="mt-1 text-[26px] leading-tight font-semibold tracking-[-0.025em] text-white lg:text-[30px]">
-            {CURRENT_USER.shortName}
+            {account.shortName || account.name}
           </h1>
           <p className="mt-1.5 text-[12.5px] text-white/55">
-            {CURRENT_USER.department} · {CURRENT_USER.unit}
+            {account.scope}
           </p>
         </div>
 
