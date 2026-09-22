@@ -48,7 +48,7 @@ export function NewRequisitionFlow() {
 
 function Flow({ existing }: { existing?: Requisition }) {
   const router = useRouter()
-  const { upsert, nextReference } = useRequisitions()
+  const { create, saveDraft: persistDraft, moveTo } = useRequisitions()
   const toast = useToast()
 
   const [step, setStep] = useState(0)
@@ -102,76 +102,44 @@ function Flow({ existing }: { existing?: Requisition }) {
     window.scrollTo({ top: 0 })
   }
 
-  function saveDraft() {
+  /** The fields the server will accept; everything else about a requisition it decides itself. */
+  function input() {
+    return {
+      programme,
+      programmeDate: programmeDate || null,
+      location: location || null,
+      purpose: purpose || null,
+      items: items.map((i) => ({ description: i.description, amount: i.amount })),
+    }
+  }
+
+  async function saveDraft() {
     if (pending) return
     setPending("draft")
-    const record = compose("draft")
-    upsert(record)
-    toast("Draft saved", "info")
-    router.push("/requisitions")
+    try {
+      if (existing) await persistDraft(existing.id, input())
+      else await create(input())
+      toast("Draft saved", "info")
+      router.push("/requisitions")
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Could not save that.", "warn")
+      setPending(null)
+    }
   }
 
-  function submit() {
+  async function submit() {
     if (pending) return
     setPending("submit")
-    const record = compose("under_review")
-    upsert(record)
-    router.push(`/requisitions/${record.id}/submitted`)
-  }
-
-  function compose(status: Requisition["status"]): Requisition {
-    const today = isoToday()
-    const base: Requisition = existing ?? {
-      id: newId("req-"),
-      reference: nextReference(),
-      programme: "",
-      programmeDate: "",
-      location: "",
-      department: CURRENT_USER.department,
-      purpose: "",
-      requester: {
-        name: CURRENT_USER.name,
-        initials: CURRENT_USER.initials,
-        department: CURRENT_USER.department,
-        unit: CURRENT_USER.unit,
-      },
-      items: [],
-      attachments: [],
-      comments: [],
-      activity: [],
-      status: "draft",
-      stageDates: {},
-      createdAt: today,
-    }
-
-    const submitting = status !== "draft"
-    return {
-      ...base,
-      programme: programme.trim(),
-      programmeDate,
-      location: location.trim(),
-      department: `${CURRENT_USER.department} · ${unit}`,
-      purpose: purpose.trim(),
-      items: filledItems,
-      attachments,
-      status,
-      stageDates: submitting ? { ...base.stageDates, submitted: today } : base.stageDates,
-      submittedAt: submitting ? today : base.submittedAt,
-      activity: [
-        ...base.activity,
-        {
-          id: newId("e"),
-          date: today,
-          actor: "You",
-          action: submitting
-            ? isResubmit
-              ? "Resubmitted after changes"
-              : "Submitted for review"
-            : "Saved draft",
-        },
-      ],
+    try {
+      const id = existing ? (await persistDraft(existing.id, input()), existing.id) : await create(input())
+      await moveTo(id, "under_review")
+      router.push(`/requisitions/${id}/submitted`)
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Could not submit that.", "warn")
+      setPending(null)
     }
   }
+
 
   return (
     <>

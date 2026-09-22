@@ -2,126 +2,107 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 
-import { CURRENT_USER, SEED_REQUISITIONS } from "./data"
-import type { Requester, Requisition } from "./types"
+import type { Requisition, RequisitionStatus } from "./types"
 
-const STORAGE_KEY = "requ.requisitions.v1"
-const LEGACY_KEY = "cwms.requisitions.v1"
-
+/**
+ * Requisitions, from the server. Nothing is kept in the browser: what a person may see and
+ * what they may do with it are decided server-side on every request, and a copy held here
+ * would only be a stale one that a reader might act on.
+ */
 interface StoreValue {
   requisitions: Requisition[]
-  /** False until localStorage has been read, so screens can hold their shape. */
+  /** False until the first fetch returns, so screens can hold their shape. */
   hydrated: boolean
   getById: (id: string) => Requisition | undefined
-  /** Inserts a new requisition or replaces an existing one by id. */
-  upsert: (requisition: Requisition) => void
-  nextReference: () => string
+  /** Re-read from the server; used after anything that changes a requisition. */
+  refresh: () => Promise<void>
+  /** Save the editable fields of a draft or a returned requisition. */
+  saveDraft: (id: string, input: DraftInput) => Promise<void>
+  /** Raise a new one. Returns its id. */
+  create: (input: DraftInput) => Promise<string>
+  /** Ask for a move. The server decides whether it is allowed. */
+  moveTo: (id: string, to: RequisitionStatus, extra?: MoveExtra) => Promise<void>
 }
 
-/**
- * Records written by an older build can be missing fields the current code
- * requires — `requester` and `stageDates` were both added after this store
- * shipped. Trusting the stored shape crashed the render, so everything read
- * back gets normalised at the boundary rather than guarded at every use site.
- *
- * Anything stored before requesters existed was raised by the HOD persona,
- * which makes that the correct backfill rather than a guess.
- */
-const FALLBACK_REQUESTER: Requester = {
-  name: CURRENT_USER.name,
-  initials: CURRENT_USER.initials,
-  department: CURRENT_USER.department,
-  unit: CURRENT_USER.unit,
+export interface DraftInput {
+  programme: string
+  programmeDate?: string | null
+  location?: string | null
+  purpose?: string | null
+  items: { description: string; amount: number }[]
 }
 
-/**
- * `finance` and `disbursed` were once separate stamps. Finance no longer
- * verifies separately, so anything stored under either key now lands on the
- * single disbursement stage.
- */
-function migrateStages(
-  dates: Partial<Record<string, string>> | undefined,
-): Requisition["stageDates"] {
-  const { finance, disbursed, ...rest } = dates ?? {}
-  const stamped = rest as Requisition["stageDates"]
-  const paid = disbursed ?? finance
-  return paid ? { ...stamped, disbursement: paid } : stamped
-}
-
-function normalise(value: unknown): Requisition[] {
-  if (!Array.isArray(value)) throw new Error("stored requisitions are not a list")
-
-  return value
-    .filter((r): r is Requisition => Boolean(r) && typeof r === "object" && "id" in r)
-    .map((r) => ({
-      ...r,
-      requester: r.requester ?? FALLBACK_REQUESTER,
-      items: r.items ?? [],
-      attachments: r.attachments ?? [],
-      comments: r.comments ?? [],
-      activity: r.activity ?? [],
-      stageDates: migrateStages(r.stageDates),
-    }))
+export interface MoveExtra {
+  comment?: string
+  requestedChanges?: string[]
+  paymentRef?: string
 }
 
 const StoreContext = createContext<StoreValue | null>(null)
 
+/** Turns a failed request into the server's own message, which is written for the reader. */
+async function must(res: Response) {
+  if (res.ok) return res
+  const body = (await res.json().catch(() => ({}))) as { error?: string }
+  throw new Error(body.error ?? "Something went wrong. Please try again.")
+}
+
 export function RequisitionStore({ children }: { children: React.ReactNode }) {
-  const [requisitions, setRequisitions] = useState<Requisition[]>(SEED_REQUISITIONS)
+  const [requisitions, setRequisitions] = useState<Requisition[]>([])
   const [hydrated, setHydrated] = useState(false)
 
-  // Read after mount only — reading during render would desync SSR markup.
-  useEffect(() => {
+  const refresh = useCallback(async () => {
     try {
-      const stored =
-        window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_KEY)
-      // Reading persisted state has to happen after mount: doing it during
-      // render would desync the server-rendered markup. The rule's cascading-
-      // render concern does not apply to a single one-shot hydration.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (stored) setRequisitions(normalise(JSON.parse(stored)))
+      const res = await fetch("/api/requisitions", { cache: "no-store" })
+      if (res.status === 401) {
+        setRequisitions([])
+        return
+      }
+      const body = (await must(res).then((r) => r.json())) as { requisitions: Requisition[] }
+      setRequisitions(body.requisitions ?? [])
     } catch {
-      // Corrupt, unreadable or unmigratable storage falls back to the seed set
-      // rather than taking the whole app down.
+      // A failed read leaves the last good list rather than blanking the screen.
+    } finally {
+      setHydrated(true)
     }
-
-    setHydrated(true)
   }, [])
 
-  useEffect(() => {
-    if (!hydrated) return
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(requisitions))
-    } catch {
-      // Private mode / quota — the prototype still works for the session.
-    }
-  }, [requisitions, hydrated])
+  useEffect(() => { void refresh() }, [refresh])
 
-  const upsert = useCallback((requisition: Requisition) => {
-    setRequisitions((current) => {
-      const index = current.findIndex((r) => r.id === requisition.id)
-      if (index === -1) return [requisition, ...current]
-      const next = [...current]
-      next[index] = requisition
-      return next
-    })
-  }, [])
+  const create = useCallback(async (input: DraftInput) => {
+    const res = await must(await fetch("/api/requisitions", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+    }))
+    const { id } = (await res.json()) as { id: string }
+    await refresh()
+    return id
+  }, [refresh])
+
+  const saveDraft = useCallback(async (id: string, input: DraftInput) => {
+    await must(await fetch(`/api/requisitions/${id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+    }))
+    await refresh()
+  }, [refresh])
+
+  const moveTo = useCallback(async (id: string, to: RequisitionStatus, extra: MoveExtra = {}) => {
+    await must(await fetch(`/api/requisitions/${id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to, ...extra }),
+    }))
+    await refresh()
+  }, [refresh])
 
   const value = useMemo<StoreValue>(
     () => ({
       requisitions,
       hydrated,
       getById: (id) => requisitions.find((r) => r.id === id),
-      upsert,
-      nextReference: () => {
-        const highest = requisitions.reduce((max, r) => {
-          const n = Number(r.reference.split("-").pop())
-          return Number.isFinite(n) && n > max ? n : max
-        }, 0)
-        return `REQ-${new Date().getFullYear()}-${String(highest + 1).padStart(4, "0")}`
-      },
+      refresh,
+      saveDraft,
+      create,
+      moveTo,
     }),
-    [requisitions, hydrated, upsert],
+    [requisitions, hydrated, refresh, saveDraft, create, moveTo],
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

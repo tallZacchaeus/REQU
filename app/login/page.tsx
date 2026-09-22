@@ -218,36 +218,7 @@ function SignInForm({
         </ol>
       </section>
 
-      {/* Passwordless means the address picks the role, so the prototype has
-          to hand you the identities to try. */}
-      <section
-        className="animate-rise border-hairline mt-5 rounded-xl border border-dashed px-4 py-3.5"
-        style={{ animationDelay: "180ms" }}
-      >
-        <MicroLabel className="mb-2.5">Prototype accounts</MicroLabel>
-        <div className="grid grid-cols-2 gap-2">
-          {DIRECTORY.map((account) => (
-            <button
-              key={account.email}
-              type="button"
-              onClick={() => onEmail(account.email)}
-              className="border-hairline bg-card hover:border-primary/40 hover:bg-muted/40 press flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-left"
-            >
-              <span className="bg-muted text-ink-soft flex size-6 shrink-0 items-center justify-center rounded-full text-[10.5px] font-semibold">
-                {account.initials}
-              </span>
-              <span className="min-w-0">
-                <span className="text-ink block truncate text-[12.5px] leading-tight font-semibold">
-                  {account.shortName}
-                </span>
-                <span className="text-ink-faint block truncate text-[10.5px] leading-tight">
-                  {account.title}
-                </span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+
     </div>
   )
 }

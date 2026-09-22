@@ -2,10 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 
-import { accountByRole, accountFor, type Account, type Role } from "./data"
-
-const STORAGE_KEY = "requ.session.v1"
-const LEGACY_KEY = "cwms.session.v1"
+import { type Account, type Role } from "./data"
 
 export interface Profile {
   phone: string
@@ -31,21 +28,6 @@ interface SessionValue {
   updateProfile: (patch: Partial<Profile>) => void
 }
 
-interface Persisted {
-  signedIn: boolean
-  role: Role
-  pendingEmail: string | null
-  profile: Profile
-}
-
-const profileFor = (account: Account): Profile => ({
-  phone: account.phone,
-  email: account.email,
-  notifyStatus: true,
-  notifyComments: true,
-  notifyDigest: false,
-})
-
 export const HOME_FOR: Record<Role, string> = {
   hod: "/",
   ayp: "/ayp",
@@ -55,99 +37,98 @@ export const HOME_FOR: Record<Role, string> = {
   super_admin: "/",
 }
 
-const initial: Persisted = {
-  signedIn: false,
-  role: "hod",
-  pendingEmail: null,
-  profile: profileFor(accountByRole("hod")),
-}
-
 const SessionContext = createContext<SessionValue | null>(null)
 
+/** What /api/me returns. */
+interface Me {
+  signedIn: boolean
+  person?: {
+    id: number; email: string; name: string; shortName: string | null
+    initials: string | null; role: Role; title: string | null; scope: string | null
+  }
+}
+
+/** The signed-in person as the rest of the app expects to see them. */
+function toAccount(p: NonNullable<Me["person"]>): Account {
+  return {
+    role: p.role,
+    name: p.name,
+    shortName: p.shortName ?? p.name.split(" ")[0] ?? p.name,
+    initials: p.initials ?? p.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase(),
+    email: p.email,
+    title: p.title ?? "",
+    scope: p.scope ?? "",
+    phone: "",
+  } as Account
+}
+
+/**
+ * Who is signed in comes from the server, every time. Nothing about identity is kept in the
+ * browser any more: a role held in localStorage was a role anybody could edit, which was
+ * tolerable in a prototype and is not once the workflow releases money.
+ */
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<Persisted>(initial)
+  const [account, setAccount] = useState<Account | null>(null)
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [hydrated, setHydrated] = useState(false)
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     try {
-      const stored =
-        window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored) as Partial<Persisted>
-        const known: Role[] = ["hod", "ayp", "nyp", "finance"]
-        const role: Role = known.includes(parsed.role as Role) ? (parsed.role as Role) : "hod"
-        // Reading persisted state has to happen after mount: doing it during
-        // render would desync the server-rendered markup. The rule's cascading-
-        // render concern does not apply to a single one-shot hydration.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setState({
-          signedIn: parsed.signedIn ?? false,
-          role,
-          pendingEmail: parsed.pendingEmail ?? null,
-          profile: { ...profileFor(accountByRole(role)), ...parsed.profile },
-        })
+      const r = await fetch("/api/me", { cache: "no-store" })
+      const body = (await r.json()) as Me
+      if (body.signedIn && body.person) {
+        const a = toAccount(body.person)
+        setAccount(a)
+        setProfile({ phone: "", email: a.email, notifyStatus: true, notifyComments: true, notifyDigest: false })
+      } else {
+        setAccount(null)
+        setProfile(null)
       }
     } catch {
-      // Unreadable storage just leaves the visitor signed out.
+      setAccount(null)
+    } finally {
+      setHydrated(true)
     }
-
-    setHydrated(true)
   }, [])
 
-  useEffect(() => {
-    if (!hydrated) return
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-    } catch {
-      // Session simply won't survive a reload.
-    }
-  }, [state, hydrated])
+  useEffect(() => { void load() }, [load])
 
-  const requestLink = useCallback((email: string) => {
-    setState((c) => ({ ...c, pendingEmail: email }))
-  }, [])
+  const requestLink = useCallback((email: string) => setPendingEmail(email), [])
 
-  /**
-   * Passwordless means the address is the credential *and* the role. An
-   * address that is not on a worker record falls back to the HOD persona
-   * rather than dead-ending the prototype.
-   */
-  const completeSignIn = useCallback(() => {
-    setState((c) => {
-      // Idempotent: pendingEmail is consumed on the first call, so a second
-      // one would resolve nobody and silently downgrade the session.
-      if (c.signedIn) return c
-      const account = (c.pendingEmail && accountFor(c.pendingEmail)) || accountByRole("hod")
-      return {
-        signedIn: true,
-        role: account.role,
-        pendingEmail: null,
-        profile: profileFor(account),
-      }
+  /** The link itself signs people in, server-side; this just re-reads who that turned out to be. */
+  const completeSignIn = useCallback(() => { void load() }, [load])
+
+  const signOut = useCallback(() => {
+    void fetch("/api/auth/signout", { method: "POST" }).finally(() => {
+      setAccount(null)
+      setProfile(null)
+      window.location.href = "/login"
     })
   }, [])
 
-  const signOut = useCallback(() => {
-    setState({ ...initial })
-  }, [])
-
   const updateProfile = useCallback((patch: Partial<Profile>) => {
-    setState((c) => ({ ...c, profile: { ...c.profile, ...patch } }))
+    setProfile((c) => (c ? { ...c, ...patch } : c))
   }, [])
 
   const value = useMemo<SessionValue>(() => {
-    const account = accountByRole(state.role)
+    const role: Role = account?.role ?? "hod"
     return {
-      ...state,
-      account,
+      signedIn: !!account,
+      role,
+      account: (account ?? {
+        role: "hod", name: "", shortName: "", initials: "", email: "", title: "", scope: "", phone: "",
+      }) as Account,
+      pendingEmail,
+      profile: profile ?? { phone: "", email: "", notifyStatus: true, notifyComments: true, notifyDigest: false },
       hydrated,
-      home: HOME_FOR[state.role],
+      home: HOME_FOR[role],
       requestLink,
       completeSignIn,
       signOut,
       updateProfile,
     }
-  }, [state, hydrated, requestLink, completeSignIn, signOut, updateProfile])
+  }, [account, pendingEmail, profile, hydrated, requestLink, completeSignIn, signOut, updateProfile])
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
 }

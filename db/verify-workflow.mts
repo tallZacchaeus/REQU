@@ -12,16 +12,38 @@ const refused = async (fn: () => Promise<unknown>, what: string) => {
   try { await fn(); ok(false, what + " (it was ALLOWED)") } catch { ok(true, what) }
 }
 
+
+/** These checks make their own people. They must never depend on seeded demo accounts. */
+async function fixture(email: string, role: string, name: string, dept?: string) {
+  let departmentId: number | null = null
+  if (dept) {
+    const d = await q<{ id: number }>(
+      "insert into departments(name) values ($1) on conflict (name) do update set name=excluded.name returning id", [dept])
+    departmentId = d[0]!.id
+  }
+  const r = await q<{ id: number }>(
+    `insert into people(email, full_name, initials, role, department_id, active)
+     values ($1,$2,'XX',$3,$4,true)
+     on conflict (email) do update set role=excluded.role, department_id=excluded.department_id, active=true
+     returning id`, [email, name, role, departmentId])
+  return r[0]!.id
+}
+
 const who = async (email: string): Promise<Actor> => {
   const r = await q<{ id: number; role: string; department_id: number | null }>(
     "select id, role, department_id from people where email=$1", [email])
   return { id: r[0]!.id, role: r[0]!.role as Actor["role"], departmentId: r[0]!.department_id }
 }
 
-const hod = await who("david.adeyemi@requ.org")
-const ayp = await who("grace.ojo@requ.org")
-const nyp = await who("emmanuel.bassey@requ.org")
-const fin = await who("ngozi.eze@requ.org")
+await fixture("check.hod@example.invalid", "hod", "Check HOD", "Check Department")
+await fixture("check.ayp@example.invalid", "ayp", "Check ANYP")
+await fixture("check.nyp@example.invalid", "nyp", "Check NYP")
+await fixture("check.fin@example.invalid", "finance", "Check Finance")
+
+const hod = await who("check.hod@example.invalid")
+const ayp = await who("check.ayp@example.invalid")
+const nyp = await who("check.nyp@example.invalid")
+const fin = await who("check.fin@example.invalid")
 
 const id = await createDraft(hod, {
   programme: "Verification Rally",
@@ -72,11 +94,9 @@ ok(Object.keys(done?.stageDates ?? {}).length === 5, `all five stages are stampe
 ok((done?.activity.length ?? 0) >= 8, `the activity trail records every step (${done?.activity.length})`)
 await refused(() => move(hod, id, { to: "under_review" }), "a closed requisition cannot be reopened")
 
-const strangerDept = await q<{ id: number }>("insert into departments(name) values ('Elsewhere') on conflict (name) do update set name=excluded.name returning id")
-const outsider = await q<{ id: number }>(
-  `insert into people(email, full_name, role, department_id) values ('outsider@requ.org','Outsider','hod',$1)
-   on conflict (email) do update set department_id=excluded.department_id returning id`, [strangerDept[0]!.id])
-const stranger: Actor = { id: outsider[0]!.id, role: "hod", departmentId: strangerDept[0]!.id }
+const outsiderId = await fixture("check.outsider@example.invalid", "hod", "Check Outsider", "Elsewhere")
+const outsiderDept = await q<{ department_id: number }>("select department_id from people where id=$1", [outsiderId])
+const stranger: Actor = { id: outsiderId, role: "hod", departmentId: outsiderDept[0]!.department_id }
 ok((await getFor(stranger, id)) === null, "a HOD in another department cannot open it")
 ok((await listFor(stranger)).length === 0, "and it does not appear in their list")
 

@@ -11,7 +11,7 @@ import {
   createLoginToken, redeemLoginToken, personFromSession,
   sealSessionId, destroySession, withinLimit,
 } from "../lib/auth"
-import { pool } from "../lib/db"
+import { pool, q } from "../lib/db"
 
 let failed = 0
 const ok = (pass: boolean, what: string) => {
@@ -19,7 +19,11 @@ const ok = (pass: boolean, what: string) => {
   console.log(`  ${pass ? "PASS" : "FAIL"}  ${what}`)
 }
 
-const WHO = "david.adeyemi@requ.org"
+const WHO = "check.signin@example.invalid"
+// Its own person, so this never depends on demo accounts being seeded.
+await q(`insert into people(email, full_name, initials, role, active)
+         values ($1,'Check Signin','CS','hod',true)
+         on conflict (email) do update set active=true`, [WHO])
 
 const issued = await createLoginToken(WHO, "1.2.3.4")
 ok(!!issued, "a link is issued for a real address")

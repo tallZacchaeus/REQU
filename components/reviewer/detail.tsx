@@ -60,7 +60,7 @@ export function ReviewerDetail({ id, config }: { id: string; config: ReviewerCon
 
 function Detail({ requisition, config }: { requisition: Requisition; config: ReviewerConfig }) {
   const router = useRouter()
-  const { upsert } = useRequisitions()
+  const { moveTo } = useRequisitions()
   const toast = useToast()
   const [open, setOpen] = useState<ActionSpec | null>(null)
   const [comment, setComment] = useState("")
@@ -83,7 +83,7 @@ function Detail({ requisition, config }: { requisition: Requisition; config: Rev
     setShowErrors(false)
   }
 
-  function commit(action: ActionSpec) {
+  async function commit(action: ActionSpec) {
     const body = comment.trim()
     const list = points.map((p) => p.trim()).filter(Boolean)
     const ref = reference.trim()
@@ -98,39 +98,23 @@ function Detail({ requisition, config }: { requisition: Requisition; config: Rev
     if (pending) return
     setPending(true)
 
-    const today = isoToday()
-    upsert({
-      ...requisition,
-      status: action.nextStatus,
-      ...(action.reference ? { paymentRef: ref } : {}),
-      stageDates: action.stamp
-        ? { ...requisition.stageDates, [action.stamp]: today }
-        : requisition.stageDates,
-      comments: [
-        ...requisition.comments,
-        {
-          id: newId("c"),
-          author: config.person.name,
-          role: config.person.role,
-          date: today,
-          body: [body || action.defaultComment || action.activity, ref && `Reference ${ref}`]
-            .filter(Boolean)
-            .join(" "),
-          ...(action.wantsPoints ? { requestedChanges: list } : {}),
-        },
-      ],
-      activity: [
-        ...requisition.activity,
-        {
-          id: newId("e"),
-          date: today,
-          actor: config.person.name,
-          action: action.activity,
-        },
-      ],
-    })
-    toast(`${requisition.programme} — ${action.activity.toLowerCase()}`)
-    router.push(config.queueHref)
+    // The move, plus what the reviewer typed. Everything that follows from it — the stage
+    // stamp, the activity line, who did it and when — the server writes itself.
+    try {
+      await moveTo(requisition.id, action.nextStatus, {
+        comment: [body || action.defaultComment || action.activity, ref && `Reference ${ref}`]
+          .filter(Boolean)
+          .join(" "),
+        ...(action.wantsPoints ? { requestedChanges: list } : {}),
+        ...(action.reference ? { paymentRef: ref } : {}),
+      })
+      toast(`${requisition.programme} — ${action.activity.toLowerCase()}`)
+      router.push(config.queueHref)
+    } catch (e) {
+      // A refusal from the server is the authority, and it is written for the reader.
+      toast(e instanceof Error ? e.message : "That could not be done.", "warn")
+      setPending(false)
+    }
   }
 
   // Whichever action is available first in this state leads the screen.

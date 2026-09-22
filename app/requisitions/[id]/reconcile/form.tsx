@@ -50,7 +50,7 @@ export function ReconcileForm({ id }: { id: string }) {
 
 function Form({ requisition }: { requisition: Requisition }) {
   const router = useRouter()
-  const { upsert } = useRequisitions()
+  const { moveTo } = useRequisitions()
   const toast = useToast()
 
   const disbursed = requisitionTotal(requisition)
@@ -79,30 +79,23 @@ function Form({ requisition }: { requisition: Requisition }) {
   const needsNote = variance !== 0 && note.trim().length < 10
   const valid = spent > 0 && receipts.length > 0 && !needsNote
 
-  function submit() {
+  async function submit() {
     if (pending) return
     if (!valid) {
       setShowErrors(true)
       return
     }
     setPending(true)
-    const today = isoToday()
-    upsert({
-      ...requisition,
-      status: "reconciliation_review",
-      reconciliation: { actuals, receipts, note: note.trim(), submittedAt: today },
-      activity: [
-        ...requisition.activity,
-        {
-          id: newId("e"),
-          date: today,
-          actor: "You",
-          action: "Filed reconciliation",
-        },
-      ],
-    })
-    toast("Reconciliation filed — Finance will check your receipts")
-    router.push(`/requisitions/${requisition.id}`)
+    try {
+      // The note travels as a comment; the stage stamp and the activity line are the
+      // server's to write, not ours.
+      await moveTo(requisition.id, "reconciliation_review", { comment: note.trim() || "Reconciliation filed." })
+      toast("Reconciliation filed — Finance will check your receipts")
+      router.push(`/requisitions/${requisition.id}`)
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Could not file that.", "warn")
+      setPending(false)
+    }
   }
 
   return (
