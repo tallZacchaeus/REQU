@@ -54,6 +54,8 @@ function reviewerNav(root: string, queueLabel: string): NavItem[] {
 }
 
 const NAV: Record<Role, NavItem[]> = {
+  // Nothing to navigate to until somebody says who they are.
+  pending: [],
   hod: [
     { href: "/", label: "Home", icon: House, isActive: (p) => p === "/" },
     {
@@ -84,6 +86,7 @@ const NAV: Record<Role, NavItem[]> = {
   // anything they might try. No "New Requisition" here, because it would only be rejected.
   super_admin: [
     { href: "/", label: "Home", icon: House, isActive: (p) => p === "/" },
+    { href: "/people", label: "People", icon: User, isActive: (p) => p.startsWith("/people") },
     {
       href: "/requisitions",
       label: "Requisitions",
@@ -116,6 +119,7 @@ const FULLSCREEN = [
 const isPublic = (pathname: string) => pathname.startsWith("/login")
 
 const ROOTS: Record<Role, string> = {
+  pending: "/pending",
   hod: "/",
   ayp: "/ayp",
   nyp: "/nyp",

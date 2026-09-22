@@ -85,6 +85,9 @@ export const isAdmin = (role: Role) => role === "super_admin"
  * submitted — but never a draft, which belongs to the person still writing it.
  */
 export function canSee(actor: Actor, r: Subject): boolean {
+  // Registered but not yet given a role. Proving you hold a church mailbox is not the same
+  // as being anybody in this workflow.
+  if (actor.role === "pending") return false
   if (isAdmin(actor.role)) return true
   if (isReviewer(actor.role)) return r.status !== "draft"
   if (actor.role === "hod") {
@@ -132,6 +135,7 @@ export function allowedTransitions(actor: Actor, r: Subject): RequisitionStatus[
 
 /** A SQL fragment scoping a list to what the actor may see. Parameters: $1 = actor id, $2 = department. */
 export function visibilityClause(actor: Actor) {
+  if (actor.role === "pending") return { sql: "false", params: [] as unknown[] }
   if (isAdmin(actor.role)) return { sql: "true", params: [] as unknown[] }
   if (isReviewer(actor.role)) return { sql: "r.status <> 'draft'", params: [] as unknown[] }
   if (actor.role === "hod") {

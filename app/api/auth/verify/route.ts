@@ -5,7 +5,7 @@ import type { Role } from "@/lib/data"
 export const runtime = "nodejs"
 
 /** Where each role lands once signed in. */
-const HOME: Record<Role, string> = { hod: "/", ayp: "/ayp", nyp: "/nyp", finance: "/finance", super_admin: "/" }
+const HOME: Record<Role, string> = { pending: "/pending", hod: "/", ayp: "/ayp", nyp: "/nyp", finance: "/finance", super_admin: "/" }
 
 /**
  * Where to send people afterwards. Taken from APP_URL, not from the request: behind a

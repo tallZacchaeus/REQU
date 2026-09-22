@@ -9,7 +9,7 @@
  */
 import {
   createLoginToken, redeemLoginToken, personFromSession,
-  sealSessionId, destroySession, withinLimit,
+  sealSessionId, destroySession, withinLimit, mayRegister,
 } from "../lib/auth"
 import { pool, q } from "../lib/db"
 
@@ -54,6 +54,22 @@ const later = await createLoginToken(WHO)
 await pool.query("update login_tokens set expires_at = now() - interval '1 minute' where used_at is null")
 const stale = await redeemLoginToken(later!.token, {})
 ok(!stale.ok && stale.reason === "expired", "an expired link is refused")
+
+/* ── Self-registration ──────────────────────────────────────── */
+ok(mayRegister("anyone@rccgyayang.org"), "a church address may register")
+ok(!mayRegister("someone@gmail.com"), "a personal address may not")
+ok(!mayRegister("attacker@rccgyayang.org.evil.com"), "a look-alike domain may not")
+ok(!mayRegister("rccgyayang.org@gmail.com"), "the domain appearing in the local part may not")
+
+const fresh = `check.newcomer.${Date.now()}@rccgyayang.org`
+const registered = await createLoginToken(fresh)
+ok(!!registered, "an unknown church address registers itself on first sight")
+ok(registered?.person.role === "pending", "and lands on pending, able to do nothing")
+
+ok((await createLoginToken(`check.outsider.${Date.now()}@gmail.com`)) === null,
+   "an unknown personal address does not register and gets no link")
+
+await q("delete from people where email like 'check.newcomer.%'")
 
 await pool.end()
 console.log(failed ? `\n${failed} check(s) failed` : "\nall checks passed")

@@ -48,15 +48,41 @@ export interface Person {
 /* ── Sign-in links ──────────────────────────────────────────────────── */
 
 /**
- * Mint a link for an address, or return null when nobody active holds it. The caller must
- * answer the same way either way: telling a stranger whether an address exists here is a
- * gift to anyone guessing at who works for the church.
+ * Addresses allowed to register themselves. Everybody who will use this has a church
+ * mailbox, and leaving registration open to any address on the internet would let anyone
+ * create an account — harmless while it lands on `pending`, but noise nobody needs.
+ */
+export const REGISTRABLE_DOMAIN = process.env.REGISTRABLE_DOMAIN ?? "rccgyayang.org"
+
+export const mayRegister = (email: string) =>
+  email.trim().toLowerCase().endsWith(`@${REGISTRABLE_DOMAIN.toLowerCase()}`)
+
+/**
+ * Mint a link for an address, registering it on first sight when it belongs to the church.
+ * Returns null when it does not, and the caller must answer identically either way: telling
+ * a stranger whether an address exists here is a gift to anyone guessing at who works here.
+ *
+ * A registered account starts on `pending` — it can see nothing until an administrator says
+ * what they are.
  */
 export async function createLoginToken(email: string, ip?: string) {
-  const people = await q<Person>(
-    "select id, email, full_name, short_name, initials, role, title, scope, department_id from people where lower(email)=lower($1) and active",
-    [email.trim()],
-  )
+  const address = email.trim().toLowerCase()
+  const select = "select id, email, full_name, short_name, initials, role, title, scope, department_id from people where lower(email)=lower($1) and active"
+
+  let people = await q<Person>(select, [address])
+  if (people.length === 0 && mayRegister(address)) {
+    // Name them from the address for now; they can be corrected when a role is assigned.
+    const guess = address.split("@")[0]!.split(/[._-]+/).filter(Boolean)
+      .map((w) => w[0]!.toUpperCase() + w.slice(1)).join(" ")
+    const initials = guess.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
+    await q(
+      `insert into people(email, full_name, short_name, initials, role, active)
+       values ($1,$2,$3,$4,'pending',true) on conflict (email) do nothing`,
+      [address, guess || address, guess.split(" ")[0] ?? address, initials || "??"],
+    )
+    people = await q<Person>(select, [address])
+  }
+
   const person = people[0]
   if (!person) return null
 

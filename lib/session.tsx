@@ -29,6 +29,8 @@ interface SessionValue {
 }
 
 export const HOME_FOR: Record<Role, string> = {
+  // Registered, but not yet anybody: there is nothing to show them but an explanation.
+  pending: "/pending",
   hod: "/",
   ayp: "/ayp",
   nyp: "/nyp",

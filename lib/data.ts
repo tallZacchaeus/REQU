@@ -1,7 +1,11 @@
 import type { Requester, Requisition } from "./types"
 
 /** `super_admin` runs the platform. It takes no part in the workflow — see lib/authz.ts. */
-export type Role = "hod" | "ayp" | "nyp" | "finance" | "super_admin"
+/**
+ * `pending` is where everybody starts: registered, but not yet anybody. It can see nothing
+ * and do nothing until an administrator says what they are.
+ */
+export type Role = "pending" | "hod" | "ayp" | "nyp" | "finance" | "super_admin"
 
 export interface Account {
   role: Role

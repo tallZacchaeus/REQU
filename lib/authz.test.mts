@@ -15,7 +15,7 @@ const ok = (pass: boolean, what: string) => { if (!pass) failed++; console.log(`
 
 const ALL: RequisitionStatus[] = ["draft","under_review","recommended","awaiting_approval","approved",
   "with_finance","disbursed","changes_requested","rejected","reconciliation_review","reconciled"]
-const ROLES: Role[] = ["hod","ayp","nyp","finance","super_admin"]
+const ROLES: Role[] = ["pending","hod","ayp","nyp","finance","super_admin"]
 
 const owner: Actor   = { id: 1, role: "hod", departmentId: 10 }
 const colleague: Actor = { id: 2, role: "hod", departmentId: 10 }   // same department
@@ -73,6 +73,13 @@ ok(ALL.every((s) => !canEdit(admin, subj(s))), "the administrator can never edit
 ok(ALL.every((from) => ALL.every((to) => !canTransition(admin, subj(from), to).ok)),
    "the administrator cannot make a single move in the workflow")
 ok(allowedTransitions(admin, subj("awaiting_approval")).length === 0, "nothing is offered to them to approve")
+
+/* ── Someone who has registered but has no part yet ─────────── */
+const newcomer: Actor = { id: 8, role: "pending", departmentId: 10 }
+ok(ALL.every((s) => !canSee(newcomer, subj(s))), "a pending account sees nothing at all")
+ok(ALL.every((s) => !canEdit(newcomer, subj(s))), "a pending account can edit nothing")
+ok(ALL.every((from) => ALL.every((to) => !canTransition(newcomer, subj(from), to).ok)),
+   "a pending account can make no move whatsoever")
 
 /* ── The happy path, in order ───────────────────────────────── */
 ok(canTransition(owner, subj("draft"), "under_review").ok, "HOD submits")
