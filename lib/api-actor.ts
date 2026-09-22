@@ -1,6 +1,6 @@
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
-import { personFromSession, SESSION_COOKIE } from "./auth"
+import { personFromSession, SESSION_COOKIE, withinLimit } from "./auth"
 import type { Actor } from "./authz"
 
 /**
@@ -15,6 +15,19 @@ export async function requireActor(): Promise<{ actor: Actor; name: string } | N
 }
 
 export const isResponse = (v: unknown): v is NextResponse => v instanceof NextResponse
+
+/**
+ * A ceiling on how often one account may change things. Generous enough that nobody
+ * working normally will meet it, and low enough that a runaway script or a stolen session
+ * cannot churn through the workflow unnoticed.
+ */
+export async function withinWriteLimit(actorId: number, max = 60, minutes = 5) {
+  if (await withinLimit(`write:${actorId}`, max, minutes)) return null
+  return NextResponse.json(
+    { error: "That is a lot of changes at once. Wait a minute and try again." },
+    { status: 429 },
+  )
+}
 
 /** Turns the errors thrown by the data layer into the status they carry. */
 export function fail(e: unknown) {

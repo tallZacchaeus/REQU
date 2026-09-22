@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { getFor, saveEdits, move } from "@/lib/requisitions"
-import { requireActor, isResponse, fail } from "@/lib/api-actor"
+import { requireActor, isResponse, fail, withinWriteLimit } from "@/lib/api-actor"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -26,6 +26,8 @@ export async function GET(_req: Request, ctx: Ctx) {
 export async function PATCH(req: Request, ctx: Ctx) {
   const who = await requireActor()
   if (isResponse(who)) return who
+  const limited = await withinWriteLimit(who.actor.id)
+  if (limited) return limited
   const { id } = await ctx.params
   const body = await req.json().catch(() => null)
   if (!body) return NextResponse.json({ error: "Nothing to save." }, { status: 400 })
