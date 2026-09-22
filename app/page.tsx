@@ -65,7 +65,7 @@ export default function DashboardPage() {
               <LogoMark className="size-[18px]" />
             </span>
             <span className="text-[15px] leading-none font-bold tracking-[0.12em] text-white">
-              REQU
+              Requisition
             </span>
           </div>
 

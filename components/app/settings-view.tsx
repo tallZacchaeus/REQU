@@ -87,7 +87,7 @@ export function SettingsView() {
                 aria-hidden
               />
               <p className="text-ink-soft text-[13px] leading-[1.5]">
-                REQU follows your device for text size and reduced motion. Turn on Reduce Motion in
+                Requisition follows your device for text size and reduced motion. Turn on Reduce Motion in
                 your system settings and every animation here is suppressed.
               </p>
             </div>

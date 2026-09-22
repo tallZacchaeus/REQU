@@ -119,7 +119,7 @@ function BrandPanel() {
         </span>
         <span className="flex flex-col">
           <span className="text-[15px] leading-none font-bold tracking-[0.14em] text-white">
-            REQU
+            Requisition
           </span>
           <span className="mt-1.5 text-[10.5px] leading-none font-medium tracking-[0.06em] text-white/55">
             Youth &amp; Young Adults

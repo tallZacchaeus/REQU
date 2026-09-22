@@ -25,9 +25,9 @@ const plexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "REQU · Requisitions",
+  title: "Requisition · RCCG YAYA",
   description:
-    "Church Worker Management System — raise, submit and track programme funding requisitions.",
+    "Raise, review and track programme funding requisitions for RCCG YAYA.",
 }
 
 export const viewport: Viewport = {

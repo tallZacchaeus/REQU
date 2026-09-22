@@ -303,7 +303,7 @@ export default function ProfilePage() {
           </Link>
 
           <p className="text-ink-faint pt-1 text-center font-mono text-[11px]">
-            REQU · Youth &amp; Young Adults · MVP
+            Requisition · RCCG YAYA
           </p>
         </div>
       </div>

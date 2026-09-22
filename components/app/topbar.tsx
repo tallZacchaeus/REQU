@@ -50,7 +50,7 @@ export function TopBar({ role }: { role: Role }) {
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="text-ink text-[14px] leading-none font-bold tracking-[0.12em]">
-              REQU
+              Requisition
             </span>
             <span className="text-ink-faint mt-1.5 truncate text-[10.5px] leading-none font-medium tracking-[0.05em]">
               Requisition Management

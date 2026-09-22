@@ -76,7 +76,7 @@ export function downloadCsv(filename: string, csv: string) {
 }
 
 export const reportFilename = (label: string) =>
-  `REQU-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${formatDate(
+  `requisition-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${formatDate(
     new Date().toISOString(),
   )
     .replace(/\s/g, "-")
