@@ -84,6 +84,13 @@ await move(fin, id, { to: "disbursed", paymentRef: "TRF-99812" })
 ok((await getFor(fin, id))?.paymentRef === "TRF-99812", "the payment reference is kept")
 
 await refused(() => move(fin, id, { to: "reconciled" }), "Finance cannot close it before the HOD files anything")
+// Phase 4's rule: a reconciliation is the receipts.
+await refused(() => move(hod, id, { to: "reconciliation_review" }),
+  "a reconciliation cannot be filed with no receipt attached")
+
+await q(`insert into attachments(requisition_id, name, kind, byte_size, content_type, storage_key, uploaded_by, scanned_at, scan_result)
+         values ($1,'receipt.pdf','receipt',1024,'application/pdf','check/receipt.pdf',$2, now(),'not scanned')`,
+        [id, hod.id])
 await move(hod, id, { to: "reconciliation_review" })
 await refused(() => move(hod, id, { to: "reconciled" }), "the HOD cannot sign off their own reconciliation")
 await move(fin, id, { to: "reconciled" })
