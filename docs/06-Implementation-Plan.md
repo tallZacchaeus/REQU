@@ -11,7 +11,7 @@
 | **1 — Database** | Schema, migration runner, seed; verified against PostgreSQL 16 | `db/migrations/001_core.sql`, `db/migrate.ts`, `db/seed.ts`, `lib/db.ts` | **Done** — *not yet wired to the screens* |
 | **2 — Sign-in** | Single-use emailed links, self-registration for church addresses, sessions, rate limits | `db/migrations/002_auth.sql`, `lib/auth.ts`, `lib/mailer.ts`, `app/api/auth/*`, `app/api/me`, `db/verify-auth.mts` | **Done** — *screens still read the browser* |
 | **3 — Permissions & transitions** | Every rule re-stated on the server; legal state moves only; screens read the database | `lib/authz.ts`, `lib/requisitions.ts`, `lib/api-actor.ts`, `app/api/requisitions/*`, `lib/authz.test.mts`, `db/verify-workflow.mts` | **Done.** Rules, endpoints and screens, all against the database |
-| **4 — Attachments** | Real upload, ClamAV scanning, storage, reconciliation against receipts | — | **Pending** |
+| **4 — Attachments** | Real upload, type and size checks, safe serving, receipts required to reconcile | `lib/attachments.ts`, `app/api/attachments/*`, `db/migrations/005_attachments.sql`, `db/verify-attachments.mts` | **Done** — *scanning built but off, see below* |
 | **5 — Notifications & reports** | Email what is waiting on someone; server-side aggregation | — | **Pending** |
 | **6 — Hardening** | Append-only audit trail in anger, backups, accessibility audit, pilot fixes | — | **Pending** |
 
@@ -64,8 +64,13 @@ that matters.
    **People** in the app. Until at least one Head of Department and one of each reviewer exist,
    no requisition can travel.
 
-8. **Receipts still cannot be uploaded** (phase 4). A requisition can go the whole way and be
-   marked reconciled with nothing attached. Worth closing before real money goes through.
+8. **Virus scanning is built but switched off.** The mail server on this box runs ClamAV, but
+   on its own Docker network beside Postfix, Dovecot and the mail database. Joining that
+   network to borrow the scanner would give this application reach into all of it — a poor
+   trade for scanning photographs of receipts. Set `CLAMD_HOST` to turn it on; it fails closed
+   rather than waving files through when the scanner cannot be reached. Meanwhile files are
+   accepted only if their **bytes** say they are PDF, JPEG, PNG, WebP or HEIC, are stored under
+   a name we choose, and are always served as a download and never rendered.
 
 ## Decisions needed from leadership
 

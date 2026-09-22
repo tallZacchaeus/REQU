@@ -41,8 +41,8 @@ nothing here, while one database means one backup covers everything.
 | Integration | Status | Purpose |
 | --- | --- | --- |
 | RCCG YAYANG mail server (SMTP) | *planned, phase 2* | Sign-in links and notifications |
-| ClamAV (already on the box) | *planned, phase 4* | Scanning uploaded receipts |
-| Nightly backup job | *planned, phase 6* | Extending the mail server's existing job |
+| ClamAV (already on the box) | **not wired** | It sits on mailcow's own network; see 06 |
+| Nightly backup job | **live** | The requisition database and the receipts, nightly |
 | Self-monitoring | **live** | `requ-web-1` and an HTTP check every 15 minutes |
 
 ## 4. Constraints
