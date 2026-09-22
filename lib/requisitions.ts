@@ -1,5 +1,6 @@
 import { q, tx } from "./db"
 import { canSee, canEdit, canTransition, visibilityClause, STAGE_ON_ARRIVAL, type Actor, type Subject } from "./authz"
+import { announce } from "./notify"
 import type { Requisition, RequisitionStatus, StageKey } from "./types"
 
 /**
@@ -268,4 +269,9 @@ export async function move(actor: Actor, id: string, input: MoveInput) {
     }
     await c.query("insert into activity(requisition_id, actor_id, action) values ($1,$2,$3)", [id, actor.id, verdict.action])
   })
+
+  // Outside the transaction and deliberately not awaited for its result: the decision is
+  // already made, and a mail server having a bad morning must not turn an approval into an
+  // error on somebody's screen.
+  void announce(id, input.to, actor.id)
 }

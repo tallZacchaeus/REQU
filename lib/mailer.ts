@@ -18,6 +18,28 @@ export const mailerConfigured = () => Boolean(cfg().master && cfg().password)
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 
+/** One plain message, wrapped in the same simple shell as everything else we send. */
+export async function send(to: string, subject: string, intro: string, lines: string[], action?: { label: string; url: string }) {
+  const c = cfg()
+  if (!mailerConfigured()) throw new Error("mail is not configured")
+
+  const text = [intro, "", ...lines, action ? `\n${action.label}: ${action.url}` : "", "",
+    "RCCG YAYA · Requisition"].filter((l) => l !== undefined).join("\n")
+
+  const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.55;color:#0b1524">
+  <p style="margin:0 0 14px">${esc(intro)}</p>
+  ${lines.map((l) => `<p style="margin:0 0 8px;color:#55606f">${esc(l)}</p>`).join("")}
+  ${action ? `<p style="margin:18px 0 20px"><a href="${esc(action.url)}" style="display:inline-block;background:#0369a1;color:#fff;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:600">${esc(action.label)}</a></p>` : ""}
+  <p style="margin:0;color:#8a94a2;font-size:12px">RCCG YAYA · Requisition</p>
+</div>`
+
+  const transport = nodemailer.createTransport({
+    host: c.host, port: c.port, secure: c.port === 465,
+    auth: { user: `${c.from}*${c.master}`, pass: c.password },
+  })
+  await transport.sendMail({ from: `RCCG YAYA Requisition <${c.from}>`, to, subject, text, html })
+}
+
 export async function sendSignInLink(to: string, opts: { name: string; url: string; minutes: number }) {
   const c = cfg()
   if (!mailerConfigured()) throw new Error("mail is not configured (MASTER_USER / MASTER_PASSWORD)")
