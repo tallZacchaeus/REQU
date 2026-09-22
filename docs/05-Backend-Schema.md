@@ -37,7 +37,7 @@ erDiagram
 | Table | Holds |
 | --- | --- |
 | `departments` | `id`, `name` (unique), `sort_order` |
-| `people` | `id`, `email` (unique), `full_name`, `short_name`, `initials`, `role`, `title`, `scope`, `phone`, `department_id`, `active`, `created_at` |
+| `people` | `id`, `email` (unique), `full_name`, `short_name`, `initials`, `role`, `title`, `scope`, `phone`, `department_id`, `active`, `created_at`, `registered_at`, `approved_by`, `approved_at` |
 | `requisitions` | `id` (uuid), `reference` (unique), `programme`, `programme_date`, `location`, `purpose`, `department_id`, `requester_id`, `status`, `payment_ref`, `submitted_at`, `created_at`, `updated_at` |
 | `expense_items` | `id`, `requisition_id`, `description`, `amount` (naira), `sort_order` |
 | `attachments` | `id`, `requisition_id`, `name`, `kind`, `byte_size`, `content_type`, `storage_key`, `uploaded_by`, `created_at` |
@@ -50,7 +50,9 @@ erDiagram
 | `sessions` | `id` (pk), `person_id`, `created_at`, `last_seen_at`, `expires_at`, `user_agent`, `ip` |
 | `rate_limits` | `(key, window_start)`, `count` |
 
-**Roles:** `hod`, `ayp`, `nyp`, `finance`.
+**Roles:** `pending`, `hod`, `ayp`, `nyp`, `finance`, `super_admin`. Everyone starts on
+`pending`, which can see nothing and do nothing; `super_admin` sees everything and can make no
+move in the workflow. Only `@rccgyayang.org` addresses may register.
 **Statuses:** `draft`, `under_review`, `recommended`, `awaiting_approval`, `approved`,
 `with_finance`, `disbursed`, `changes_requested`, `rejected`, `reconciliation_review`,
 `reconciled`.
@@ -82,6 +84,8 @@ so the phase column says which is which.
 | `GET /api/auth/verify` | Exchange the link for a session | **built** |
 | `POST /api/auth/signout` | End the session | **built** |
 | `GET /api/me` | Who is signed in, and their role | **built** |
+| `GET /api/people` | Everyone who has registered — administrators only | **built** |
+| `PATCH /api/people/:id` | Give somebody a role, department, or switch them off | **built** |
 | `GET /api/requisitions` | List, scoped to the caller's role | **built** |
 | `POST /api/requisitions` | Create a draft | **built** |
 | `GET /api/requisitions/:id` | Detail, if the caller may see it | **built** |

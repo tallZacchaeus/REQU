@@ -58,7 +58,7 @@ rather than daily.
 
 **Required for production, not yet built** — see [06-Implementation-Plan.md](06-Implementation-Plan.md):
 
-- Real sign-in (single-use emailed links), and accounts that mean something.
+- ~~Real sign-in~~ **done** — single-use emailed links, and people register themselves.
 - Permissions enforced by the server rather than drawn by the browser.
 - Real file upload for receipts, with scanning.
 - Notifications by email.

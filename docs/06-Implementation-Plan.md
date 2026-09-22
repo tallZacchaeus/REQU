@@ -9,7 +9,7 @@
 | **0 — Prototype** | 29 screens across four role areas, the domain model, the workflow, reports with CSV and print | `app/`, `components/`, `lib/types.ts`, `lib/status.ts`, `lib/roles.ts` | **Done** (by the designer) |
 | **Infra** | Containerised, behind Caddy at `requisition.rccgyayang.org`, loopback-only, deploy with rollback, in monitoring, holding password | `Dockerfile`, `docker-compose.yml`, `infra/deploy-from-git.sh` | **Done** |
 | **1 — Database** | Schema, migration runner, seed; verified against PostgreSQL 16 | `db/migrations/001_core.sql`, `db/migrate.ts`, `db/seed.ts`, `lib/db.ts` | **Done** — *not yet wired to the screens* |
-| **2 — Sign-in** | Single-use emailed links through the parish mail server, sessions, accounts, rate limits | `db/migrations/002_auth.sql`, `lib/auth.ts`, `lib/mailer.ts`, `app/api/auth/*`, `app/api/me`, `db/verify-auth.mts` | **Done** — *screens still read the browser* |
+| **2 — Sign-in** | Single-use emailed links, self-registration for church addresses, sessions, rate limits | `db/migrations/002_auth.sql`, `lib/auth.ts`, `lib/mailer.ts`, `app/api/auth/*`, `app/api/me`, `db/verify-auth.mts` | **Done** — *screens still read the browser* |
 | **3 — Permissions & transitions** | Every rule re-stated on the server; legal state moves only; screens read the database | `lib/authz.ts`, `lib/requisitions.ts`, `lib/api-actor.ts`, `app/api/requisitions/*`, `lib/authz.test.mts`, `db/verify-workflow.mts` | **Done.** Rules, endpoints and screens, all against the database |
 | **4 — Attachments** | Real upload, ClamAV scanning, storage, reconciliation against receipts | — | **Pending** |
 | **5 — Notifications & reports** | Email what is waiting on someone; server-side aggregation | — | **Pending** |
@@ -55,19 +55,17 @@ that matters.
 6. **Thin tests.** `npm run verify:auth` covers the sign-in machinery against a real database
    — replay, forged and tampered sessions, limits, expiry. Nothing else is covered; transitions
    and permissions need the same treatment in phase 3.
-7. **Nobody can use it yet, and that is now the only thing in the way.** The demo accounts are
-   gone, the screens read the database, and the database holds exactly one person:
-   `webmaster@rccgyayang.org`, the platform administrator — who deliberately cannot raise,
-   approve or disburse anything.
+7. **Nobody has a part to play yet.** Anyone with an `@rccgyayang.org` address can now sign in
+   and an account appears by itself, but it lands on *pending*: it sees nothing and does
+   nothing until somebody says what they are.
 
-   So there is no Head of Department to raise a requisition and nobody to review one. The
-   mail server holds 73 real `@rccgyayang.org` mailboxes, so the addresses exist. What is
-   missing is the decision: **who is a Head of Department, who reviews, who approves, and who
-   is Finance.** Each answer is then one command:
+   So the remaining step is not loading people — they load themselves. It is deciding **who is
+   a Head of Department, who reviews, who approves, and who is Finance**, and setting that on
+   **People** in the app. Until at least one Head of Department and one of each reviewer exist,
+   no requisition can travel.
 
-   ```bash
-   npm run person -- --email someone@rccgyayang.org --name "Their Name" --role hod --department "Media"
-   ```
+8. **Receipts still cannot be uploaded** (phase 4). A requisition can go the whole way and be
+   marked reconciled with nothing attached. Worth closing before real money goes through.
 
 ## Decisions needed from leadership
 

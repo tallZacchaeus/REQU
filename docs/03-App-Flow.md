@@ -39,8 +39,10 @@ an approved requisition rather than re-verifying it.
 ### Shared
 | Route | Purpose |
 | --- | --- |
-| `/login` | Email address; sends a single-use link *(prototype: lists accounts)* |
+| `/login` | Email address; sends a single-use link. An unrecognised `@rccgyayang.org` address registers itself |
 | `/login/verify` | "Check your email" holding screen |
+| `/pending` | Where a newly registered person waits until an administrator gives them a role |
+| `/people` | **Administrators only.** Who has registered, who is waiting, and what each one is |
 
 ### Head of Department
 | Route | Purpose |
