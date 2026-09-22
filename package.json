@@ -12,7 +12,8 @@
     "verify:auth": "tsx db/verify-auth.mts",
     "verify:authz": "tsx lib/authz.test.mts",
     "verify:workflow": "tsx db/verify-workflow.mts",
-    "person": "tsx db/add-person.mts"
+    "person": "tsx db/add-person.mts",
+    "verify:attachments": "tsx db/verify-attachments.mts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

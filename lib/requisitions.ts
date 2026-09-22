@@ -224,6 +224,20 @@ export async function move(actor: Actor, id: string, input: MoveInput) {
     throw Object.assign(new Error("Say what needs to change before returning it."), { status: 400 })
   }
 
+  // A reconciliation is the receipts. Without them it is an assertion that the money was
+  // spent properly, which is the thing this system exists to replace.
+  if (input.to === "reconciliation_review") {
+    const receipts = await q<{ n: string }>(
+      "select count(*) as n from attachments where requisition_id=$1 and kind='receipt' and scanned_at is not null",
+      [id])
+    if (Number(receipts[0]?.n ?? 0) === 0) {
+      throw Object.assign(
+        new Error("Attach at least one receipt before filing the reconciliation."),
+        { status: 400 },
+      )
+    }
+  }
+
   await tx(async (c) => {
     const guarded = await c.query(
       "update requisitions set status=$2, updated_at=now() where id=$1 and status=$3",

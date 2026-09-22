@@ -65,6 +65,7 @@ function Form({ requisition }: { requisition: Requisition }) {
     ),
   )
   const [receipts, setReceipts] = useState<Attachment[]>(requisition.reconciliation?.receipts ?? [])
+  const [uploading, setUploading] = useState(false)
   const [note, setNote] = useState(requisition.reconciliation?.note ?? "")
   const [showErrors, setShowErrors] = useState(false)
   const [pending, setPending] = useState(false)
@@ -218,28 +219,46 @@ function Form({ requisition }: { requisition: Requisition }) {
             <Upload className="text-ink-faint size-5" strokeWidth={1.7} aria-hidden />
             <span className="text-ink mt-2.5 text-[14px] font-semibold">Attach receipts</span>
             <span className="text-ink-faint mt-1 text-[12px]">
-              One per expense line where possible
+              {uploading ? "Uploading…" : "PDF or a photo, up to 10 MB each"}
             </span>
             <input
               type="file"
               multiple
-              accept=".pdf,image/*"
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic"
+              disabled={uploading}
               className="sr-only"
-              onChange={(event) => {
+              onChange={async (event) => {
                 const files = Array.from(event.target.files ?? [])
-                setReceipts((current) => [
-                  ...current,
-                  ...files.map((file) => ({
-                    id: newId("r"),
-                    name: file.name,
-                    size:
-                      file.size > 1_048_576
-                        ? `${(file.size / 1_048_576).toFixed(1)} MB`
-                        : `${Math.max(1, Math.round(file.size / 1024))} KB`,
-                    kind: "receipt" as const,
-                  })),
-                ])
                 event.target.value = ""
+                setUploading(true)
+                for (const file of files) {
+                  try {
+                    const body = new FormData()
+                    body.append("file", file)
+                    body.append("kind", "receipt")
+                    const r = await fetch(`/api/requisitions/${requisition.id}/attachments`, {
+                      method: "POST",
+                      body,
+                    })
+                    const json = (await r.json()) as { attachment?: Attachment; error?: string }
+                    if (!r.ok || !json.attachment) throw new Error(json.error ?? "That file was not accepted.")
+                    const a = json.attachment as unknown as { id: string; name: string; bytes: number }
+                    setReceipts((current) => [
+                      ...current,
+                      {
+                        id: a.id,
+                        name: a.name,
+                        size: a.bytes > 1_048_576
+                          ? `${(a.bytes / 1_048_576).toFixed(1)} MB`
+                          : `${Math.max(1, Math.round(a.bytes / 1024))} KB`,
+                        kind: "receipt" as const,
+                      },
+                    ])
+                  } catch (e) {
+                    toast(e instanceof Error ? e.message : "That file was not accepted.", "warn")
+                  }
+                }
+                setUploading(false)
               }}
             />
           </label>
@@ -260,7 +279,11 @@ function Form({ requisition }: { requisition: Requisition }) {
                   <button
                     type="button"
                     aria-label={`Remove ${file.name}`}
-                    onClick={() => setReceipts((c) => c.filter((r) => r.id !== file.id))}
+                    onClick={async () => {
+                      const r = await fetch(`/api/attachments/${file.id}`, { method: "DELETE" })
+                      if (r.ok) setReceipts((c) => c.filter((x) => x.id !== file.id))
+                      else toast("That could not be removed.", "warn")
+                    }}
                     className="text-ink-faint hover:text-st-bad press -mr-1 flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md"
                   >
                     <Trash2 className="size-3.5" strokeWidth={1.8} aria-hidden />

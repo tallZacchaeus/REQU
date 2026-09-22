@@ -11,6 +11,12 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      ATTACHMENT_DIR: /data/attachments
+    volumes:
+      # Receipts and quotations live on the host, so they survive a rebuild and are picked
+      # up by the nightly backup alongside the database.
+      - ./attachments:/data/attachments
     ports:
       - "127.0.0.1:3200:3000"
     networks:
