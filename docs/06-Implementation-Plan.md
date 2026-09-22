@@ -13,7 +13,7 @@
 | **3 — Permissions & transitions** | Every rule re-stated on the server; legal state moves only; screens read the database | `lib/authz.ts`, `lib/requisitions.ts`, `lib/api-actor.ts`, `app/api/requisitions/*`, `lib/authz.test.mts`, `db/verify-workflow.mts` | **Done.** Rules, endpoints and screens, all against the database |
 | **4 — Attachments** | Real upload, type and size checks, safe serving, receipts required to reconcile | `lib/attachments.ts`, `app/api/attachments/*`, `db/migrations/005_attachments.sql`, `db/verify-attachments.mts` | **Done** — *scanning built but off, see below* |
 | **5 — Notifications & reports** | Email what is waiting on someone; server-side aggregation | — | **Pending** |
-| **6 — Hardening** | Append-only audit trail in anger, backups, accessibility audit, pilot fixes | — | **Pending** |
+| **6 — Hardening** | Append-only trail enforced by the database, CSP, write limits, proven restore, contrast audit | `db/migrations/006_immutable_activity.sql`, `next.config.ts`, `infra/verify-restore.sh` | **Done** — *keyboard/screen-reader pass still needs a person* |
 
 Roughly **four to six weeks** of focused work from here, plus review time between phases.
 
@@ -50,8 +50,11 @@ that matters.
    across once that is resolved.
 4. **Departments are thin.** The seed knows only the two the prototype data mentions. The real
    list must come from the church before phase 2.
-5. **Accessibility unaudited.** Focus states, contrast and a keyboard pass are all untested —
-   see [04-UI-UX-Design-Brief.md](04-UI-UX-Design-Brief.md).
+5. **Accessibility: contrast audited and fixed, keyboard pass outstanding.** Every colour now
+   meets AA for normal text; `--ink-faint` failed at 2.79:1 and was darkened. Focus is visible
+   for keyboard users. What remains is a person going through the review queue and the
+   reconcile form with a keyboard and a screen reader — measuring colour is arithmetic, that
+   is not.
 6. **Thin tests.** `npm run verify:auth` covers the sign-in machinery against a real database
    — replay, forged and tampered sessions, limits, expiry. Nothing else is covered; transitions
    and permissions need the same treatment in phase 3.

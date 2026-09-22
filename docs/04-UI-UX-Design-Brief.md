@@ -20,7 +20,7 @@ line up and digits can be compared at a glance.
 | `--brand-ink` | `#0369a1` | Brand text, hover states |
 | `--ink` | `#0b1524` | Body text |
 | `--ink-soft` | `#55606f` | Secondary text |
-| `--ink-faint` | `#8a94a2` | Labels, hints, metadata |
+| `--ink-faint` | `#667085` | Labels, hints, metadata |
 | `--canvas` | `#f2f4f7` | Page background |
 | `--hairline` | `#e3e8ee` | Borders and rules |
 | `--accent` | `#eef0f3` | Quiet surfaces |
@@ -65,9 +65,30 @@ figure anyone might act on.
 - Touch targets sized for a phone held one-handed.
 - Plain-language empty states and errors: the audience is volunteers, not operators.
 - Text at 14px and above, with generous line height.
-- **To verify before production:** focus-visible styling on every interactive element, contrast
-  ratios against `--canvas` for `--ink-faint`, and a full keyboard pass through the review
-  queue. None of these has been audited yet.
+### Contrast, audited
+
+Every token was measured against both surfaces people read on. All pass AA for normal text:
+
+| | on `--canvas` | on white |
+| --- | --- | --- |
+| `--ink` | 16.62:1 | 18.31:1 |
+| `--ink-soft` | 5.79:1 | 6.39:1 |
+| `--ink-faint` | 4.51:1 | 4.97:1 |
+| `--brand-ink` | 5.39:1 | 5.93:1 |
+| `--destructive` | 5.93:1 | 6.54:1 |
+
+`--ink-faint` was `#8a94a2` and failed at **2.79:1** — used in thirty files for labels, hints
+and timestamps, the small grey text that is hardest to read and easiest to overlook when
+choosing colours. It was darkened to `#667085`, which passes while keeping the hierarchy.
+
+`--brand` (`#0ea5e9`) does not pass as text at 2.52:1, and is deliberately never used as
+text: links use `--brand-ink`. The primary button is a gradient, and white on it measures
+4.83–7.50:1 across every stop.
+
+**Focus is visible**, keyboard-only, via `:focus-visible` with a two-pixel offset outline.
+
+**Still to do:** a full keyboard pass through the review queue and the reconcile form with a
+screen reader. Measuring colour is arithmetic; this is not, and it needs a person.
 
 ## 7. Brand assets
 
