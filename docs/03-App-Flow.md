@@ -95,12 +95,17 @@ back to the HOD as `changes_requested` with those points attached.
 computed (positive means money to return, negative an overspend) → Finance accepts and it
 becomes `reconciled`, or queries it back.
 
-## 5. What the screens cannot do yet
+## 5. What is real, and what is not
 
-- **Two sign-in paths exist side by side.** The email field is real: it asks the server for a
-  single-use link, which arrives by email and opens a genuine session. The **prototype account
-  buttons still sign you in as anyone**, because the screens do not read the database until
-  phase 3 and removing that path would break the review in progress.
-- **Data is per-browser.** Two people never see the same requisition.
-- **Attachments are names only.** No file is ever uploaded or stored.
-- **Nothing is emailed.** The "single-use link" is not sent.
+Real as of phase 3:
+
+- **Sign-in.** One path only: a single-use link, sent by email, that opens a genuine session.
+  There is no way to sign in as somebody else.
+- **The data.** One shared database. What you see is scoped server-side to what you may see.
+- **The rules.** Every move is checked by the server; the screens only draw the buttons.
+
+Still not real:
+
+- **Attachments are names only.** No file is uploaded or stored — phase 4. This matters most
+  for receipts, which are the basis of reconciliation.
+- **Notifications.** Nothing tells you something is waiting; you have to look — phase 5.

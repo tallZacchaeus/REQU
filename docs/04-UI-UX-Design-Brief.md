@@ -71,6 +71,12 @@ figure anyone might act on.
 
 ## 7. Brand assets
 
-The REQU mark is a small bar-chart glyph in `--brand`, used at the sidebar head and on the
-sign-in screen. There is no favicon yet — one should be added before the app is circulated
-more widely.
+The parish emblem, `public/brand/logo.png` — the same mark the mail application uses, so the
+two read as one organisation rather than two products. It sits on white inside the brand tile,
+because its gold wreath disappears against the gradient the old glyph was drawn for.
+
+The favicon is the same circular crop of the roundel used for mail, at 16/32/48. The reasoning
+is in that project's design brief: the full mark resamples to a smudge at tab size.
+
+The application is called **Requisition**. "REQU" was a working title and survives only as the
+repository name.
