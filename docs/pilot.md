@@ -56,9 +56,9 @@ Decide three things:
 
 ## Things to know while piloting
 
-- **The site has a holding password** while it is not yet open to everybody. Pilot users need it
-  once, in the browser prompt, before the app's own sign-in. It comes off when you are ready to
-  open up.
+- **There is nothing in front of the sign-in page.** The site is open; the protection is the
+  sign-in itself. Only an `@rccgyayang.org` address can register, a new account can see nothing
+  until somebody gives it a part, and every rule is checked on the server.
 - **Receipts must be attached before a requisition can be closed.** PDF or a photo, up to 10 MB.
 - **Nothing is deleted.** A requisition that should not have been raised is rejected, and the
   rejection stays on the record. That is the point of it.
