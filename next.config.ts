@@ -14,26 +14,8 @@ const nextConfig: NextConfig = {
           // box. These are the ones specific to this application.
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
-          {
-            // Next needs inline and eval for its own runtime in development; in production
-            // it needs neither for scripts, but its styles are injected inline.
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              process.env.NODE_ENV === "production"
-                ? "script-src 'self'"
-                : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self'",
-              // Nothing here should ever be framed, embed a plugin, or post a form away.
-              "frame-ancestors 'none'",
-              "object-src 'none'",
-              "base-uri 'none'",
-              "form-action 'self'",
-            ].join("; "),
-          },
+          // The content security policy is set per request in middleware.ts, because it
+          // carries a nonce. These two need no nonce and are cheaper as static headers.
         ],
       },
     ]
