@@ -24,6 +24,14 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500"],
 })
 
+/**
+ * Render every page per request. Nonced scripts need it: Next stamps the nonce while
+ * server-rendering, from the policy on the incoming request, and a page prerendered at
+ * build time has no request to read. The cost is nil here — every screen is behind a
+ * session and fetches its data at run time anyway.
+ */
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "Requisition · RCCG YAYA",
   description:
