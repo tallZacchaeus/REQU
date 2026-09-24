@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server"
 /**
  * The content security policy, issued per request with a nonce.
  *
+ * Next 16 calls this file `proxy`; it was `middleware` until 15.
+ *
  * It lived in next.config.ts as a static header with `script-src 'self'`, which blocked
  * Next's own inline bootstrap scripts: the page server-rendered, React never took over, and
  * every visitor sat looking at the splash screen for ever. A policy that is present and
@@ -12,7 +14,7 @@ import { NextResponse, type NextRequest } from "next/server"
  * injects when it sees one in the policy on the incoming request, so the framework's own
  * code runs and anything injected into the page still does not.
  */
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64")
 
   const csp = [
